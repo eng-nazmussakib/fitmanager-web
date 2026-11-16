@@ -1,0 +1,294 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "cli": {
+        "packageManager": "npm",
+        "analytics": false,
+        "schematicCollections": ["angular-eslint"]
+    },
+    "newProjectRoot": "projects",
+    "projects": {
+        "fitmanager-web": {
+            "projectType": "application",
+            "schematics": {
+                "@schematics/angular:component": {
+                    "style": "scss",
+                    "type": "component",
+                    "changeDetection": "OnPush"
+                },
+                "@schematics/angular:directive": {
+                    "type": "directive"
+                },
+                "@schematics/angular:service": {
+                    "type": "service"
+                },
+                "@schematics/angular:guard": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:interceptor": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:resolver": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:pipe": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:module": {
+                    "typeSeparator": "."
+                }
+            },
+            "root": "",
+            "sourceRoot": "src",
+            "prefix": "app",
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:application",
+                    "options": {
+                        "browser": "src/main.ts",
+                        "outputPath": {
+                            "base": "dist"
+                        },
+                        "tsConfig": "tsconfig.app.json",
+                        "inlineStyleLanguage": "scss",
+                        "assets": [
+                            {
+                                "glob": "**/*",
+                                "input": "public"
+                            }
+                        ],
+                        "styles": ["src/styles.css"],
+                        "allowedCommonJsDependencies": ["file-saver", "fast-unique-numbers", "html2canvas", "canvg", "core-js", "raf", "rgbcolor"],
+                        "server": "src/main.server.ts",
+                        "outputMode": "server",
+                        "security": {
+                            "allowedHosts": []
+                        },
+                        "ssr": {
+                            "entry": "src/server.ts"
+                        }
+                    },
+                    "configurations": {
+                        "stage": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.dev.ts"
+                                },
+                                {
+                                    "replace": "src/app/mock/mock.providers.ts",
+                                    "with": "src/app/mock/mock.providers.prod.ts"
+                                }
+                            ],
+                            "outputMode": "static"
+                        },
+                        "iat": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.iat.ts"
+                                },
+                                {
+                                    "replace": "src/app/mock/mock.providers.ts",
+                                    "with": "src/app/mock/mock.providers.prod.ts"
+                                }
+                            ],
+                            "outputMode": "static"
+                        },
+                        "uat": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.uat.ts"
+                                },
+                                {
+                                    "replace": "src/app/mock/mock.providers.ts",
+                                    "with": "src/app/mock/mock.providers.prod.ts"
+                                }
+                            ],
+                            "outputMode": "static"
+                        },
+                        "production": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                },
+                                {
+                                    "replace": "src/app/mock/mock.providers.ts",
+                                    "with": "src/app/mock/mock.providers.prod.ts"
+                                }
+                            ],
+                            "outputMode": "static"
+                        },
+                        "proxy": {
+                            "optimization": false,
+                            "extractLicenses": false,
+                            "sourceMap": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.proxy.ts"
+                                }
+                            ]
+                        },
+                        "development": {
+                            "optimization": false,
+                            "extractLicenses": false,
+                            "sourceMap": true
+                        },
+                        "production-vm": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                },
+                                {
+                                    "replace": "src/app/mock/mock.providers.ts",
+                                    "with": "src/app/mock/mock.providers.prod.ts"
+                                },
+                                {
+                                    "replace": "src/app/public-render-mode.ts",
+                                    "with": "src/app/public-render-mode.vm.ts"
+                                }
+                            ]
+                        },
+                        "demo": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "8kB",
+                                    "maximumError": "16kB"
+                                }
+                            ],
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.demo.ts"
+                                },
+                                {
+                                    "replace": "src/app/public-render-mode.ts",
+                                    "with": "src/app/public-render-mode.vm.ts"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "serve": {
+                    "builder": "@angular/build:dev-server",
+                    "configurations": {
+                        "production": {
+                            "buildTarget": "fitmanager-web:build:production"
+                        },
+                        "development": {
+                            "buildTarget": "fitmanager-web:build:development"
+                        },
+                        "proxy": {
+                            "buildTarget": "fitmanager-web:build:proxy",
+                            "proxyConfig": "proxy.conf.mjs"
+                        },
+                        "demo": {
+                            "buildTarget": "fitmanager-web:build:demo"
+                        }
+                    },
+                    "defaultConfiguration": "development"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "providersFile": "src/test-providers.ts",
+                        "coverageReporters": ["text-summary", "html", "lcov"],
+                        "coverageExclude": [
+                            "src/**/*.spec.ts",
+                            "src/environments/**",
+                            "src/app/config/**",
+                            "src/main.ts",
+                            "src/test-providers.ts",
+                            "src/app/mock/seed/**",
+                            "src/**/*.model.ts",
+                            "src/**/*.routes.ts"
+                        ]
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-eslint/builder:lint",
+                    "options": {
+                        "lintFilePatterns": ["src/**/*.ts", "src/**/*.html", "e2e/**/*.ts"]
+                    }
+                }
+            }
+        }
+    }
+}

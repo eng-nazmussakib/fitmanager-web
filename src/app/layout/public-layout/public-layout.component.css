@@ -1,0 +1,137 @@
+/* Public layout: the pinned header, the menu underline and the theme switcher. Shared page styles: styles/public-site.css. */
+
+/* ── Header: in the page at the top, pinned as a compact blurred bar once scrolled ── */
+.site-header.is-stuck {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    background: color-mix(in srgb, var(--color-ink-950) 82%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    box-shadow:
+        0 10px 30px rgb(0 0 0 / 45%),
+        0 1px 0 color-mix(in srgb, var(--color-primary-500) 35%, transparent);
+}
+.site-header.is-stuck .header-bar {
+    padding-block: 0.6rem;
+}
+
+/* Gradient underline: under the menu item of the current page or section, grows from the centre. */
+.nav-underline {
+    position: absolute;
+    inset-inline: -1rem;
+    bottom: -0.25rem;
+    height: 0.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-primary-500), var(--color-secondary-500));
+    opacity: 0;
+    scale: 0 1;
+    transition:
+        scale 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+        opacity 0.25s;
+}
+.nav-underline.is-active {
+    opacity: 1;
+    scale: 1 1;
+}
+.site-header.is-stuck .nav-underline {
+    bottom: 0;
+}
+
+/* ── Theme switcher: a floating button with a menu of the brand's colour themes ── */
+.theme-switcher {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+.theme-fab {
+    display: flex;
+    width: 3rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255 255 255 / 15%);
+    border-radius: 9999px;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--color-secondary-500), var(--color-primary-500));
+    box-shadow: var(--shadow-e6);
+    transition:
+        scale 0.15s,
+        box-shadow 0.15s;
+}
+.theme-fab:hover {
+    scale: 1.06;
+}
+.theme-fab[aria-expanded='true'] {
+    box-shadow:
+        0 0 0 2px var(--color-ink-900),
+        0 0 0 4px rgb(255 255 255 / 70%);
+}
+.theme-menu {
+    width: 13rem;
+    padding: 0.5rem;
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-ink-800) 95%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-e6);
+    transform-origin: bottom right;
+}
+.theme-option {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    text-align: left;
+    color: rgb(255 255 255 / 85%);
+    cursor: pointer;
+    transition:
+        background-color 0.15s,
+        color 0.15s;
+}
+.theme-option:hover {
+    background: rgb(255 255 255 / 5%);
+    color: #fff;
+}
+.theme-option[aria-checked='true'] {
+    background: rgb(255 255 255 / 8%);
+    font-weight: 500;
+    color: #fff;
+}
+.theme-swatch {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 25%);
+    background: linear-gradient(135deg, var(--a) 50%, var(--b) 50%);
+}
+
+@media (width >= 64rem) {
+    .theme-switcher {
+        right: 1.5rem;
+        bottom: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .site-header.is-stuck {
+        animation: header-down 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .header-bar {
+        transition: padding 0.3s;
+    }
+}
+@keyframes header-down {
+    from {
+        translate: 0 -100%;
+    }
+}

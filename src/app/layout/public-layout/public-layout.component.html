@@ -1,0 +1,299 @@
+<div #content id="top" class="site relative overflow-x-clip">
+    <!-- ───────────── Header (pinned to the top once the page scrolls past the sentinel) ───────────── -->
+    <div #stickSentinel class="pointer-events-none absolute inset-x-0 top-0 h-40" aria-hidden="true"></div>
+    <div class="relative z-30" [style.height.px]="stuck() ? headerSpace() : null">
+        <header #siteHeader class="site-header" [class.is-stuck]="stuck()">
+            <div class="header-bar wrap relative flex items-center gap-3 py-6 lg:gap-5 lg:pt-14 lg:pb-0">
+                <a class="shrink-0" fragment="top" routerLink="/" [attr.aria-label]="site.brand + ' home'">
+                    <app-logo [tagline]="true" />
+                </a>
+
+                <!-- Search: an expanding field on desktop, always visible on phones. -->
+                <div class="relative flex-1 lg:flex-none" (appClickOutside)="searchOpen.set(false)">
+                    <button
+                        class="hidden size-10 cursor-pointer items-center justify-center rounded-lg bg-ink-800 text-white/80 transition hover:text-white lg:flex"
+                        type="button"
+                        aria-controls="site-search"
+                        aria-label="Search"
+                        [attr.aria-expanded]="searchOpen()"
+                        (click)="searchOpen.set(!searchOpen())"
+                    >
+                        <ng-icon name="lucideSearch" aria-hidden="true" size="1.25rem" />
+                    </button>
+                    <form
+                        id="site-search"
+                        class="flex h-9 items-center gap-2 rounded-lg bg-ink-800 px-3 lg:absolute lg:top-full lg:left-0 lg:mt-3 lg:h-11 lg:w-72 lg:shadow-e5"
+                        role="search"
+                        [class.lg:hidden]="!searchOpen()"
+                        (submit)="search($event)"
+                    >
+                        <ng-icon class="shrink-0 text-white/70" name="lucideSearch" aria-hidden="true" size="1.1rem" />
+                        <input
+                            class="w-full min-w-0 bg-transparent text-sm text-white outline-none placeholder:text-white/80"
+                            type="search"
+                            name="q"
+                            aria-label="Search the site"
+                            placeholder="Search"
+                            [attr.aria-invalid]="searchMiss()"
+                            (input)="searchMiss.set(false)"
+                        />
+                    </form>
+                    @if (searchMiss()) {
+                        <p
+                            class="absolute top-full left-0 mt-2 rounded-md bg-ink-800 px-3 py-1.5 text-xs whitespace-nowrap text-white/80 lg:mt-16"
+                            role="status"
+                        >
+                            Nothing found. Try "plans" or "trainers".
+                        </p>
+                    }
+                </div>
+
+                <nav class="mx-auto hidden items-center gap-6 lg:flex xl:gap-14" aria-label="Main">
+                    @for (item of site.nav(); track item.label) {
+                        @if (item.children) {
+                            <div class="relative" (appClickOutside)="openDropdown() === item.label && openDropdown.set(null)">
+                                <button
+                                    class="relative flex cursor-pointer items-center gap-1 py-3 text-base font-medium transition hover:text-primary-300"
+                                    type="button"
+                                    [attr.aria-controls]="'menu-' + $index"
+                                    [attr.aria-expanded]="openDropdown() === item.label"
+                                    (click)="toggleDropdown(item.label)"
+                                >
+                                    {{ item.label }}
+                                    <ng-icon
+                                        class="text-primary-500 transition-transform"
+                                        name="lucideChevronDown"
+                                        aria-hidden="true"
+                                        size="1rem"
+                                        [class.rotate-180]="openDropdown() === item.label"
+                                    />
+                                    <span class="nav-underline" aria-hidden="true" [class.is-active]="activeNav() === item.label"></span>
+                                </button>
+                                @if (openDropdown() === item.label) {
+                                    <ul
+                                        class="menu-in absolute top-full left-1/2 mt-2 min-w-52 -translate-x-1/2 rounded-xl border border-white/10 bg-ink-800 py-2 shadow-e5"
+                                        [id]="'menu-' + $index"
+                                    >
+                                        @for (child of item.children; track child.label) {
+                                            <li>
+                                                <a
+                                                    class="block px-4 py-2 text-sm text-white/85 hover:bg-white/5 hover:text-white"
+                                                    [fragment]="to(child).fragment"
+                                                    [routerLink]="to(child).route"
+                                                    (click)="closeMenus()"
+                                                >
+                                                    {{ child.label }}
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        } @else {
+                            <a
+                                class="relative py-3 text-base font-medium transition hover:text-primary-300"
+                                [attr.aria-current]="activeNav() === item.label ? 'page' : null"
+                                [fragment]="to(item).fragment"
+                                [routerLink]="to(item).route"
+                            >
+                                {{ item.label }}
+                                <span class="nav-underline" aria-hidden="true" [class.is-active]="activeNav() === item.label"></span>
+                            </a>
+                        }
+                    }
+                </nav>
+
+                <div class="hidden items-center gap-3 lg:flex">
+                    <a class="btn btn-md btn-outline-secondary font-light" [routerLink]="loginRoute">Login</a>
+                    <a class="btn btn-md btn-fill-primary font-light" [fragment]="to(c.signUp).fragment" [routerLink]="to(c.signUp).route">
+                        {{ c.signUp.label }}
+                    </a>
+                </div>
+
+                <button
+                    class="flex size-10 shrink-0 cursor-pointer items-center justify-center lg:hidden"
+                    type="button"
+                    aria-controls="mobile-menu"
+                    [attr.aria-expanded]="mobileMenuOpen()"
+                    [attr.aria-label]="mobileMenuOpen() ? 'Close menu' : 'Open menu'"
+                    (click)="mobileMenuOpen.set(!mobileMenuOpen())"
+                >
+                    <ng-icon aria-hidden="true" size="2rem" [name]="mobileMenuOpen() ? 'lucideX' : 'lucideMenu'" />
+                </button>
+
+                @if (mobileMenuOpen()) {
+                    <nav
+                        id="mobile-menu"
+                        class="menu-in absolute inset-x-6 top-full z-40 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-xl border border-white/10 bg-ink-800 p-4 shadow-e6 md:inset-x-12 lg:hidden"
+                        aria-label="Mobile"
+                    >
+                        <ul class="divide-y divide-white/5">
+                            @for (item of site.navItems(); track item.label) {
+                                <li class="py-1">
+                                    <a class="block py-2 font-medium" [fragment]="to(item).fragment" [routerLink]="to(item).route" (click)="closeMenus()">
+                                        {{ item.label }}
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="mt-4 grid grid-cols-2 gap-3">
+                            <a class="btn btn-md btn-outline-secondary" [routerLink]="loginRoute">Login</a>
+                            <a class="btn btn-md btn-fill-primary" [fragment]="to(c.signUp).fragment" [routerLink]="to(c.signUp).route" (click)="closeMenus()">
+                                {{ c.signUp.label }}
+                            </a>
+                        </div>
+                    </nav>
+                }
+            </div>
+        </header>
+    </div>
+
+    <main>
+        <router-outlet />
+        <div class="h-20" aria-hidden="true"></div>
+    </main>
+
+    <!-- ───────────── Footer ───────────── -->
+    <footer class="bg-ink-950">
+        <div class="wrap grid gap-10 py-12 lg:grid-cols-[1.45fr_2.2fr_1.1fr] lg:gap-12 lg:py-16" appReveal>
+            <div id="about">
+                <a fragment="top" routerLink="/" [attr.aria-label]="site.brand + ' home'">
+                    <app-logo size="lg" [tagline]="true" />
+                </a>
+                <p class="mt-6 text-justify leading-relaxed text-white/55">
+                    {{ c.footer.about }}
+                    @if (c.footer.aboutLink; as link) {
+                        <a class="text-secondary-400 hover:underline" [fragment]="to(link).fragment" [routerLink]="to(link).route">{{ link.label }}</a>
+                    }
+                </p>
+                <ul class="mt-8 flex justify-around" aria-label="Social media">
+                    @for (s of site.social; track s.name) {
+                        <li>
+                            <a
+                                class="block text-white/90 transition hover:text-primary-400"
+                                rel="noopener"
+                                target="_blank"
+                                [attr.aria-label]="s.name"
+                                [href]="s.href"
+                            >
+                                <svg
+                                    class="size-8"
+                                    aria-hidden="true"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.6"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path [attr.d]="s.icon" />
+                                </svg>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <nav
+                class="grid gap-4 text-center"
+                aria-label="Footer"
+                [style.grid-template-columns]="'repeat(' + site.footerColumns().length + ', minmax(0, 1fr))'"
+            >
+                @for (col of site.footerColumns(); track col.title) {
+                    <div>
+                        <h2 class="text-base font-medium text-primary-400 lg:text-h2">{{ col.title }}</h2>
+                        <ul class="mt-6 space-y-5 text-[0.8rem] text-white/60 lg:mt-10">
+                            @for (link of col.links; track link.label) {
+                                <li>
+                                    <a class="hover:text-white" [fragment]="to(link).fragment" [routerLink]="to(link).route">{{ link.label }}</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </nav>
+
+            <div id="contact">
+                <h2 class="text-center text-base font-medium text-secondary-400 lg:text-h2">{{ c.footer.contact.title }}</h2>
+                <ul class="mt-6 space-y-6 text-[0.8rem] text-white/60 lg:mt-10">
+                    @if (site.enabled('branches')) {
+                        <li>
+                            <a class="flex items-center gap-3 hover:text-white" fragment="branches" routerLink="/">
+                                <ng-icon class="shrink-0 text-white" name="lucideMapPin" aria-hidden="true" size="1.4rem" />
+                                <span>
+                                    @for (b of site.branches; track b.name; let last = $last) {
+                                        {{ b.name }}{{ last ? ', ' + b.locality : ' · ' }}
+                                    }
+                                </span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        <a class="flex items-center gap-3 hover:text-white" [href]="'tel:' + c.footer.contact.phone.replaceAll(' ', '').replaceAll('-', '')">
+                            <ng-icon class="shrink-0 text-white" name="lucidePhone" aria-hidden="true" size="1.4rem" />
+                            {{ c.footer.contact.phone }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex items-center gap-3 hover:text-white" [href]="'mailto:' + c.footer.contact.email">
+                            <ng-icon class="shrink-0 text-white" name="lucideMail" aria-hidden="true" size="1.4rem" />
+                            {{ c.footer.contact.email }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Bottom bar: the gym's copyright, and the software credit. -->
+        <div class="border-t border-white/10">
+            <div class="wrap flex flex-col items-center justify-between gap-2 py-5 text-xs text-white/50 sm:flex-row">
+                <p>© {{ year }} {{ site.brand }}. All rights reserved.</p>
+                @if (poweredBy; as p) {
+                    <p>
+                        Powered by
+                        @if (p.url) {
+                            <a class="font-medium text-white/80 hover:text-primary-300" rel="noopener" target="_blank" [href]="p.url">{{ p.name }}</a>
+                        } @else {
+                            <span class="font-medium text-white/80">{{ p.name }}</span>
+                        }
+                    </p>
+                }
+            </div>
+        </div>
+    </footer>
+
+    <!-- ───────────── Theme switcher (showcases the brand's colour themes; the choice applies app-wide) ───────────── -->
+    @if (themeSwitcher) {
+        <div class="theme-switcher" (appClickOutside)="themeMenuOpen.set(false)">
+            @if (themeMenuOpen()) {
+                <div id="theme-menu" class="theme-menu menu-in" aria-label="Colour theme" role="radiogroup">
+                    <p class="px-2 pb-2 text-xs font-medium tracking-wider text-white/55 uppercase">Colour theme</p>
+                    @for (t of theme.palettes; track t.id) {
+                        <button
+                            class="theme-option"
+                            type="button"
+                            role="radio"
+                            [attr.aria-checked]="theme.palette().id === t.id"
+                            (click)="theme.setPalette(t.id)"
+                        >
+                            <span class="theme-swatch" aria-hidden="true" [style.--a]="t.primary" [style.--b]="t.secondary"></span>
+                            {{ t.label }}
+                            @if (theme.palette().id === t.id) {
+                                <ng-icon class="ml-auto text-primary-400" name="lucideCheck" aria-hidden="true" />
+                            }
+                        </button>
+                    }
+                </div>
+            }
+            <button
+                class="theme-fab"
+                type="button"
+                aria-controls="theme-menu"
+                aria-label="Change colour theme"
+                [attr.aria-expanded]="themeMenuOpen()"
+                (click)="themeMenuOpen.set(!themeMenuOpen())"
+            >
+                <ng-icon name="lucidePalette" aria-hidden="true" size="1.5rem" />
+            </button>
+        </div>
+    }
+</div>

@@ -1,0 +1,144 @@
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
+
+import { environment } from '@env/environment';
+
+import { mockApiInterceptor } from './mock-api.interceptor';
+import { resetDemo, setFastMode } from './store';
+
+interface Res<T> {
+    code: number;
+    message: string;
+    data: T;
+}
+
+/**
+ * The mock enforces what the API will (phase 0.5 brief): tokens, branch scoping by X-Branch-Id and the user's
+ * assignments, and CASL permissions. These cases become API tests in phases 1 and 2.
+ */
+describe('mock API', () => {
+    let http: HttpClient;
+    const base = environment.apiBaseUrl;
+
+    async function login(username: string, password: string): Promise<string> {
+        const r = await firstValueFrom(http.post<Res<{ access_token: string }>>(`${base}/v1/auth/login`, { username, password }));
+        return r.data.access_token;
+    }
+
+    function get<T>(path: string, token: string, branch?: string): Promise<Res<T>> {
+        const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+        if (branch) headers['X-Branch-Id'] = branch;
+        return firstValueFrom(http.get<Res<T>>(`${base}${path}`, { headers }));
+    }
+
+    function status(p: Promise<unknown>): Promise<number> {
+        return p.then(
+            () => 200,
+            (e: { status: number }) => e.status
+        );
+    }
+
+    beforeEach(() => {
+        localStorage.clear();
+        setFastMode(true);
+        resetDemo();
+        TestBed.configureTestingModule({ providers: [provideHttpClient(withInterceptors([mockApiInterceptor]))] });
+        http = TestBed.inject(HttpClient);
+    });
+
+    it('rejects a wrong password and a missing token', async () => {
+        expect(await status(login('owner', 'nope'))).toBe(400);
+        expect(await status(get('/v1/auth/me', 'bogus'))).toBe(401);
+    });
+
+    it('scopes members to the X-Branch-Id branch, and only branches the user works at', async () => {
+        const desk = await login('desk.gulshan', 'Desk@123');
+        const page = await get<{ rows: { code: string }[]; count: number }>('/v1/members?size=100', desk, 'br-gul');
+        expect(page.data.count).toBeGreaterThan(200);
+        expect(page.data.rows.every(r => r.code.startsWith('MEM-GUL-'))).toBe(true);
+        expect(await status(get('/v1/members', desk, 'br-dha'))).toBe(403);
+        expect(await status(get('/v1/members', desk))).toBe(403);
+        // Another branch's member by id is not found, not leaked.
+        expect(await status(get('/v1/members/mem-dha-1', desk, 'br-gul'))).toBe(404);
+    });
+
+    it('applies CASL: front desk cannot open the HQ dashboard or override a block; the owner can see HQ', async () => {
+        const desk = await login('desk.gulshan', 'Desk@123');
+        expect(await status(get('/v1/hq/dashboard', desk, 'br-hq'))).toBe(403);
+        const owner = await login('owner', 'Owner@123');
+        const hq = await get<{ kpis: unknown[]; comparison: unknown[] }>('/v1/hq/dashboard', owner, 'br-hq');
+        expect(hq.data.kpis.length).toBe(6);
+        expect(hq.data.comparison.length).toBe(3);
+    });
+
+    it('evaluates the scripted members: allowed, expired, dues over the limit', async () => {
+        const manager = await login('manager.gulshan', 'Manager@123');
+        const evaluate = (code: string): Promise<Res<{ allowed: boolean; failures: { rule: string }[]; can_override: boolean }>> =>
+            firstValueFrom(
+                http.post<Res<{ allowed: boolean; failures: { rule: string }[]; can_override: boolean }>>(
+                    `${base}/v1/attendance/evaluate`,
+                    { code },
+                    { headers: { Authorization: `Bearer ${manager}`, 'X-Branch-Id': 'br-gul' } }
+                )
+            );
+        const expired = await evaluate('MEM-GUL-000002');
+        expect(expired.data.failures.map(f => f.rule)).toContain('expired');
+        expect(expired.data.can_override).toBe(true);
+        const dues = await evaluate('MEM-GUL-000003');
+        expect(dues.data.failures.map(f => f.rule)).toContain('dues');
+    });
+
+    it('VAT is an HQ setting: only HQ changes it, and new quotes use the new rate', async () => {
+        const send = <T>(method: 'PATCH' | 'POST', path: string, body: unknown, token: string, branch: string): Promise<Res<T>> =>
+            firstValueFrom(http.request<Res<T>>(method, `${base}${path}`, { body, headers: { Authorization: `Bearer ${token}`, 'X-Branch-Id': branch } }));
+        const desk = await login('desk.gulshan', 'Desk@123');
+        const owner = await login('owner', 'Owner@123');
+        expect(await status(send('PATCH', '/v1/hq/settings', { vat_rate: 0 }, desk, 'br-hq'))).toBe(403);
+        expect(await status(send('PATCH', '/v1/hq/settings', { vat_rate: 0.9 }, owner, 'br-hq'))).toBe(400);
+        expect(await status(send('PATCH', '/v1/hq/settings', { vat_bin: 'abc' }, owner, 'br-hq'))).toBe(400);
+
+        const saved = await send<{ vat_rate: number; updated_by: string }>('PATCH', '/v1/hq/settings', { vat_rate: 0.075 }, owner, 'br-hq');
+        expect(saved.data.vat_rate).toBe(0.075);
+        expect(saved.data.updated_by).toBe('Kamrul Chowdhury');
+
+        const plan = (await get<{ oid: string; price: number }[]>('/v1/plans', desk, 'br-gul')).data[0];
+        const member = (await get<{ rows: { oid: string }[] }>('/v1/members?size=1', desk, 'br-gul')).data.rows[0];
+        const quote = await send<{ vat_rate: number; vat: number; subtotal: number }>(
+            'POST',
+            '/v1/subscriptions/quote',
+            { member_oid: member.oid, plan_oid: plan.oid, charge_admission: false, discount: { kind: 'none', value: 0 } },
+            desk,
+            'br-gul'
+        );
+        expect(quote.data.vat_rate).toBe(0.075);
+        expect(quote.data.vat).toBe(Math.round(quote.data.subtotal * 0.075));
+
+        const pub = await firstValueFrom(http.get<Res<{ vat_rate: number }[]>>(`${base}/v1/public/plans`));
+        expect(pub.data[0].vat_rate).toBe(0.075);
+    });
+
+    it('site groups: section and page switch separately; required groups stay on (D-040)', async () => {
+        interface Group {
+            key: string;
+            required: boolean;
+            section: boolean | null;
+            page: boolean | null;
+        }
+        const patch = (key: string, body: object, token: string, branch: string): Promise<Res<Group>> =>
+            firstValueFrom(
+                http.patch<Res<Group>>(`${base}/v1/hq/site-groups/${key}`, body, { headers: { Authorization: `Bearer ${token}`, 'X-Branch-Id': branch } })
+            );
+        const owner = await login('owner', 'Owner@123');
+        const desk = await login('desk.gulshan', 'Desk@123');
+        expect(await status(patch('blog', { section: false }, desk, 'br-hq'))).toBe(403);
+        expect(await status(patch('plans', { page: false }, owner, 'br-hq'))).toBe(409);
+        expect(await status(patch('reviews', { page: true }, owner, 'br-hq'))).toBe(400);
+        const blog = await patch('blog', { section: false }, owner, 'br-hq');
+        expect(blog.data).toMatchObject({ section: false, page: true });
+        expect(blog.message).toBe('Blog: section hidden, page shown');
+        const pub = await firstValueFrom(http.get<Res<Group[]>>(`${base}/v1/public/site-groups`));
+        expect(pub.data.find(r => r.key === 'blog')).toMatchObject({ section: false, page: true });
+        expect(pub.data.filter(r => r.required).map(r => r.key)).toEqual(['hero', 'services', 'plans', 'facilities']);
+    });
+});

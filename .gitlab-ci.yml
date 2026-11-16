@@ -1,0 +1,83 @@
+# FitManager web: two hosting targets, both checked on every pipeline (D-027).
+#   A. Cloudflare Workers, Free plan (primary): `npm run build:prod` → dist/browser, public pages prerendered.
+#   B. VM with Docker and nginx (future): `npm run build:vm` → Node SSR server image.
+stages: [verify, build, deploy]
+
+default:
+    image: node:26-alpine # keep in sync with .nvmrc and the Dockerfile
+    cache:
+        key: { files: [package-lock.json] }
+        paths: [.npm/]
+    before_script:
+        - npm ci --cache .npm --prefer-offline --ignore-scripts
+
+verify:
+    stage: verify
+    script:
+        - npm run format:check
+        - npm run lint
+        - npm run test:ci
+    coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
+    artifacts:
+        when: always
+        expire_in: 1 week
+        paths: [coverage/]
+
+# Target A: every public route's prerendered HTML has its h1, title, description and canonical; no mock code ships.
+cloudflare-build:
+    stage: build
+    script:
+        - npm run build:prod
+        - npm run check:prerender
+        - npm run check:no-mock
+    artifacts:
+        expire_in: 1 week
+        paths: [dist/]
+
+# Target B: the SSR server answers /healthz and renders a public page with its title.
+vm-ssr-smoke:
+    stage: build
+    script:
+        - npm run build:vm
+        - npm run check:no-mock
+        - (PORT=4000 node dist/server/server.mjs &) && sleep 3
+        - wget -qO- http://127.0.0.1:4000/healthz
+        - wget -qO- http://127.0.0.1:4000/plans | grep -q '<title>Membership plans'
+
+# Target B: build the image (its `test` stage runs the checks) and check its health. Deploying waits for a VM.
+vm-image:
+    stage: build
+    image: docker:27
+    services: [docker:27-dind]
+    before_script: []
+    rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+    script:
+        - docker build --build-arg BUILD_ENV=production-vm -t fitmanager-web:$CI_COMMIT_SHORT_SHA .
+        - docker run -d --name web fitmanager-web:$CI_COMMIT_SHORT_SHA
+        - for i in $(seq 1 20); do [ "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy ] && break; sleep 2; done
+        - test "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy
+
+# Browser tests against the mock API, on merge requests.
+e2e:
+    stage: verify
+    image: mcr.microsoft.com/playwright:v1.65.0-noble # must match @playwright/test in package.json
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    script:
+        - npx playwright test
+    artifacts:
+        when: on_failure
+        expire_in: 1 week
+        paths: [playwright-report/, test-results/]
+
+# Target A deploy: manual, from main. Needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as masked CI variables.
+# Steps and the Free-plan check: ../fitmanager-infra/cloudflare/web.md.
+deploy-cloudflare:
+    stage: deploy
+    needs: [cloudflare-build]
+    when: manual
+    rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+    script:
+        - npx --yes wrangler@4 deploy --message "web ${CI_COMMIT_SHORT_SHA}"

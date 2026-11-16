@@ -1,0 +1,10 @@
+node_modules
+dist
+.angular
+.git
+.husky
+coverage
+*.md
+playwright-report
+test-results
+blob-report

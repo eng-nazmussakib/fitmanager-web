@@ -1,0 +1,8 @@
+**/*.md
+**/*.svg
+coverage/
+dist/
+.angular/
+node_modules/
+package-lock.json
+public/

@@ -1,0 +1,228 @@
+/*
+ * Sign-in and sign-up forms (inside AuthShellComponent's `.auth`). Native inputs on the design tokens, dark like
+ * the public site. Imported by styles.css into the `components` layer. Plain CSS, no `@apply`.
+ */
+/* Links and headings take the auth pages' own colours. */
+.auth :is(h1, h2, a) {
+    color: inherit;
+}
+.auth :is(a, button, input, select):focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+.auth .field {
+    display: block;
+}
+.auth .field + .field,
+.auth .field-row + .field,
+.auth .field + .field-row,
+.auth .field-row + .field-row {
+    margin-top: 1.1rem;
+}
+.auth .field-row {
+    display: grid;
+    gap: 1.1rem;
+    align-items: start;
+}
+.auth .field-row > .field {
+    margin-top: 0;
+}
+.auth .field-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(255 255 255 / 85%);
+}
+.auth .field-label .optional {
+    font-weight: 400;
+    color: rgb(255 255 255 / 45%);
+}
+.auth .field-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.auth .field-box > ng-icon:first-child {
+    position: absolute;
+    left: 0.9rem;
+    color: rgb(255 255 255 / 45%);
+    pointer-events: none;
+}
+.auth .field-input {
+    width: 100%;
+    height: 2.875rem;
+    padding: 0 0.9rem 0 2.6rem;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 0.75rem;
+    background: var(--color-ink-800);
+    font-size: 0.95rem;
+    color: #fff;
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+.auth select.field-input {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23ffffff99' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    cursor: pointer;
+}
+.auth .field-input::placeholder {
+    color: rgb(255 255 255 / 35%);
+}
+.auth .field-input:hover {
+    border-color: rgb(255 255 255 / 25%);
+}
+.auth .field-input:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-500) 30%, transparent);
+}
+.auth .field-input[aria-invalid='true'] {
+    border-color: #f87171;
+}
+.auth .field-input:-webkit-autofill {
+    -webkit-text-fill-color: #fff;
+    box-shadow: 0 0 0 30px var(--color-ink-800) inset;
+    caret-color: #fff;
+}
+.auth .field-toggle {
+    position: absolute;
+    right: 0.4rem;
+    display: flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    color: rgb(255 255 255 / 55%);
+    cursor: pointer;
+}
+.auth .field-toggle:hover {
+    color: #fff;
+}
+.auth .field-error {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: #fca5a5;
+}
+.auth .auth-link {
+    font-weight: 500;
+    color: var(--color-primary-300);
+}
+.auth .auth-link:hover {
+    color: var(--color-primary-200);
+    text-decoration: underline;
+}
+.auth .auth-note {
+    padding: 0.85rem 1rem;
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 0.75rem;
+    background: rgb(255 255 255 / 4%);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: rgb(255 255 255 / 70%);
+}
+.auth .auth-note code {
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.3rem;
+    background: rgb(255 255 255 / 10%);
+    color: #fff;
+}
+.auth .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: rgb(255 255 255 / 45%);
+}
+.auth .auth-divider::before,
+.auth .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid rgb(255 255 255 / 10%);
+}
+.auth .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: rgb(255 255 255 / 75%);
+    cursor: pointer;
+}
+.auth .check input {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    accent-color: var(--color-primary-500);
+    cursor: pointer;
+}
+/* Period chips (sign-up). */
+.auth .period-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.auth .period-chip {
+    position: relative;
+    display: flex;
+    min-height: 3.4rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.5rem;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 0.75rem;
+    background: var(--color-ink-800);
+    font-size: 0.85rem;
+    line-height: 1.3;
+    text-align: center;
+    color: rgb(255 255 255 / 80%);
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background-color 0.15s;
+}
+.auth .period-chip:has(input:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+.auth .period-chip:has(input:disabled) {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.auth .period-chip:hover {
+    border-color: rgb(255 255 255 / 25%);
+}
+.auth .period-chip:has(input:checked) {
+    border-color: var(--color-primary-500);
+    background: color-mix(in srgb, var(--color-primary-500) 18%, var(--color-ink-800));
+    color: #fff;
+}
+.auth .period-chip small {
+    display: block;
+    line-height: 1.2;
+    font-size: 0.7rem;
+    color: rgb(255 255 255 / 55%);
+}
+.auth .summary {
+    padding: 1rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary-500) 40%, transparent);
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--color-primary-500) 10%, transparent);
+}
+
+@media (width >= 40rem) {
+    .auth .field-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .auth .period-chips {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

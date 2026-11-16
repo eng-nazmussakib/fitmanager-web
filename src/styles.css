@@ -1,0 +1,376 @@
+/*
+ * Global stylesheet.
+ *
+ * Tailwind v4 is configured CSS-first (no tailwind.config.js). Design tokens live in @theme below
+ * (fitmanager-infra/docs/03-design-system.md §2). There is no UI component library (D-007): the kit's styles are
+ * `src/styles/ui.css` (the fm-* classes).
+ *
+ * Cascade-layer order: theme < base (preflight) < ng-icon < components < utilities.
+ * `ng-icon` is the layer @ng-icons puts its default colour in; declared before `components`, so `text-*` utilities
+ * and kit classes can colour icons. Utilities beat component classes, so `class="w-full"` on a kit element works.
+ */
+@layer theme, base, ng-icon, components, utilities;
+
+@import 'tailwindcss';
+/* The in-house UI kit (fm-* classes): buttons, fields, overlays, tables… */
+@import './styles/ui.css' layer(components);
+/* Public site (landing, trainers, blog, gallery): scoped under `.site`, see the file. */
+@import './styles/public-site.css' layer(components);
+@import './styles/auth.css' layer(components);
+
+/* Rich text (policies, blog posts) only; form controls are styled by the kit, so @tailwindcss/forms is gone. */
+@plugin '@tailwindcss/typography';
+@plugin 'tailwind-scrollbar';
+
+/* Dark mode is toggled with a `.dark` class on <html> (ThemeService, and index.html before the first paint). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* Design system (fitmanager-resources/Designs): Vazirmatn for all text, Rubik Dirt for display headlines. */
+    --font-sans: 'Vazirmatn', system-ui, sans-serif;
+    --font-display: 'Rubik Dirt', 'Vazirmatn', system-ui, sans-serif;
+
+    /* Type scale from the design's typography sheet (size / weight is set where used). */
+    --text-title: 2.5rem; /* Main title: 40px, extra bold */
+    --text-title--line-height: 1.2;
+    --text-h1: 1.5rem; /* Heading 1: 24px, bold */
+    --text-h1--line-height: 1.3;
+    --text-h2: 1.25rem; /* Heading 2: 20px, semibold */
+    --text-h2--line-height: 1.35;
+    --text-h3: 1rem; /* Heading 3: 16px, medium */
+    --text-h3--line-height: 1.4;
+
+    --breakpoint-xs: 23rem;
+
+    /* Content width of the 12-column desktop grid: 1440px frame minus 98px margins (24px gutters). */
+    --container-site: 77.75rem;
+
+    /* Corner radii from the design (0, 4, 8, 12 and 16 are Tailwind's none, sm, lg, xl and 2xl). */
+    --radius-3xl: 1.75rem; /* 28px */
+    --radius-pill: 5rem; /* 80px */
+
+    /* Elevation: shadows E1–E6, tinted with the theme's main accent. */
+    --shadow-e1: 0 1px 1px color-mix(in srgb, var(--brand-primary) 4%, transparent);
+    --shadow-e2: 0 1px 8px color-mix(in srgb, var(--brand-primary) 8%, transparent);
+    --shadow-e3: 0 1px 8px color-mix(in srgb, var(--brand-primary) 12%, transparent);
+    --shadow-e4: 0 8px 12px color-mix(in srgb, var(--brand-primary) 12%, transparent);
+    --shadow-e5: 0 8px 16px color-mix(in srgb, var(--brand-primary) 16%, transparent);
+    --shadow-e6: 0 16px 24px color-mix(in srgb, var(--brand-primary) 16%, transparent);
+
+    /*
+     * Colour theme: ThemeService writes the active theme (src/app/config/tenant.ts `themes`) to <html>:
+     * `--brand-primary` / `--brand-secondary`, and, when the theme gives them, exact shades (`--primary-50` …),
+     * button states (`--primary-hover`, `--primary-pressed`) and dark surfaces (`--surface-950` …).
+     * Anything a theme leaves out is mixed from its two accents, so a new theme needs no CSS.
+     * The landing page, sign-in and the consoles all use these tokens: one design for the whole app.
+     */
+    --color-primary: var(--brand-primary);
+    --color-primary-50: var(--primary-50, color-mix(in oklab, var(--brand-primary) 7%, white));
+    --color-primary-100: var(--primary-100, color-mix(in oklab, var(--brand-primary) 16%, white));
+    --color-primary-200: var(--primary-200, color-mix(in oklab, var(--brand-primary) 32%, white));
+    --color-primary-300: var(--primary-300, color-mix(in oklab, var(--brand-primary) 52%, white));
+    --color-primary-400: var(--primary-400, color-mix(in oklab, var(--brand-primary) 76%, white));
+    --color-primary-500: var(--brand-primary);
+    --color-primary-600: var(--primary-600, color-mix(in oklab, var(--brand-primary) 84%, black));
+    --color-primary-700: var(--primary-700, color-mix(in oklab, var(--brand-primary) 68%, black));
+    --color-primary-800: var(--primary-800, color-mix(in oklab, var(--brand-primary) 52%, black));
+    --color-primary-900: var(--primary-900, color-mix(in oklab, var(--brand-primary) 36%, black));
+    --color-primary-hover: var(--primary-hover, color-mix(in oklab, var(--brand-primary) 88%, black));
+    --color-primary-pressed: var(--primary-pressed, color-mix(in oklab, var(--brand-primary) 78%, black));
+
+    --color-secondary: var(--brand-secondary);
+    --color-secondary-50: var(--secondary-50, color-mix(in oklab, var(--brand-secondary) 10%, white));
+    --color-secondary-100: var(--secondary-100, color-mix(in oklab, var(--brand-secondary) 20%, white));
+    --color-secondary-200: var(--secondary-200, color-mix(in oklab, var(--brand-secondary) 38%, white));
+    --color-secondary-300: var(--secondary-300, color-mix(in oklab, var(--brand-secondary) 56%, white));
+    --color-secondary-400: var(--secondary-400, color-mix(in oklab, var(--brand-secondary) 78%, white));
+    --color-secondary-500: var(--brand-secondary);
+    --color-secondary-600: var(--secondary-600, color-mix(in oklab, var(--brand-secondary) 86%, black));
+    --color-secondary-700: var(--secondary-700, color-mix(in oklab, var(--brand-secondary) 68%, black));
+    --color-secondary-800: var(--secondary-800, color-mix(in oklab, var(--brand-secondary) 50%, black));
+    --color-secondary-900: var(--secondary-900, color-mix(in oklab, var(--brand-secondary) 32%, black));
+    --color-secondary-hover: var(--secondary-hover, color-mix(in oklab, var(--brand-secondary) 88%, black));
+    --color-secondary-pressed: var(--secondary-pressed, color-mix(in oklab, var(--brand-secondary) 78%, black));
+
+    /* Dark surfaces: the landing page, and the consoles in dark mode (`night` is the consoles' name for them). */
+    --color-ink-950: var(--surface-950, #181818);
+    --color-ink-900: var(--surface-900, #1b1b1b);
+    --color-ink-800: var(--surface-800, #232323);
+    --color-ink-700: var(--surface-700, #2a2a2a);
+    --color-night-700: var(--color-ink-700);
+    --color-night-800: var(--color-ink-800);
+    --color-night-900: var(--color-ink-900);
+
+    --shadow-card: 0 0 50px 0 rgb(82 63 105 / 15%);
+
+    --animate-fade-in-up: fade-in-up 0.3s ease-out;
+    @keyframes fade-in-up {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/*
+ * Semantic tokens for the consoles and the portal: surfaces, text, borders, status, radius, motion, layers.
+ * `inline`: utilities reference the `--fm-*` variables directly, so `.dark` (below) restyles every component
+ * without a dark: variant. Components use THESE, never raw palette colours. The public site and the auth pages are
+ * always dark and use the `ink-*` surfaces instead.
+ */
+@theme inline {
+    --color-bg: var(--fm-bg);
+    --color-surface: var(--fm-surface);
+    --color-surface-raised: var(--fm-surface-raised);
+    --color-surface-sunken: var(--fm-surface-sunken);
+    --color-overlay: var(--fm-overlay);
+    --color-fg: var(--fm-fg);
+    --color-fg-muted: var(--fm-fg-muted);
+    --color-fg-subtle: var(--fm-fg-subtle);
+    --color-fg-on-primary: var(--fm-fg-on-primary);
+    --color-border: var(--fm-border);
+    --color-border-strong: var(--fm-border-strong);
+    --color-ring: var(--fm-ring);
+    --color-accent: var(--fm-accent);
+    --color-accent-soft: var(--fm-accent-soft);
+
+    --color-success: var(--fm-success);
+    --color-success-soft: var(--fm-success-soft);
+    --color-success-fg: var(--fm-success-fg);
+    --color-warning: var(--fm-warning);
+    --color-warning-soft: var(--fm-warning-soft);
+    --color-warning-fg: var(--fm-warning-fg);
+    --color-danger: var(--fm-danger);
+    --color-danger-soft: var(--fm-danger-soft);
+    --color-danger-fg: var(--fm-danger-fg);
+    --color-info: var(--fm-info);
+    --color-info-soft: var(--fm-info-soft);
+    --color-info-fg: var(--fm-info-fg);
+}
+
+@theme {
+    --radius-control: 0.625rem; /* buttons, inputs: 10px */
+    --radius-panel: 1rem; /* cards, dialogs: 16px */
+
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --duration-fast: 120ms;
+    --duration-normal: 200ms;
+    --duration-slow: 320ms;
+
+    --z-dropdown: 40;
+    --z-sticky: 30;
+    --z-drawer: 50;
+    --z-dialog: 60;
+    --z-toast: 70;
+}
+
+:root {
+    --fm-bg: #f5f5f6;
+    --fm-surface: #ffffff;
+    --fm-surface-raised: #ffffff;
+    --fm-surface-sunken: #efeff1;
+    --fm-overlay: rgb(10 10 12 / 48%);
+    --fm-fg: #18181b;
+    --fm-fg-muted: #52525b;
+    --fm-fg-subtle: #6b6b74;
+    --fm-fg-on-primary: #ffffff;
+    --fm-border: #e4e4e7;
+    --fm-border-strong: #c9c9cf;
+    --fm-ring: var(--color-primary-500);
+    /* Accent text on the page background: the brand colour, darkened where needed for AA contrast. */
+    --fm-accent: var(--color-primary-600);
+    --fm-accent-soft: var(--color-primary-50);
+
+    --fm-success: #1f8a3c;
+    --fm-success-soft: #e7f6ec;
+    --fm-success-fg: #14632a;
+    --fm-warning: #c27803;
+    --fm-warning-soft: #fdf3e1;
+    --fm-warning-fg: #8a4b00;
+    --fm-danger: #d92d20;
+    --fm-danger-soft: #fdecea;
+    --fm-danger-fg: #a2180f;
+    --fm-info: #2563eb;
+    --fm-info-soft: #e8f0fe;
+    --fm-info-fg: #1d4ed8;
+
+    /* Chart series (categorical, fixed order: one per branch). Validated with the dataviz palette checks. */
+    --fm-series-1: #2a78d6;
+    --fm-series-2: #eb6834;
+    --fm-series-3: #1baf7a;
+    --fm-series-4: #eda100;
+
+    color-scheme: light;
+}
+.dark {
+    --fm-bg: var(--color-ink-950);
+    --fm-surface: var(--color-ink-900);
+    --fm-surface-raised: var(--color-ink-800);
+    --fm-surface-sunken: #121212;
+    --fm-overlay: rgb(0 0 0 / 62%);
+    --fm-fg: #f2f2f3;
+    --fm-fg-muted: #b4b4bb;
+    --fm-fg-subtle: #93939b;
+    --fm-border: #2e2e32;
+    --fm-border-strong: #45454b;
+    --fm-ring: var(--color-primary-400);
+    --fm-accent: var(--color-primary-400);
+    --fm-accent-soft: color-mix(in oklab, var(--color-primary-500) 18%, transparent);
+
+    --fm-success: #3fb466;
+    --fm-success-soft: rgb(63 180 102 / 14%);
+    --fm-success-fg: #7ad89a;
+    --fm-warning: #e3a21a;
+    --fm-warning-soft: rgb(227 162 26 / 14%);
+    --fm-warning-fg: #f3c35f;
+    --fm-danger: #f04438;
+    --fm-danger-soft: rgb(240 68 56 / 16%);
+    --fm-danger-fg: #ff8a80;
+    --fm-info: #5b8def;
+    --fm-info-soft: rgb(91 141 239 / 16%);
+    --fm-info-fg: #9dbcff;
+
+    --fm-series-1: #3987e5;
+    --fm-series-2: #d95926;
+    --fm-series-3: #199e70;
+    --fm-series-4: #c98500;
+
+    color-scheme: dark;
+}
+
+/* ngx-editor ships its own CSS and is themed through CSS variables (no ::ng-deep needed). */
+:root {
+    /* Fallback until ThemeService applies the active theme at startup (src/app/config/tenant.ts). */
+    --brand-primary: #d90a14;
+    --brand-secondary: #cd4e17;
+
+    --ngx-editor-border-radius: 6px;
+    --ngx-editor-focus-ring-color: var(--color-primary-400);
+    --ngx-editor-menu-item-active-color: var(--color-primary-500);
+    --ngx-editor-menu-item-active-bg-color: var(--color-primary-50);
+}
+.dark {
+    --ngx-editor-background-color: var(--color-night-900);
+    --ngx-editor-menubar-bg-color: var(--color-night-800);
+    --ngx-editor-text-color: #e5e7eb;
+    --ngx-editor-border-color: var(--color-night-700);
+    --ngx-editor-wrapper-border-color: var(--color-night-700);
+    --ngx-editor-popup-bg-color: var(--color-night-800);
+}
+
+/* Public-site button classes (Button sheet). The consoles use the kit's `fmButton` (styles/ui.css). */
+@layer components {
+    /*
+     * Design-system buttons (Button sheet): `.btn` + a size (`btn-lg|md|sm`) + a variant
+     * (`btn-fill|outline|text` + `-primary|-secondary`). Hover darkens; `.is-selected`, `aria-pressed`
+     * and :active use the "selected" shade. Icons go inside, left or right of the label.
+     */
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 border border-transparent whitespace-nowrap transition-[background-color,border-color,color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-lg {
+        @apply h-11 rounded-2xl px-6 text-lg font-medium;
+    }
+    .btn-md {
+        @apply h-9 rounded-xl px-4 text-base font-medium;
+    }
+    .btn-sm {
+        @apply h-7 rounded-lg px-3 text-sm font-light;
+    }
+    .btn-fill-primary {
+        @apply bg-primary-500 text-white hover:bg-primary-hover hover:shadow-e3 active:bg-primary-pressed aria-pressed:bg-primary-pressed [&.is-selected]:bg-primary-pressed;
+    }
+    .btn-fill-secondary {
+        @apply bg-secondary-500 text-white hover:bg-secondary-hover hover:shadow-e3 active:bg-secondary-pressed aria-pressed:bg-secondary-pressed [&.is-selected]:bg-secondary-pressed;
+    }
+    .btn-outline-primary {
+        @apply border-primary-500 text-primary-500 hover:border-primary-hover hover:text-primary-hover active:border-primary-pressed active:text-primary-pressed;
+    }
+    .btn-outline-secondary {
+        @apply border-secondary-500 text-secondary-500 hover:border-secondary-hover hover:text-secondary-hover active:border-secondary-pressed active:text-secondary-pressed;
+    }
+    .btn-text-primary {
+        @apply h-auto px-0 text-primary-500 hover:text-primary-hover active:text-primary-pressed;
+    }
+    .btn-text-secondary {
+        @apply h-auto px-0 text-secondary-500 hover:text-secondary-hover active:text-secondary-pressed;
+    }
+
+    /* The landing page's dark backdrop with the theme's glows; also behind sign-in, so the whole app reads as one brand. */
+    .brand-backdrop {
+        background:
+            radial-gradient(70rem 45rem at 100% 0%, color-mix(in srgb, var(--color-primary-500) 30%, transparent), transparent 65%),
+            radial-gradient(55rem 40rem at 0% 0%, color-mix(in srgb, var(--color-secondary-500) 22%, transparent), transparent 65%), var(--color-ink-900);
+    }
+}
+
+/*
+ * Photo tint: the design's photos carry a warm red/orange glow. In a theme with `tintPhotos`, ThemeService sets
+ * `data-tint` on <html> and this overlay recolours the glow: shades of the theme's main accent (one hue, like the
+ * design's orange-to-red disc; two clashing accents look muddy), masked by the photo's
+ * `*.tint.webp` (glow only, never the person) and blended with `color`, so the photo keeps its light and shade.
+ * Use: `<span class="photo-tint" [style.--tint-mask]="'url(' + img.tint + ')'"></span>` right after the <img>,
+ * inside a positioned box the image fills.
+ */
+.photo-tint {
+    position: absolute;
+    inset: 0;
+    display: none;
+    pointer-events: none;
+    background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+    mask: var(--tint-mask) var(--tint-position, center) / cover no-repeat;
+    mix-blend-mode: color;
+}
+:root[data-tint] .photo-tint {
+    display: block;
+}
+
+/*
+ * Motion. Everything here is skipped when the visitor prefers reduced motion.
+ * - Smooth scrolling for in-page links on pages that opt in (the landing page).
+ * - Scroll reveal for RevealDirective. An animation, not a transition, so it never fights `transition-*` utilities.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    html:has(.landing) {
+        scroll-behavior: smooth;
+    }
+    .reveal {
+        opacity: 0;
+    }
+    .reveal.revealed {
+        animation: reveal-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
+    }
+}
+/* Switching the colour theme cross-fades the page (ThemeService uses a view transition where supported). */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.45s;
+}
+
+@keyframes reveal-up {
+    from {
+        opacity: 0;
+        transform: translateY(1.75rem);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Chrome's autofill paints inputs pale yellow; keep the field's own surface (light and dark). */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px var(--fm-surface) inset;
+    -webkit-text-fill-color: var(--fm-fg);
+}
+
+/* Hide chrome when printing (OMS `do-not-print`). */
+@media print {
+    .do-not-print {
+        display: none !important;
+    }
+}

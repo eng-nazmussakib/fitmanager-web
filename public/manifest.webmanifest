@@ -1,0 +1,11 @@
+{
+    "name": "Iron Tribe Fitness: my membership",
+    "short_name": "My gym",
+    "description": "Your membership card, classes, routine and progress.",
+    "start_url": "/me",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#1b1b1b",
+    "theme_color": "#d90a14",
+    "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

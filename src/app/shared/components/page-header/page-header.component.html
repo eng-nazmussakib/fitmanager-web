@@ -1,0 +1,25 @@
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+        <nz-breadcrumb class="mb-1">
+            <nz-breadcrumb-item>
+                <a routerLink="/">Home</a>
+            </nz-breadcrumb-item>
+            @for (crumb of crumbs(); track crumb.url; let last = $last) {
+                <nz-breadcrumb-item>
+                    @if (last) {
+                        {{ crumb.label }}
+                    } @else {
+                        <a [routerLink]="crumb.url">{{ crumb.label }}</a>
+                    }
+                </nz-breadcrumb-item>
+            }
+        </nz-breadcrumb>
+        <h1 class="page-title">{{ title() }}</h1>
+        @if (subtitle(); as sub) {
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ sub }}</p>
+        }
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <ng-content />
+    </div>
+</div>

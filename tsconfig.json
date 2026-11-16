@@ -1,0 +1,40 @@
+/* https://www.typescriptlang.org/docs/handbook/tsconfig-json.html */
+/* https://angular.dev/reference/configs/angular-compiler-options */
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "strict": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "resolveJsonModule": true,
+        "target": "ES2022",
+        "module": "preserve",
+        /* Path aliases: never write '../../../core/...' – import from an alias instead. */
+        "paths": {
+            "@core/*": ["./src/app/core/*"],
+            "@shared/*": ["./src/app/shared/*"],
+            "@layout/*": ["./src/app/layout/*"],
+            "@features/*": ["./src/app/features/*"],
+            "@config/*": ["./src/app/config/*"],
+            "@env/*": ["./src/environments/*"],
+            "@mock/*": ["./src/app/mock/*"]
+        }
+    },
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
+        "strictTemplates": true,
+        "strictStandalone": true
+    },
+    "files": [],
+    "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.spec.json" }]
+}

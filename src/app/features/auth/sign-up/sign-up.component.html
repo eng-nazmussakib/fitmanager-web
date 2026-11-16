@@ -1,0 +1,253 @@
+@if (done(); as d) {
+    <app-auth-shell heading="You're almost in, {{ d.name }}!" lead="We've received your request.">
+        <div class="summary flex gap-3">
+            <ng-icon class="mt-0.5 shrink-0 text-primary-400" name="lucideCircleCheck" aria-hidden="true" size="1.5rem" />
+            <div class="text-sm leading-relaxed text-white/80">
+                <p>
+                    Visit the
+                    <strong class="text-white">{{ d.branch }}</strong>
+                    front desk to pay for your plan and collect your member card. Your membership starts on the day you pay.
+                </p>
+                <p class="mt-2 text-white/55">Request number: {{ d.id }}</p>
+            </div>
+        </div>
+        <div class="mt-7 grid gap-3 sm:grid-cols-2">
+            <a class="btn btn-lg btn-fill-primary" fragment="branches" routerLink="/">Branch hours</a>
+            <a class="btn btn-lg btn-outline-secondary" [routerLink]="loginRoute">Sign in</a>
+        </div>
+    </app-auth-shell>
+} @else {
+    <app-auth-shell heading="Join {{ brandName }}" lead="Create your account, pick a plan and pay at the front desk." [wide]="true">
+        <form novalidate [formGroup]="form" (ngSubmit)="submit()">
+            <div class="field">
+                <label class="field-label" for="fullName">Full name</label>
+                <span class="field-box">
+                    <ng-icon name="lucideUser" aria-hidden="true" />
+                    <input
+                        id="fullName"
+                        class="field-input"
+                        autocomplete="name"
+                        formControlName="fullName"
+                        placeholder="Your name"
+                        [attr.aria-describedby]="showError('fullName') ? 'fullName-error' : null"
+                        [attr.aria-invalid]="showError('fullName')"
+                    />
+                </span>
+                @if (showError('fullName')) {
+                    <p id="fullName-error" class="field-error">{{ form.controls.fullName.errors | errorMessage }}</p>
+                }
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label class="field-label" for="phone">Mobile number</label>
+                    <span class="field-box">
+                        <ng-icon name="lucidePhone" aria-hidden="true" />
+                        <input
+                            id="phone"
+                            class="field-input"
+                            autocomplete="tel"
+                            formControlName="phone"
+                            inputmode="tel"
+                            placeholder="01712345678"
+                            [attr.aria-describedby]="showError('phone') ? 'phone-error' : null"
+                            [attr.aria-invalid]="showError('phone')"
+                        />
+                    </span>
+                    @if (showError('phone')) {
+                        <p id="phone-error" class="field-error">{{ form.controls.phone.errors | errorMessage }}</p>
+                    }
+                </div>
+                <div class="field">
+                    <label class="field-label" for="email">
+                        Email
+                        <span class="optional">Optional</span>
+                    </label>
+                    <span class="field-box">
+                        <ng-icon name="lucideMail" aria-hidden="true" />
+                        <input
+                            id="email"
+                            class="field-input"
+                            type="email"
+                            autocomplete="email"
+                            formControlName="email"
+                            inputmode="email"
+                            placeholder="you@example.com"
+                            [attr.aria-describedby]="showError('email') ? 'email-error' : null"
+                            [attr.aria-invalid]="showError('email')"
+                        />
+                    </span>
+                    @if (showError('email')) {
+                        <p id="email-error" class="field-error">{{ form.controls.email.errors | errorMessage }}</p>
+                    }
+                </div>
+            </div>
+
+            <div class="field-row">
+                @if (branches.length > 1) {
+                    <div class="field">
+                        <label class="field-label" for="branch">Branch</label>
+                        <span class="field-box">
+                            <ng-icon name="lucideMapPin" aria-hidden="true" />
+                            <select
+                                id="branch"
+                                class="field-input"
+                                formControlName="branch"
+                                [attr.aria-describedby]="showError('branch') ? 'branch-error' : null"
+                                [attr.aria-invalid]="showError('branch')"
+                            >
+                                <option disabled value="">Choose a branch</option>
+                                @for (b of branches; track b.name) {
+                                    <option [value]="b.name">{{ b.name }}</option>
+                                }
+                            </select>
+                        </span>
+                        @if (showError('branch')) {
+                            <p id="branch-error" class="field-error">{{ form.controls.branch.errors | errorMessage }}</p>
+                        }
+                    </div>
+                }
+                @if (plans.length > 1) {
+                    <div class="field" [class.sm:col-span-2]="branches.length === 1">
+                        <label class="field-label" for="plan">Plan</label>
+                        <span class="field-box">
+                            <ng-icon name="lucideCircleCheck" aria-hidden="true" />
+                            <select
+                                id="plan"
+                                class="field-input"
+                                formControlName="plan"
+                                [attr.aria-describedby]="showError('plan') ? 'plan-error' : null"
+                                [attr.aria-invalid]="showError('plan')"
+                            >
+                                <option disabled value="">Choose a plan</option>
+                                @for (p of plans; track p.id) {
+                                    <option [value]="p.id">{{ p.name }}</option>
+                                }
+                            </select>
+                        </span>
+                        @if (showError('plan')) {
+                            <p id="plan-error" class="field-error">{{ form.controls.plan.errors | errorMessage }}</p>
+                        }
+                    </div>
+                }
+            </div>
+
+            <fieldset class="field mt-[1.1rem]">
+                <legend class="field-label">Billing period</legend>
+                <div class="period-chips">
+                    @for (p of periods; track p.id) {
+                        <label class="period-chip">
+                            <input
+                                class="sr-only"
+                                type="radio"
+                                name="period"
+                                formControlName="period"
+                                [attr.disabled]="sold(form.controls.plan.value, p.id) || !form.controls.plan.value ? null : ''"
+                                [value]="p.id"
+                            />
+                            <span>{{ p.label }}</span>
+                            @if (periodNote(p.id); as note) {
+                                <small>{{ note }}</small>
+                            }
+                        </label>
+                    }
+                </div>
+            </fieldset>
+
+            @if (summary(); as s) {
+                <div class="summary mt-5 flex items-center justify-between gap-4" aria-live="polite">
+                    <div class="min-w-0">
+                        <p class="truncate font-semibold">{{ s.plan.name }} · {{ s.period.label }}</p>
+                        <p class="mt-0.5 text-xs text-white/60">
+                            Pay at the {{ s.branch || 'branch' }} front desk
+                            @if (s.quote.savePercent > 0) {
+                                · you save {{ s.quote.savePercent }}%
+                            }
+                        </p>
+                    </div>
+                    <p class="shrink-0 text-right">
+                        <span class="text-xl font-bold">{{ s.quote.price | taka: 0 : c.currency.symbol }}</span>
+                        <span class="block text-xs text-white/55">{{ s.quote.per }}</span>
+                    </p>
+                </div>
+            } @else if (form.controls.plan.value) {
+                <p class="mt-4 text-sm text-white/60" role="status">This plan is not sold for that period. Choose another period.</p>
+            }
+
+            <div class="field-row mt-[1.1rem]">
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <span class="field-box">
+                        <ng-icon name="lucideLock" aria-hidden="true" />
+                        <input
+                            id="password"
+                            class="field-input"
+                            autocomplete="new-password"
+                            formControlName="password"
+                            [attr.aria-describedby]="showError('password') ? 'password-error' : null"
+                            [attr.aria-invalid]="showError('password')"
+                            [type]="showPassword() ? 'text' : 'password'"
+                        />
+                        <button
+                            class="field-toggle"
+                            type="button"
+                            [attr.aria-label]="showPassword() ? 'Hide passwords' : 'Show passwords'"
+                            [attr.aria-pressed]="showPassword()"
+                            (click)="showPassword.set(!showPassword())"
+                        >
+                            <ng-icon aria-hidden="true" [name]="showPassword() ? 'lucideEyeOff' : 'lucideEye'" />
+                        </button>
+                    </span>
+                    @if (showError('password')) {
+                        <p id="password-error" class="field-error">{{ form.controls.password.errors | errorMessage }}</p>
+                    }
+                </div>
+                <div class="field">
+                    <label class="field-label" for="confirm">Confirm password</label>
+                    <span class="field-box">
+                        <ng-icon name="lucideLock" aria-hidden="true" />
+                        <input
+                            id="confirm"
+                            class="field-input"
+                            autocomplete="new-password"
+                            formControlName="confirm"
+                            [attr.aria-describedby]="showError('confirm') || mismatch() ? 'confirm-error' : null"
+                            [attr.aria-invalid]="showError('confirm') || mismatch()"
+                            [type]="showPassword() ? 'text' : 'password'"
+                        />
+                    </span>
+                    @if (showError('confirm')) {
+                        <p id="confirm-error" class="field-error">{{ form.controls.confirm.errors | errorMessage }}</p>
+                    } @else if (mismatch()) {
+                        <p id="confirm-error" class="field-error">The passwords do not match.</p>
+                    }
+                </div>
+            </div>
+
+            <label class="check mt-6">
+                <input type="checkbox" formControlName="agree" [attr.aria-invalid]="showError('agree')" />
+                <span>
+                    I agree to the
+                    <a class="auth-link" routerLink="/membership-terms" target="_blank">membership terms</a>
+                    and the
+                    <a class="auth-link" routerLink="/privacy-policy" target="_blank">privacy policy</a>
+                </span>
+            </label>
+            @if (showError('agree')) {
+                <p class="field-error">Please accept the terms to continue.</p>
+            }
+
+            <button class="btn btn-lg btn-fill-primary mt-7 w-full" type="submit" [disabled]="loading()">
+                @if (loading()) {
+                    <ng-icon class="animate-spin" name="lucideLoaderCircle" aria-hidden="true" />
+                }
+                Create account
+            </button>
+
+            <p class="mt-5 text-center text-sm text-white/65">
+                Already a member?
+                <a class="auth-link" [routerLink]="loginRoute">Sign in</a>
+            </p>
+        </form>
+    </app-auth-shell>
+}

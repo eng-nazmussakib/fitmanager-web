@@ -1,0 +1,508 @@
+@for (section of site.sections(); track section) {
+    @switch (section) {
+        <!-- ───────────── Hero ───────────── -->
+        @case ('hero') {
+            <section class="wrap grid items-center gap-10 pt-6 pb-12 lg:grid-cols-2 lg:gap-6 lg:pt-12 lg:pb-16" aria-labelledby="hero-title">
+                <div class="hero-copy text-center lg:pb-8">
+                    <h1 id="hero-title" class="flex flex-col items-center gap-3 font-extrabold lg:gap-5">
+                        <span class="text-[1.75rem] leading-tight lg:text-title">{{ c.hero.lines[0] }}</span>
+                        <span
+                            class="text-flame font-display text-[2rem] leading-none font-normal tracking-wide whitespace-nowrap uppercase xs:text-[2.4rem] sm:text-[3.25rem] lg:text-[2.9rem] xl:text-[3.6rem]">
+                            {{ c.hero.lines[1] }}
+                        </span>
+                        <span class="text-[1.75rem] leading-tight lg:text-title">{{ c.hero.lines[2] }}</span>
+                    </h1>
+                    <p class="mt-10 text-left text-sm leading-relaxed text-white/90 sm:text-justify lg:mt-14 lg:text-base">{{ c.hero.text }}</p>
+                    <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-6 lg:mt-10">
+                        <a class="btn btn-lg btn-fill-primary text-base sm:text-lg" [fragment]="to(c.hero.primaryCta).fragment" [routerLink]="to(c.hero.primaryCta).route">{{ c.hero.primaryCta.label }}</a>
+                        <a class="btn btn-lg btn-outline-secondary text-base sm:text-lg" [fragment]="to(c.hero.secondaryCta).fragment" [routerLink]="to(c.hero.secondaryCta).route">
+                            {{ c.hero.secondaryCta.label }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hero-art relative mx-auto aspect-[610/670] w-full max-w-[38rem] lg:mr-0">
+                    <img class="hero-photo absolute inset-0 size-full" fetchpriority="high" height="670" width="610" [alt]="c.hero.image.alt" [src]="c.hero.image.src" />
+                    @if (c.hero.image.tint) {
+                        <span class="photo-tint hero-tint" [style.--tint-mask]="'url(' + c.hero.image.tint + ')'"></span>
+                    }
+                    <ul aria-label="Our community in numbers">
+                        @for (b of c.hero.badges; track b.label; let i = $index) {
+                            <li class="hero-badge" [style.--i]="i" [style.left.%]="b.left" [style.top.%]="b.top" [style.width.%]="b.width">
+                                <span class="hero-badge-value">
+                                    @if (b.icon) {
+                                        <ng-icon class="text-primary-400" aria-hidden="true" [name]="badgeIcons[b.icon]" />
+                                    }
+                                    <span [appCountUp]="b.value"></span>
+                                </span>
+                                <span class="hero-badge-label">{{ b.label }}</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </section>
+        }
+
+        <!-- ───────────── Stats ───────────── -->
+        @case ('stats') {
+            <section id="stats" class="wrap" aria-label="Key figures">
+                <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+                    @for (s of c.stats; track s.label; let first = $first; let i = $index) {
+                        <li class="stat-divider px-4 pb-6 text-center lg:pb-0" appReveal [class.lg:border-l-2]="!first" [revealDelay]="i * 90">
+                            <p class="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 lg:flex-col lg:items-center xl:flex-row xl:items-baseline">
+                                <span
+                                    class="text-[1.75rem] leading-none font-semibold lg:text-[2.25rem]"
+                                    [class]="s.tone === 'primary' ? 'text-primary-500' : 'text-secondary-500'">
+                                    {{ s.value }}
+                                </span>
+                                <span class="font-medium whitespace-nowrap xl:text-lg">{{ s.label }}</span>
+                            </p>
+                            <p class="mt-4 text-sm text-white/55">{{ s.text }}</p>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        <!-- ───────────── Services ───────────── -->
+        @case ('services') {
+            <section id="services" class="wrap pt-20 lg:pt-24" aria-labelledby="services-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.services, id: 'services-title', center: true }" />
+                <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:mt-10 lg:grid-cols-4 lg:gap-9">
+                    @for (s of c.services.items; track s.title; let i = $index) {
+                        <article class="service-card lift group" appReveal [revealDelay]="i * 90">
+                            <div class="absolute inset-0 transition duration-700 group-hover:scale-105">
+                                <img class="size-full object-cover" height="376" loading="lazy" width="382" [alt]="s.image.alt" [src]="s.image.src" />
+                                @if (s.image.tint) {
+                                    <span class="photo-tint" [style.--tint-mask]="'url(' + s.image.tint + ')'"></span>
+                                }
+                            </div>
+                            <div class="service-body relative flex h-full flex-col">
+                                <h3 class="service-title">{{ s.title }}</h3>
+                                <p class="service-lead">{{ s.lead }}</p>
+                                <p class="service-text">{{ s.text }}</p>
+                                <a class="service-link" [fragment]="to(s.link).fragment" [routerLink]="to(s.link).route">
+                                    {{ s.link.label }}
+                                    <ng-icon class="text-primary-500 transition-transform group-hover:translate-x-1" aria-hidden="true" name="lucideMoveRight" />
+                                </a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        <!-- ───────────── Plans ───────────── -->
+        @case ('plans') {
+            <section id="plans" class="wrap pt-20 lg:pt-24" aria-labelledby="plans-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.plans, id: 'plans-title', center: true }" />
+                @if (planSwitch(); as sw) {
+                    <div class="billing-switch mx-auto mt-8" role="group" appReveal [attr.aria-label]="sw.label" [style.--periods]="sw.options.length">
+                        @for (o of sw.options; track o.id) {
+                            <button class="billing-option" type="button" [attr.aria-pressed]="sw.value === o.id" (click)="selectPlanOption(o.id)">
+                                {{ o.label }}
+                            </button>
+                        }
+                    </div>
+                }
+
+                <!-- Single plan (or the periods layout): the plan's details once, above a card per period. -->
+                @if (planMode === 'periods') {
+                    @let sp = selectedPlan();
+                    @if (sp && (sp.description || sp.features?.length)) {
+                        @for (key of [sp.id]; track key) {
+                            <div class="plan-details swap-in mx-auto mt-8 max-w-3xl text-center" appReveal>
+                                <h3 class="font-display text-[1.75rem] leading-none uppercase lg:text-[2rem]">{{ sp.name }}</h3>
+                                @if (sp.description) {
+                                    <p class="mt-4 text-sm leading-relaxed text-white/85">{{ sp.description }}</p>
+                                }
+                                @if (sp.features?.length) {
+                                    <ul class="mt-5 grid gap-x-8 gap-y-2 text-left text-sm sm:grid-cols-2">
+                                        @for (f of sp.features; track f) {
+                                            <li class="flex items-start gap-2">
+                                                <ng-icon class="mt-0.5 shrink-0 text-primary-400" aria-hidden="true" name="lucideCircleCheck" />
+                                                {{ f }}
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        }
+                    }
+                }
+
+                <div class="plan-grid mt-8" [attr.data-cols]="planCards().length > 4 ? 4 : planCards().length">
+                    @for (card of planCards(); track card.key; let i = $index) {
+                        <article class="plan-card lift" appReveal [revealDelay]="i * 110" [class.max-lg:order-first]="card.featured && planMode === 'plans'" [class.plan-card-featured]="card.featured">
+                            @if (card.badge) {
+                                <span class="plan-badge">{{ card.badge }}</span>
+                            }
+                            @if (card.kicker) {
+                                <p class="plan-label">{{ card.kicker }}</p>
+                            }
+                            <h3 class="mt-4 font-display text-[1.75rem] leading-none uppercase lg:text-[2rem]">{{ card.title }}</h3>
+                            @if (card.description) {
+                                <p class="plan-label mt-5 text-xs">Description</p>
+                                <p class="mt-3 text-sm leading-relaxed text-white/90 lg:text-justify">{{ card.description }}</p>
+                            }
+                            @if (card.features?.length) {
+                                <p class="plan-label mt-5 text-xs">Features</p>
+                                <ul class="mt-3 list-inside list-disc space-y-1 text-left text-sm marker:text-white/70">
+                                    @for (f of card.features; track f) {
+                                        <li>{{ f }}</li>
+                                    }
+                                </ul>
+                            }
+                            <div class="mt-auto pt-8">
+                                @for (key of [card.query.plan + card.query.period]; track key) {
+                                    <div class="swap-in">
+                                        @if (card.quote; as q) {
+                                            <p>
+                                                <span class="text-2xl font-bold">{{ q.price | taka: 0 : c.currency.symbol }}</span>
+                                                <span class="text-sm text-white/60">{{ q.per }}</span>
+                                            </p>
+                                            <p class="mt-1 flex min-h-6 items-center justify-center gap-2 text-xs text-white/60">
+                                                @if (card.showPerMonth) {
+                                                    {{ q.perMonth | taka: 0 : c.currency.symbol }} a month
+                                                    @if (q.savePercent > 0) {
+                                                        <span class="plan-save">Save {{ q.savePercent }}%</span>
+                                                    }
+                                                }
+                                            </p>
+                                        } @else {
+                                            <p class="text-sm text-white/60">{{ card.missing }}</p>
+                                            <p class="min-h-6"></p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            @if (card.quote && c.plans.cta.route) {
+                                <a
+                                    class="btn btn-lg mt-6 w-full"
+                                    [class]="card.featured ? 'btn-fill-primary' : 'btn-fill-secondary'"
+                                    [queryParams]="card.query"
+                                    [routerLink]="c.plans.cta.route"
+                                >
+                                    {{ c.plans.cta.label }}
+                                </a>
+                            } @else {
+                                <a
+                                    class="btn btn-lg mt-6 w-full"
+                                    [class]="card.featured ? 'btn-fill-primary' : 'btn-fill-secondary'"
+                                    [fragment]="to(c.plans.cta).fragment"
+                                    [routerLink]="to(c.plans.cta).route"
+                                >
+                                    {{ c.plans.cta.label }}
+                                </a>
+                            }
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        <!-- ───────────── Facilities ───────────── -->
+        @case ('facilities') {
+            <section id="facilities" class="wrap pt-20 lg:pt-24" aria-labelledby="facilities-title">
+                <div class="flex items-start justify-between gap-4">
+                    <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.facilities, id: 'facilities-title', noLead: true }" />
+                    <ng-container *ngTemplateOutlet="pagerControls; context: { $implicit: facilitiesPager, label: 'facilities' }" />
+                </div>
+                <ng-container *ngTemplateOutlet="lead; context: { $implicit: c.facilities.lead }" />
+                <ul #facilitiesPager="pager" class="track mt-8 gap-3 lg:mt-10 lg:gap-4" appReveal appScrollPager [revealDelay]="120">
+                    @for (f of facilities; track f.name) {
+                        <li class="facility-card lift-sm basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-4rem)/5)]">
+                            <div class="facility-art" aria-hidden="true">
+                                <ng-icon strokeWidth="1.25" [name]="f.icon" />
+                            </div>
+                            <h3 class="facility-name">{{ f.name }}</h3>
+                            <p class="px-3 pb-4 text-center text-[0.65rem] leading-snug text-white/70 sm:text-xs">{{ f.text }}</p>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        <!-- ───────────── Reviews ───────────── -->
+        @case ('reviews') {
+            <section id="reviews" class="wrap pt-20 lg:pt-24" aria-labelledby="reviews-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.reviews, id: 'reviews-title', center: true }" />
+                <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end lg:mt-4" appReveal [revealDelay]="120">
+                    <div class="flex flex-1 items-end" aria-live="polite">
+                        @for (r of [activeReview()]; track r.name) {
+                            <div class="review-portrait swap-in relative hidden w-[30%] max-w-56 shrink-0 sm:block">
+                                <img class="w-full object-cover object-top" loading="lazy" [alt]="r.image.alt" [src]="r.image.src" />
+                                @if (r.image.tint) {
+                                    <span class="photo-tint" [style.--tint-mask]="'url(' + r.image.tint + ')'" [style.--tint-position]="'top'"></span>
+                                }
+                            </div>
+                            <figure class="swap-in relative mb-0 flex-1 rounded-xl bg-primary-800 p-4 shadow-e6 sm:mb-0 lg:p-5">
+                                <ng-icon class="absolute top-4 right-4 rotate-180 text-primary-400" aria-hidden="true" name="lucideQuote" size="2.75rem" strokeWidth="3" />
+                                <figcaption>
+                                    <p class="text-h1 pr-14 font-semibold">{{ r.name }}</p>
+                                    <p class="mt-1 text-sm text-white/60">{{ r.role }}</p>
+                                </figcaption>
+                                <blockquote class="mt-4 text-[0.8rem] leading-relaxed text-white/95 sm:text-justify">{{ r.quote }}</blockquote>
+                            </figure>
+                        }
+                    </div>
+                    <div class="flex items-end gap-4 self-end">
+                        <div class="flex gap-3">
+                            <button class="pager-btn" type="button" aria-label="Previous review" (click)="prevReview()">
+                                <ng-icon aria-hidden="true" name="lucideArrowLeft" size="1.25rem" />
+                            </button>
+                            <button class="pager-btn" type="button" aria-label="Next review" (click)="nextReview()">
+                                <ng-icon aria-hidden="true" name="lucideArrowRight" size="1.25rem" />
+                            </button>
+                        </div>
+                        <ul class="hidden gap-4 lg:flex" aria-label="Other reviews">
+                            @for (r of otherReviews(); track r.name) {
+                                <li>
+                                    <button class="review-thumb" type="button" [attr.aria-label]="'Show the review from ' + r.name" (click)="reviewIndex.set(r.index)">
+                                        <img class="absolute inset-0 size-full object-cover object-top" alt="" loading="lazy" [src]="r.image.src" />
+                                        @if (r.image.tint) {
+                                            <span class="photo-tint" [style.--tint-mask]="'url(' + r.image.tint + ')'" [style.--tint-position]="'top'"></span>
+                                        }
+                                        <span class="review-thumb-name">{{ r.name }}</span>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        }
+
+        <!-- ───────────── Trainers ───────────── -->
+        @case ('trainers') {
+            <section id="trainers" class="wrap pt-20 lg:pt-24" aria-labelledby="trainers-title">
+                <div class="flex items-start justify-between gap-4">
+                    <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.trainers, id: 'trainers-title', noLead: true }" />
+                    <ng-container *ngTemplateOutlet="pagerControls; context: { $implicit: trainersPager, label: 'trainers' }" />
+                </div>
+                <ng-container *ngTemplateOutlet="lead; context: { $implicit: c.trainers.lead }" />
+                <ul #trainersPager="pager" class="track mt-8 gap-3 sm:gap-6 lg:mt-10 lg:gap-10" appReveal appScrollPager [revealDelay]="120">
+                    @for (t of c.trainers.items; track t.name) {
+                        <li class="trainer-card lift-sm group basis-[calc((100%-1.5rem)/3)] sm:basis-[calc((100%-3rem)/3)] lg:basis-[calc((100%-7.5rem)/4)]">
+                            <div class="overflow-hidden">
+                                <div class="relative aspect-[280/284] transition duration-700 group-hover:scale-105">
+                                    <img class="size-full object-cover" height="284" loading="lazy" width="280" [alt]="t.image.alt" [src]="t.image.src" />
+                                    @if (t.image.tint) {
+                                        <span class="photo-tint" [style.--tint-mask]="'url(' + t.image.tint + ')'"></span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="p-3 lg:px-3 lg:pt-2 lg:pb-5">
+                                <h3 class="truncate text-sm font-semibold sm:text-xl lg:text-h1">{{ t.name }}</h3>
+                                <p class="mt-1 truncate text-[0.65rem] text-white/60 sm:text-base">{{ t.role }}</p>
+                                <a class="service-link mt-3 text-xs sm:text-sm lg:mt-4" [fragment]="t.link.route ? slug(t.name) : to(t.link).fragment" [routerLink]="to(t.link).route">
+                                    {{ t.link.label }}
+                                    <ng-icon class="text-primary-500" aria-hidden="true" name="lucideMoveRight" />
+                                </a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                @if (c.trainers.viewAll; as viewAll) {
+                    @if (site.shows(viewAll)) {
+                    <ng-container *ngTemplateOutlet="viewAllLink; context: { $implicit: viewAll }" />
+                    }
+                }
+            </section>
+        }
+
+        <!-- ───────────── Blog ───────────── -->
+        @case ('blog') {
+            <section id="blog" class="wrap pt-20 lg:pt-24" aria-labelledby="blog-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.blog, id: 'blog-title' }" />
+                <ul class="mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:grid-cols-[1.02fr_0.5fr_0.5fr] lg:grid-rows-2 lg:gap-x-5 lg:gap-y-3">
+                    @for (p of c.blog.items; track p.title; let first = $first; let i = $index) {
+                        <li class="blog-card group" appReveal [class.blog-card-main]="first" [revealDelay]="i * 80">
+                            <img class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" [alt]="p.image.alt" [src]="p.image.src" />
+                            <div class="relative mt-auto w-full">
+                                <h3 class="blog-title">{{ p.title }}</h3>
+                                <div class="blog-meta">
+                                    @if (p.date) {
+                                        <span class="flex items-center gap-1.5">
+                                            <ng-icon aria-hidden="true" name="lucideCalendar" />
+                                            {{ p.date }}
+                                        </span>
+                                    }
+                                    <span class="flex min-w-0 items-center gap-1.5">
+                                        <ng-icon class="shrink-0" aria-hidden="true" name="lucideNewspaper" />
+                                        <span class="truncate">{{ p.category }}</span>
+                                    </span>
+                                    <a class="service-link ml-auto shrink-0" [attr.aria-label]="'Read: ' + p.title" [fragment]="to(p.link).fragment" [queryParams]="p.link.route ? { category: p.category } : null" [routerLink]="to(p.link).route">
+                                        {{ p.link.label }}
+                                        <ng-icon class="text-primary-500" aria-hidden="true" name="lucideMoveRight" />
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                @if (c.blog.viewAll; as viewAll) {
+                    @if (site.shows(viewAll)) {
+                    <ng-container *ngTemplateOutlet="viewAllLink; context: { $implicit: viewAll }" />
+                    }
+                }
+            </section>
+        }
+
+        <!-- ───────────── Branches (one branch: only its timetable) ───────────── -->
+        @case ('branches') {
+            <section id="branches" class="wrap pt-20 lg:pt-24" aria-labelledby="branches-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: branchHeading, id: 'branches-title', center: true }" />
+                <ul class="mt-8 grid gap-6 lg:mt-10" [class.lg:grid-cols-3]="branches.length > 1" [class.lg:gap-9]="branches.length > 1">
+                    @for (b of branches; track b.name; let i = $index) {
+                        <li
+                            class="lift flex flex-col rounded-lg bg-ink-800 p-4 shadow-e4 lg:p-6"
+                            appReveal
+                            [attr.aria-label]="branches.length > 1 ? b.name + ' branch' : null"
+                            [class.max-w-4xl]="branches.length === 1"
+                            [class.mx-auto]="branches.length === 1"
+                            [class.w-full]="branches.length === 1"
+                            [revealDelay]="i * 110">
+                            @if (branches.length > 1) {
+                                <h3 class="mb-0 flex items-center gap-2 text-h2 font-semibold">
+                                    <ng-icon class="shrink-0 text-primary-500" aria-hidden="true" name="lucideMapPin" />
+                                    {{ b.name }}
+                                </h3>
+                                <p class="mt-0.5 mb-0 ml-7 text-xs text-white/55">{{ b.address }}</p>
+                            }
+                            <dl class="mb-0 grid gap-4 sm:grid-cols-[1fr_0.85fr_1.45fr]" [class.lg:grid-cols-1]="branches.length > 1" [class.mt-4]="branches.length > 1">
+                                @for (block of b.timetable; track block.title; let j = $index) {
+                                    <div>
+                                        <dt class="flex items-center gap-1.5 text-sm font-medium" [class]="j === 1 ? 'text-secondary-400' : 'text-primary-400'">
+                                            <ng-icon aria-hidden="true" name="lucideClock" />
+                                            {{ block.title }}
+                                        </dt>
+                                        @for (row of block.rows; track row.days) {
+                                            <dd class="mt-1.5 text-xs leading-relaxed text-white/85 lg:text-sm">
+                                                <span class="font-medium text-white">{{ row.days }}:</span>
+                                                {{ row.times }}
+                                            </dd>
+                                        }
+                                    </div>
+                                }
+                            </dl>
+                            @if (site.pageEnabled('branches')) {
+                                <a class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-400 hover:text-primary-300" [routerLink]="['/branches', slug(b.name)]">
+                                    {{ branches.length > 1 ? b.name + ': prices, facilities and classes' : 'Prices, facilities and classes' }}
+                                    <ng-icon aria-hidden="true" name="lucideArrowRight" />
+                                </a>
+                            }
+                            @if (c.signUp.route) {
+                                <div class="mt-auto flex flex-wrap gap-3 pt-5">
+                                    <a class="btn btn-md btn-fill-primary flex-1" [queryParams]="{ branch: b.name }" [routerLink]="c.signUp.route">
+                                        {{ branches.length > 1 ? 'Join ' + b.name : 'Join now' }}
+                                    </a>
+                                    <a class="btn btn-md btn-outline-secondary flex-1" [routerLink]="loginRoute">Member login</a>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        <!-- ───────────── Gallery (preview; the gallery page has every photo) ───────────── -->
+    @case ('gallery') {
+        <section id="gallery" class="wrap pt-20 lg:pt-24" aria-labelledby="gallery-title">
+            <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.gallery, id: 'gallery-title', center: true }" />
+            <ul class="mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:grid-cols-3 lg:gap-6">
+                @for (g of galleryPreview; track g.src; let i = $index) {
+                    <li appReveal [revealDelay]="(i % 3) * 90">
+                        <a
+                            class="gallery-tile aspect-[4/3] !cursor-pointer"
+                            [routerLink]="site.pageEnabled('gallery') ? '/gallery' : null"
+                            [attr.aria-label]="g.alt + ' (' + g.category + ')'"
+                            [queryParams]="{ category: g.category }">
+                            <img loading="lazy" [alt]="g.alt" [height]="g.height" [src]="g.thumb" [width]="g.width" />
+                            <span class="gallery-label">
+                                <ng-icon class="text-primary-400" aria-hidden="true" name="lucideMapPin" />
+                                {{ g.category }}
+                            </span>
+                        </a>
+                    </li>
+                }
+            </ul>
+            @if (c.gallery.viewAll; as viewAll) {
+                    @if (site.shows(viewAll)) {
+                <ng-container *ngTemplateOutlet="viewAllLink; context: { $implicit: viewAll }" />
+                    }
+            }
+        </section>
+    }
+
+    <!-- ───────────── FAQ ───────────── -->
+        @case ('faq') {
+            <section id="faq" class="wrap pt-20 lg:pt-24" aria-labelledby="faq-title">
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.faq, id: 'faq-title', center: true }" />
+                <div class="mt-8 space-y-4 lg:mt-10 lg:space-y-6">
+                    @for (f of c.faq.items; track f.question; let first = $first; let i = $index) {
+                        <details class="faq group" name="faq" appReveal [open]="first" [revealDelay]="i * 70">
+                            <summary class="faq-question">
+                                <span>{{ f.question }}</span>
+                                <ng-icon class="faq-chevron" aria-hidden="true" name="lucideChevronDown" size="1.75rem" />
+                            </summary>
+                            <p class="faq-answer">{{ f.answer }}</p>
+                        </details>
+                    }
+                </div>
+            </section>
+        }
+    }
+}
+
+<!-- Section heading from the config: title, accent in the theme colour, optional lead. -->
+<ng-template #heading let-h let-id="id" let-center="center" let-noLead="noLead">
+    <div [class.text-center]="center">
+        <h2 class="section-title" appReveal [id]="id">
+            {{ h.title }}
+            @if (h.accent) {
+                <span class="text-primary-500">{{ h.accent }}</span>
+            }
+        </h2>
+        @if (!noLead) {
+            <ng-container *ngTemplateOutlet="lead; context: { $implicit: h.lead }" />
+        }
+    </div>
+</ng-template>
+
+<ng-template #lead let-text>
+    @if (text) {
+        <p class="section-lead text-center" appReveal [revealDelay]="90">{{ text }}</p>
+    }
+</ng-template>
+
+<ng-template #viewAllLink let-link>
+    <div class="mt-8 text-center">
+        <a class="btn btn-md btn-outline-secondary font-light" [fragment]="to(link).fragment" [routerLink]="to(link).route">
+            {{ link.label }}
+            <ng-icon aria-hidden="true" name="lucideChevronRight" />
+        </a>
+    </div>
+</ng-template>
+
+<!-- Arrows and dots for a carousel track (ScrollPagerDirective). -->
+<ng-template #pagerControls let-pager let-label="label">
+    <div class="flex shrink-0 flex-col items-end gap-3">
+        <div class="flex gap-3">
+            <button class="pager-btn" type="button" [attr.aria-label]="'Previous ' + label" [disabled]="pager.atStart()" (click)="pager.prev()">
+                <ng-icon aria-hidden="true" name="lucideArrowLeft" size="1.25rem" />
+            </button>
+            <button class="pager-btn" type="button" [attr.aria-label]="'Next ' + label" [disabled]="pager.atEnd()" (click)="pager.next()">
+                <ng-icon aria-hidden="true" name="lucideArrowRight" size="1.25rem" />
+            </button>
+        </div>
+        <div class="flex gap-1.5" aria-hidden="true">
+            @for (d of pager.dots(); track d) {
+                <span class="h-2.5 rounded-full transition-all" [class]="d === pager.page() ? 'w-7 bg-primary-500' : 'w-4 bg-white/10'"></span>
+            }
+        </div>
+    </div>
+</ng-template>
+
+<!-- Offer pop-up (landing.promo), a moment after the page opens. -->
+<app-promo-dialog />

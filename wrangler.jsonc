@@ -1,0 +1,19 @@
+// Cloudflare Workers config for the web app (target A, Free plan only: D-024, D-026).
+// Build first (`npm run build:prod`), then deploy with the Cloudflare CLI; see ../fitmanager-infra/cloudflare/web.md.
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "fitmanager-web",
+    "main": "cloudflare/worker.mjs",
+    "compatibility_date": "2026-11-01",
+    "assets": {
+        "directory": "dist/browser",
+        "binding": "ASSETS",
+        // /plans → plans/index.html, and /plans/ redirects to /plans (the canonical URLs have no trailing slash).
+        "html_handling": "drop-trailing-slash",
+        // Unmatched paths run the Worker (client routes get index.csr.html with noindex).
+        "not_found_handling": "none"
+    },
+    // Phase 1: the API Worker, called without a public round trip.
+    // "services": [{ "binding": "API", "service": "fitmanager-api" }],
+    "observability": { "enabled": true }
+}

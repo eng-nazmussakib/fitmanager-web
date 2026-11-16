@@ -1,0 +1,110 @@
+{
+    "name": "fitmanager-web",
+    "version": "0.0.0",
+    "scripts": {
+        "ng": "ng",
+        "start": "ng serve --open",
+        "start:proxy": "ng serve --configuration proxy",
+        "build": "ng build",
+        "build:dev": "ng build --configuration stage",
+        "build:iat": "ng build --configuration iat",
+        "build:uat": "ng build --configuration uat",
+        "build:prod": "ng build --configuration production && node scripts/postbuild.mjs",
+        "watch": "ng build --watch --configuration development",
+        "test": "ng test",
+        "test:ci": "ng test --watch=false --coverage",
+        "e2e": "playwright test",
+        "e2e:ui": "playwright test --ui",
+        "lint": "ng lint",
+        "lint:fix": "eslint --fix --cache \"src/**/*.{ts,html}\"",
+        "format": "prettier --write \"src/**/*.{ts,html,css,scss,json}\" \"e2e/**/*.ts\"",
+        "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json}\" \"e2e/**/*.ts\"",
+        "validate": "npm run format:check && npm run lint && npm run test:ci",
+        "prepare": "husky",
+        "start:demo": "ng serve --configuration demo",
+        "build:vm": "ng build --configuration production-vm && node scripts/postbuild.mjs",
+        "build:demo": "ng build --configuration demo",
+        "serve:ssr": "node dist/server/server.mjs",
+        "check:prerender": "node scripts/check-prerender.mjs",
+        "check:no-mock": "node scripts/check-no-mock.mjs",
+        "postbuild": "node scripts/postbuild.mjs"
+    },
+    "private": true,
+    "packageManager": "npm@11.19.0",
+    "dependencies": {
+        "@angular/common": "^22.2.6",
+        "@angular/compiler": "^22.2.6",
+        "@angular/core": "^22.2.6",
+        "@angular/forms": "^22.2.6",
+        "@angular/platform-browser": "^22.2.6",
+        "@angular/platform-server": "^22.2.6",
+        "@angular/router": "^22.2.6",
+        "@angular/ssr": "^22.2.6",
+        "@casl/ability": "^7.1.1",
+        "@date-fns/tz": "^1.5.0",
+        "@ng-icons/core": "^36.1.0",
+        "@ng-icons/lucide": "^36.1.0",
+        "@sentry/angular": "^11.11.0",
+        "apexcharts": "^8.8.1",
+        "date-fns": "^4.4.0",
+        "express": "^5.1.0",
+        "file-saver": "^2.0.5",
+        "html2canvas-pro": "^2.6.3",
+        "jspdf": "^4.2.1",
+        "ng-apexcharts": "^3.2.0",
+        "ng-recaptcha-2": "^22.0.1",
+        "ngx-editor": "^19.1.1",
+        "ngx-image-cropper": "^9.1.7",
+        "rxjs": "~7.8.0",
+        "tslib": "^2.3.0",
+        "worker-timers": "^8.0.34"
+    },
+    "devDependencies": {
+        "@angular/build": "^22.2.6",
+        "@angular/cli": "^22.2.6",
+        "@angular/compiler-cli": "^22.2.6",
+        "@axe-core/playwright": "4.14.0",
+        "@eslint/js": "^10.0.1",
+        "@playwright/test": "^1.65.0",
+        "@tailwindcss/postcss": "^4.3.5",
+        "@tailwindcss/typography": "^0.5.20",
+        "@types/express": "^5.0.1",
+        "@types/file-saver": "^2.0.7",
+        "@types/node": "26.6.6",
+        "@vitest/coverage-v8": "5.1.0",
+        "angular-eslint": "^22.6.0",
+        "eslint": "^10.14.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-simple-import-sort": "^14.0.0",
+        "eslint-plugin-unused-imports": "^4.4.1",
+        "husky": "^9.1.7",
+        "jsdom": "^30.0.0",
+        "lint-staged": "^17.6.0",
+        "postcss": "^8.5.32",
+        "prettier": "^3.8.1",
+        "prettier-plugin-organize-attributes": "^1.0.0",
+        "prettier-plugin-tailwindcss": "^0.8.1",
+        "tailwind-scrollbar": "^4.0.2",
+        "tailwindcss": "^4.3.5",
+        "typescript": "~6.0.2",
+        "typescript-eslint": "^8.72.1",
+        "vitest": "^5.0.0"
+    },
+    "lint-staged": {
+        "*.{ts,html}": [
+            "eslint --cache --fix",
+            "prettier --write"
+        ],
+        "*.{css,scss,json}": [
+            "prettier --write"
+        ]
+    },
+    "engines": {
+        "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+    },
+    "overrides": {
+        "vite": {
+            "rolldown": "1.2.16"
+        }
+    }
+}

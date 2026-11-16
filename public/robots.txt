@@ -1,0 +1,11 @@
+# Public gym pages only. Private areas also send X-Robots-Tag: noindex (_headers, cloudflare/worker.mjs, server.ts).
+User-agent: *
+Disallow: /me
+Disallow: /console
+Disallow: /hq
+Disallow: /auth
+Disallow: /demo
+Disallow: /dev
+Allow: /
+
+Sitemap: /sitemap.xml

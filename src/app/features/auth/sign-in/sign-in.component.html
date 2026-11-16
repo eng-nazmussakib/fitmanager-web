@@ -1,0 +1,99 @@
+<app-auth-shell heading="Welcome back" [lead]="sso ? 'Sign in with your organisation account.' : 'Sign in to your ' + brandName + ' account.'">
+    @if (sso) {
+        <p class="mb-5 text-sm text-white/65">You will be sent to the identity provider and brought back here.</p>
+        <button class="btn btn-lg btn-fill-primary w-full" type="button" [disabled]="loading()" (click)="startSso()">
+            @if (loading()) {
+                <ng-icon class="animate-spin" name="lucideLoaderCircle" aria-hidden="true" />
+            }
+            Sign in with SSO
+        </button>
+    } @else {
+        <form novalidate [formGroup]="form" (ngSubmit)="submit()">
+            <div class="field">
+                <label class="field-label" for="username">Username</label>
+                <span class="field-box">
+                    <ng-icon name="lucideUser" aria-hidden="true" />
+                    <input
+                        id="username"
+                        class="field-input"
+                        autocomplete="username"
+                        formControlName="username"
+                        placeholder="Your username"
+                        [attr.aria-describedby]="showError('username') ? 'username-error' : null"
+                        [attr.aria-invalid]="showError('username')"
+                    />
+                </span>
+                @if (showError('username')) {
+                    <p id="username-error" class="field-error">{{ form.controls.username.errors | errorMessage }}</p>
+                }
+            </div>
+
+            <div class="field">
+                <span class="field-label">
+                    <label for="password">Password</label>
+                    <button class="auth-link cursor-pointer text-xs font-normal" type="button" (click)="forgotHint.set(true)">Forgot password?</button>
+                </span>
+                <span class="field-box">
+                    <ng-icon name="lucideLock" aria-hidden="true" />
+                    <input
+                        id="password"
+                        class="field-input"
+                        autocomplete="current-password"
+                        formControlName="password"
+                        [attr.aria-describedby]="showError('password') ? 'password-error' : null"
+                        [attr.aria-invalid]="showError('password')"
+                        [type]="showPassword() ? 'text' : 'password'"
+                    />
+                    <button
+                        class="field-toggle"
+                        type="button"
+                        [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                        [attr.aria-pressed]="showPassword()"
+                        (click)="showPassword.set(!showPassword())"
+                    >
+                        <ng-icon aria-hidden="true" [name]="showPassword() ? 'lucideEyeOff' : 'lucideEye'" />
+                    </button>
+                </span>
+                @if (showError('password')) {
+                    <p id="password-error" class="field-error">{{ form.controls.password.errors | errorMessage }}</p>
+                }
+                @if (forgotHint()) {
+                    <p class="mt-2 text-xs text-white/60" role="status">Ask the front desk at your branch to reset your password.</p>
+                }
+            </div>
+
+            <button class="btn btn-lg btn-fill-primary mt-7 w-full" type="submit" [disabled]="loading()">
+                @if (loading()) {
+                    <ng-icon class="animate-spin" name="lucideLoaderCircle" aria-hidden="true" />
+                }
+                Sign in
+            </button>
+
+            @if (hasSignUp) {
+                <p class="mt-5 text-center text-sm text-white/65">
+                    New to {{ brandName }}?
+                    <a class="auth-link" routerLink="/auth/sign-up">Create an account</a>
+                </p>
+            }
+
+            @if (demo) {
+                <div class="auth-divider mt-8">Demo accounts</div>
+                <ul class="auth-note mt-4 space-y-1">
+                    @for (a of demoAccounts(); track a.username) {
+                        <li>
+                            <code>{{ a.username }}</code>
+                            /
+                            <code>{{ a.password }}</code>
+                            : {{ a.role }}
+                        </li>
+                    }
+                </ul>
+                <p class="auth-note mt-3"><a class="auth-link" routerLink="/demo">Or pick a role on the demo page</a></p>
+            }
+
+            <p class="mt-6 text-center text-[11px] text-white/40">
+                {{ recaptchaEnabled ? 'Protected by reCAPTCHA v3.' : 'reCAPTCHA is disabled: set recaptchaSiteKey in the environment file to enable it.' }}
+            </p>
+        </form>
+    }
+</app-auth-shell>

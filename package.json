@@ -10,6 +10,7 @@
         "build:iat": "ng build --configuration iat",
         "build:uat": "ng build --configuration uat",
         "build:prod": "ng build --configuration production && node scripts/postbuild.mjs",
+        "build:cloudflare": "npm run build:prod && npm run check:prerender && npm run check:no-mock",
         "watch": "ng build --watch --configuration development",
         "test": "ng test",
         "test:ci": "ng test --watch=false --coverage",

@@ -1,5 +1,6 @@
 // Cloudflare Workers config for the web app (target A, Free plan only: D-024, D-026).
-// Build first (`npm run build:prod`), then deploy with the Cloudflare CLI; see ../fitmanager-infra/cloudflare/web.md.
+// Deployed by Cloudflare's Git integration (build `npm run build:cloudflare`, deploy `npx wrangler deploy`, D-046);
+// see ../fitmanager-infra/cloudflare/web.md.
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "fitmanager-web",

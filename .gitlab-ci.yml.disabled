@@ -1,3 +1,6 @@
+# DISABLED (D-046): CI/CD is off while the app deploys through Cloudflare's Git integration (Workers Builds).
+# Kept for when a custom VM is used: rename back to .gitlab-ci.yml to turn it on again.
+#
 # FitManager web: two hosting targets, both checked on every pipeline (D-027).
 #   A. Cloudflare Workers, Free plan (primary): `npm run build:prod` → dist/browser, public pages prerendered.
 #   B. VM with Docker and nginx (future): `npm run build:vm` → Node SSR server image.

@@ -32,6 +32,7 @@ Against the real API: build its database with `npm run seed` in [`../fitmanager-
 | `npm start` / `start:demo`            | dev server on the mock / the demo build (mock + demo banner)                                |
 | `npm run start:proxy`                 | dev server against a real API through a proxy (`API_TARGET=…`)                              |
 | `npm run build:prod`                  | **Cloudflare** build: static output, public pages prerendered, mock left out, sitemap      |
+| `npm run build:cloudflare`            | `build:prod` + both checks below; the build command Cloudflare's Git integration runs      |
 | `npm run build:vm`                    | **VM** build: Node SSR server (`npm run serve:ssr`), public pages rendered per request     |
 | `npm run build:demo`                  | the showcase build (mock API inside)                                                        |
 | `npm run check:prerender`             | after `build:prod`: every public route was prerendered with its title and canonical URL    |
@@ -39,7 +40,7 @@ Against the real API: build its database with `npm run seed` in [`../fitmanager-
 | `npm test` / `test:ci`                | unit tests (Vitest), watch / one run with coverage                                          |
 | `npm run e2e` / `e2e:ui`              | browser tests (Playwright, with axe accessibility scans). First: `npx playwright install chromium` |
 | `npm run lint` / `format`             | ESLint (Angular, type-checked TypeScript, template a11y, banned UI libraries) / Prettier    |
-| `npm run validate`                    | format check + lint + unit tests, as CI runs them                                           |
+| `npm run validate`                    | format check + lint + unit tests (no CI for now, D-046: run it before pushing)             |
 
 ## Where things are
 
@@ -71,7 +72,7 @@ e2e/                         Playwright: auth, permissions, the demo script, lan
 
 ## Hosting
 
-- **Cloudflare (primary, D-026, D-027):** `npm run build:prod`, then deploy `dist/browser` with `wrangler.jsonc`. Public pages are static files, and client routes get `index.csr.html` through the Worker. Steps in [`../fitmanager-infra/cloudflare/web.md`](../fitmanager-infra/cloudflare/web.md).
+- **Cloudflare (primary, D-026, D-027, D-046):** Cloudflare's Git integration runs `npm run build:cloudflare` and `npx wrangler deploy` on each push to `main`; there is no CI/CD pipeline. Public pages are static files, and client routes get `index.csr.html` through the Worker. Steps in [`../fitmanager-infra/cloudflare/web.md`](../fitmanager-infra/cloudflare/web.md).
 - **VM (kept for later):** `npm run build:vm` or the `Dockerfile` (Node SSR behind nginx). Set `NG_ALLOWED_HOSTS` to the site's host names. Steps in [`../fitmanager-infra/vm/README.md`](../fitmanager-infra/vm/README.md).
 
 ## Rules worth knowing

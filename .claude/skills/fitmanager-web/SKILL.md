@@ -36,7 +36,7 @@ npm run start:proxy     # against a real API: API_TARGET=http://localhost:3000
 npm test                # Vitest; npm run test:ci for one run with coverage
 npm run e2e             # Playwright (starts its own dev server on :4300); first: npx playwright install chromium
 npm run lint && npm run format:check
-npm run validate        # every check CI runs. Run it before saying work is done.
+npm run validate        # format + lint + unit tests. No CI for now (D-046): run it before saying work is done.
 npm run build:prod && npm run check:prerender && npm run check:no-mock   # Cloudflare build checks
 npm run build:vm        # VM build; npm run serve:ssr, then curl localhost:4000/healthz
 ```

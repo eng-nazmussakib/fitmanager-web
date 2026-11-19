@@ -67,6 +67,12 @@
             </p>
         }
 
+        @if (guestAccess) {
+            <div class="auth-divider mt-8">Just looking?</div>
+            <a class="btn btn-lg btn-outline-primary mt-4 w-full" routerLink="/demo">Explore as a guest</a>
+            <p class="auth-note mt-3 text-center">Pick a role (owner, manager, front desk or member) and look around on shared demo data.</p>
+        }
+
         @if (demo) {
             <div class="auth-divider mt-8">Demo accounts</div>
             <ul class="auth-note mt-4 space-y-1">

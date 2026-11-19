@@ -37,6 +37,8 @@ export class SignInComponent {
     protected readonly hasSignUp = !!inject(TenantService).config.landing;
     /** The mock API's demo accounts are listed only in mock builds. */
     protected readonly demo = environment.useMockApi;
+    /** The hosted demo (D-076): a way in without an account, through the guest picker on /demo. */
+    protected readonly guestAccess = !environment.useMockApi && environment.guestAccess;
     protected readonly demoAccounts = toSignal(inject(DemoAccountsService).accounts(), { initialValue: [] });
 
     /** Bound from `?returnUrl=` by withComponentInputBinding(). */

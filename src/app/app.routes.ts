@@ -27,8 +27,9 @@ export const routes: Routes = [
         canActivate: [guestGuard],
         loadChildren: () => import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES)
     },
-    // Showcase entry (phase 0.5): role cards that sign in as a demo user. Only in builds with the mock API.
-    ...(environment.demo || environment.useMockApi
+    // Showcase entry (phase 0.5): role cards that sign in as a demo user. Mock builds use the mock's demo accounts;
+    // the hosted demo (guestAccess) the API's shared guest accounts, without passwords (D-076).
+    ...(environment.demo || environment.useMockApi || environment.guestAccess
         ? [{ path: 'demo', title: 'Demo', loadComponent: () => import('@features/demo/demo-page.component').then(m => m.DemoPageComponent) }]
         : []),
     // Your own password and sessions; forced while a temporary password is set (D-054).

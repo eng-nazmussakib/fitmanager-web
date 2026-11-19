@@ -36,6 +36,8 @@ export interface CurrentUser {
     all_branches: boolean;
     /** A temporary password is set (D-054): every screen except the password page is closed until it is changed. */
     must_change_password?: boolean;
+    /** A shared guest account of the hosted demo (D-076): its password and sessions cannot be changed. */
+    guest?: boolean;
     /** Members only. */
     member?: { oid: string; code: string; branch: BranchRef } | null;
 }

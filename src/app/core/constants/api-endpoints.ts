@@ -9,7 +9,9 @@ export const API = {
         LOGOUT: '/v1/auth/logout',
         ME: '/v1/auth/me',
         CHANGE_PASSWORD: '/v1/auth/change-password',
-        SESSIONS: '/v1/auth/sessions'
+        SESSIONS: '/v1/auth/sessions',
+        /** The demo's shared guest accounts (D-076): `GET` lists them, `POST { username }` signs in as one. */
+        GUEST: '/v1/auth/guest'
     },
     /** Staff management (D-055): the HQ console sees every account, a branch the people assigned there. */
     STAFF: {

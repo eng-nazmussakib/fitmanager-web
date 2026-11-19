@@ -4,8 +4,9 @@ export const environment: Environment = {
     name: 'prod',
     production: true,
     apiBaseUrl: '/api',
-    // The client's public domain (Q-006): canonical URLs, Open Graph, the sitemap. Set it before go-live.
-    siteUrl: 'https://www.example.com',
+    // The demo's public domain (Q-010): canonical URLs, Open Graph, the sitemap. The API is on the same host at /api.
+    siteUrl: 'https://fitmanager.nazmussakib.app',
     demo: false,
-    useMockApi: false
+    useMockApi: false,
+    guestAccess: true
 };

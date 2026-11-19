@@ -56,6 +56,15 @@ export class AuthService {
         );
     }
 
+    /** Signs in as one of the hosted demo's shared guest accounts, without a password (D-076). */
+    loginAsGuest(username: string): Observable<CurrentUser> {
+        return this._http.post<ApiResponse<AuthTokens>>(`${environment.apiBaseUrl}${API.AUTH.GUEST}`, { username }, { context: publicContext('errors') }).pipe(
+            map(res => res.data),
+            tap(tokens => this._setTokens(tokens)),
+            switchMap(() => this.loadCurrentUser())
+        );
+    }
+
     loadCurrentUser(): Observable<CurrentUser> {
         return this._http.get<ApiResponse<CurrentUser>>(`${environment.apiBaseUrl}${API.AUTH.ME}`).pipe(
             map(res => res.data),

@@ -11,5 +11,6 @@ export const environment: Environment = {
     apiBaseUrl: '/api',
     siteUrl: '',
     demo: true,
-    useMockApi: true
+    useMockApi: true,
+    guestAccess: false
 };

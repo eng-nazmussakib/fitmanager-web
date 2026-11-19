@@ -15,4 +15,9 @@ export interface Environment {
     demo: boolean;
     /** true → MockApiInterceptor answers every /api call in memory. Run the app with no backend. */
     useMockApi: boolean;
+    /**
+     * Guest access on the real API (D-076): `/demo` lists the API's shared guest accounts and signs in as one without
+     * a password (`POST /v1/auth/guest`). Off in mock builds, which have their own demo accounts.
+     */
+    guestAccess: boolean;
 }

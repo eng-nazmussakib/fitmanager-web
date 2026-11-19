@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { AuthService } from '@core/auth/auth.service';
 import { homeUrl } from '@core/branch/branch.guards';
+import { environment } from '@env/environment';
 import { AuthShellComponent } from '@layout/auth-shell/auth-shell.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
@@ -12,17 +14,15 @@ import { type DemoAccount, DemoAccountsService } from './demo-accounts';
 /**
  * `/demo`: the showcase entry (phase 0.5). One click signs in as a demo role and lands on that role's home
  * (owner → HQ dashboard, manager → Gulshan dashboard, front desk → check-in, trainer → classes, member → portal).
+ * Mock builds sign in with the mock's demo passwords; the hosted demo as the API's shared guest accounts, without a
+ * password (D-076).
  */
 @Component({
     selector: 'app-demo-page',
     imports: [RouterLink, AuthShellComponent, IconComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <app-auth-shell
-            heading="Try FitManager"
-            lead="Pick a role. Every screen runs on realistic demo data for three Dhaka branches, and nothing you do leaves this browser."
-            [wide]="true"
-        >
+        <app-auth-shell heading="Try FitManager" [lead]="lead" [wide]="true">
             <ul class="grid gap-3 sm:grid-cols-2">
                 @for (a of accounts(); track a.username) {
                     <li>
@@ -62,11 +62,15 @@ import { type DemoAccount, DemoAccountsService } from './demo-accounts';
                     </a>
                 </li>
             </ul>
-            <p class="mt-6 text-sm text-white/55">
-                Or sign in with these accounts on the
-                <a class="underline hover:text-white" routerLink="/auth/sign-in">sign-in page</a>
-                .
-            </p>
+            @if (!guest) {
+                <p class="mt-6 text-sm text-white/55">
+                    Or sign in with these accounts on the
+                    <a class="underline hover:text-white" routerLink="/auth/sign-in">sign-in page</a>
+                    .
+                </p>
+            } @else if (loaded() && !accounts().length) {
+                <p class="mt-6 text-sm text-white/55" role="status">Guest access is not available right now.</p>
+            }
         </app-auth-shell>
     `
 })
@@ -74,14 +78,27 @@ export class DemoPageComponent {
     private readonly _auth = inject(AuthService);
     private readonly _router = inject(Router);
 
-    protected readonly accounts = toSignal(inject(DemoAccountsService).accounts(), { initialValue: [] });
+    /** The hosted demo: shared guest accounts on the real API, not this browser's mock. */
+    protected readonly guest = !environment.useMockApi && environment.guestAccess;
+    protected readonly lead = this.guest
+        ? 'Pick a role to look around, no sign-up needed. Every screen runs on demo data for three Dhaka branches, shared with other visitors and reset from time to time.'
+        : 'Pick a role. Every screen runs on realistic demo data for three Dhaka branches, and nothing you do leaves this browser.';
+    private readonly _accounts = toSignal(
+        inject(DemoAccountsService)
+            .accounts()
+            .pipe(map(list => ({ list })))
+    );
+    protected readonly accounts = computed(() => this._accounts()?.list ?? []);
+    /** The list has answered (it may be empty: guest access off, or the API unreachable). */
+    protected readonly loaded = computed(() => !!this._accounts());
     protected readonly busy = signal<string | null>(null);
 
     protected enter(a: DemoAccount): void {
         this.busy.set(a.username);
         // Switching role: end the current demo session first (no redirect), then sign in as the new role.
         if (this._auth.isLoggedIn()) this._auth.logout({ redirect: false });
-        this._auth.login({ username: a.username, password: a.password }).subscribe({
+        const signIn$ = a.password ? this._auth.login({ username: a.username, password: a.password }) : this._auth.loginAsGuest(a.username);
+        signIn$.subscribe({
             next: user => void this._router.navigateByUrl(homeUrl(user)).finally(() => this.busy.set(null)),
             error: () => this.busy.set(null)
         });

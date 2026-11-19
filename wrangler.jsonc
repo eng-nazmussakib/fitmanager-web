@@ -17,5 +17,8 @@
     // The API Worker, called without a public round trip (phase 1, D-036). Deploy the API Worker first: a binding to a
     // Worker that does not exist yet fails the web deploy. Locally: `wrangler dev -c wrangler.jsonc -c ../fitmanager-api/wrangler.jsonc`.
     "services": [{ "binding": "API", "service": "fitmanager-api" }],
+    // The demo's one public hostname (Q-010): the web app, with the API behind it at /api through the binding above.
+    // `custom_domain` makes Cloudflare create the DNS record and certificate on deploy; the API Worker has no domain.
+    "routes": [{ "pattern": "fitmanager.nazmussakib.app", "custom_domain": true }],
     "observability": { "enabled": true }
 }

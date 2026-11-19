@@ -3,6 +3,7 @@ import {
     lucideArrowDown,
     lucideArrowLeft,
     lucideArrowRight,
+    lucideArrowRightLeft,
     lucideArrowUp,
     lucideArrowUpDown,
     lucideBadgeCheck,
@@ -42,6 +43,7 @@ import {
     lucideEye,
     lucideEyeOff,
     lucideFileQuestion,
+    lucideFileText,
     lucideFilter,
     lucideFlame,
     lucideHandCoins,
@@ -50,6 +52,7 @@ import {
     lucideImage,
     lucideInbox,
     lucideInfo,
+    lucideKeyRound,
     lucideLayers,
     lucideLayoutDashboard,
     lucideListChecks,
@@ -60,6 +63,7 @@ import {
     lucideMapPin,
     lucideMegaphone,
     lucideMenu,
+    lucideMessageSquare,
     lucideMinus,
     lucideMonitor,
     lucideMoon,
@@ -94,6 +98,7 @@ import {
     lucideUser,
     lucideUserPlus,
     lucideUsers,
+    lucideUserX,
     lucideWallet,
     lucideWrench,
     lucideX,
@@ -169,6 +174,7 @@ export const FM_ICONS = {
     clock: lucideClock,
     phone: lucidePhone,
     mail: lucideMail,
+    'message-square': lucideMessageSquare,
     'map-pin': lucideMapPin,
     activity: lucideActivity,
     'trending-up': lucideTrendingUp,
@@ -204,7 +210,11 @@ export const FM_ICONS = {
     save: lucideSave,
     'undo-2': lucideUndo2,
     timer: lucideTimer,
-    wrench: lucideWrench
+    wrench: lucideWrench,
+    'key-round': lucideKeyRound,
+    'arrow-right-left': lucideArrowRightLeft,
+    'user-x': lucideUserX,
+    'file-text': lucideFileText
 } as const;
 
 export type IconName = keyof typeof FM_ICONS;

@@ -24,14 +24,16 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
     const d = db();
     const s = memberState(m, ctx.now.date);
     const branch = d.branches.find(b => b.oid === ctx.branch!.oid)!;
-    const memberBranch = d.branches.find(b => b.oid === m.branch_oid)!;
+    const home = d.branches.find(b => b.oid === m.branch_oid)!;
     const open = idx().openCheckIn.get(m.oid);
+    const openBranch = open ? d.branches.find(b => b.oid === open.branch_oid) : undefined;
+    // Any branch's member may train here (D-059); their HOME branch's dues limit applies.
     const failures = evaluateAccess(
         {
-            member: { branch_oid: m.branch_oid, branch_name: memberBranch.name, status: s.status, dues: s.dues },
+            member: { status: s.status, dues: s.dues, home_branch_name: home.name, dues_limit: home.dues_limit },
             subscription: s.relevant ? { start_date: s.relevant.start_date, end_date: s.relevant.end_date, freezes: s.relevant.freezes } : null,
-            branch: { oid: branch.oid, dues_limit: branch.dues_limit, hours: openingHours(branch.name) },
-            open_check_in: open && dateOf(open.in_at) === ctx.now.date ? timeOf(open.in_at) : null
+            branch: { name: branch.name, hours: openingHours(branch.name) },
+            open_check_in: open ? { branch_name: openBranch?.name ?? 'another branch', time: timeOf(open.in_at) } : null
         },
         { date: ctx.now.date, time: ctx.now.time, weekday: ctx.now.weekday }
     );
@@ -43,12 +45,15 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
             oid: m.oid,
             code: m.code,
             name: m.name,
-            photo_url: sameBranch ? m.photo_url : null,
+            // A visitor's photo is copied onto the visit (D-066), so the desk sees who it lets in.
+            photo_url: m.photo_url,
             status: s.status,
             plan_name: sameBranch ? (s.relevant?.plan_name ?? null) : null,
             valid_until: sameBranch ? s.valid_until : null,
             days_left: sameBranch ? s.days_left : null,
-            dues: sameBranch ? s.dues : 0
+            dues: sameBranch ? s.dues : 0,
+            visitor: !sameBranch,
+            home_branch_name: home.name
         },
         can_override: failures.length > 0 && failures.every(f => f.overridable) && ctx.ability.can('create', 'AttendanceOverride')
     };
@@ -60,7 +65,10 @@ function evaluate(ctx: Ctx): HttpResponse<unknown> {
 
 function toCheckIn(c: CheckInRow): CheckIn {
     const m = idx().members.get(c.member_oid)!;
+    const home = db().branches.find(b => b.oid === m.branch_oid);
     return {
+        visitor: m.branch_oid !== c.branch_oid,
+        home_branch_name: home?.name ?? '',
         oid: c.oid,
         member_oid: c.member_oid,
         member_code: m.code,

@@ -2,7 +2,6 @@ import { Directive } from '@angular/core';
 
 /**
  * `<input appDigitsOnly>` blocks anything that is not 0-9 (typed or pasted).
- * OMS had five near-identical directives (allow-only-number, allow-decimal-number, mobile-number…).
  * Uses `beforeinput`, so paste and IME input are covered, not only keypress.
  */
 @Directive({

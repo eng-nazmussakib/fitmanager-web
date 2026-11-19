@@ -1,4 +1,4 @@
-// Prerender check (target A): every public route's HTML in dist/browser has its <h1>, <title>, meta description
+// Prerender check: every public route's HTML in dist/browser has its <h1>, <title>, meta description
 // and canonical URL. Run after `npm run build:prod`. Exits 1 on the first missing piece.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';

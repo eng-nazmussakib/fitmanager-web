@@ -13,11 +13,12 @@ import { addDaysIso, dateOf } from '../seed/clock';
 import { toRef } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
 import { branchMember } from './members.handlers';
+import { staffTakings } from './phase2.handlers';
 
 const METHODS: PaymentMethod[] = ['cash', 'card', 'bkash', 'nagad', 'bank'];
 
 function branchPlan(ctx: Ctx, oid: string): Plan {
-    const plan = db().plans.find(p => p.oid === oid && p.branch_oid === ctx.branch!.oid && p.active);
+    const plan = db().plans.find(p => p.oid === oid && p.branch_oid === ctx.branch!.oid && p.sellable);
     if (!plan) fail(404, 'Plan not found at this branch');
     return plan;
 }
@@ -58,7 +59,8 @@ function priceOf(ctx: Ctx, sale: SaleInput, plan: Plan): ReturnType<typeof quote
         start_date: sale.start_date,
         today: ctx.now.date,
         vat_rate: db().settings.vat_rate,
-        promos: db().promos
+        vat_inclusive: db().settings.vat_inclusive,
+        promos: db().promos.filter(p => p.active)
     });
 }
 
@@ -170,10 +172,14 @@ function freeze(ctx: Ctx): HttpResponse<unknown> {
     const from = str(ctx.body['from']) || ctx.now.date;
     const days = Math.round(num(ctx.body['days']));
     const reason = str(ctx.body['reason']);
-    if (days < 7 || days > 60) fail(400, 'A freeze lasts 7 to 60 days.');
+    // The rule is HQ's (D-063, D-067 e): the range and count from the settings, `freezable` from the plan's template.
+    const { freeze_min_days: min, freeze_max_days: max, freeze_max_count: count } = db().settings;
+    const plan = db().plans.find(p => p.oid === sub.plan_oid);
+    if (plan && !plan.freezable) fail(409, 'This plan cannot be frozen.');
+    if (days < min || days > max) fail(400, `A freeze lasts ${min} to ${max} days.`);
     if (!reason) fail(400, 'Give a reason for the freeze.');
     if (from < ctx.now.date || from > sub.end_date) fail(400, 'The freeze must start today or later, before the plan ends.');
-    if (sub.freezes.length >= 2) fail(409, 'This plan has already been frozen twice.');
+    if (sub.freezes.length >= count) fail(409, count === 1 ? 'This plan has already been frozen once.' : `This plan has already been frozen ${count} times.`);
     const to = addDaysIso(from, days - 1);
     commit({ t: 'subscription.freeze', oid: sub.oid, freeze: { from, to, reason }, end_date: addDaysIso(sub.end_date, days) });
     return ok(sub, `Frozen until ${to}; the plan now ends ${addDaysIso(sub.end_date, 0)}`);
@@ -225,7 +231,7 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
             if (dateOf(p.received_at) !== today) continue;
             const e = byMethod.get(p.method) ?? { count: 0, amount: 0 };
             e.count++;
-            e.amount += p.amount;
+            e.amount += p.kind === 'refund' ? -p.amount : p.amount;
             byMethod.set(p.method, e);
         }
     }
@@ -235,7 +241,8 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
         total: [...byMethod.values()].reduce((s, e) => s + e.amount, 0),
         invoices: invoicesToday,
         new_members: newMembers,
-        renewals
+        renewals,
+        by_staff: staffTakings(ctx)
     };
     return ok(result);
 }

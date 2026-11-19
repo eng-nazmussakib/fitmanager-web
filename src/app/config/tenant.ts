@@ -665,8 +665,12 @@ export const TENANT: TenantConfig = {
                 blocks: [
                     {
                         heading: 'Freezing a membership',
-                        text: ['Annual members can freeze their membership for travel, illness or injury. The end date moves by the frozen days.'],
-                        list: ['Up to 30 days a year', 'At least 7 days at a time', 'Ask the front desk before the freeze starts']
+                        // The plans that may freeze and the shortest and longest freeze are HQ settings (D-063): no numbers here
+                        // until this page reads them from the API (phase 2 step 8).
+                        text: [
+                            'Members on plans that allow it can freeze their membership for travel, illness or injury. The end date moves by the frozen days.'
+                        ],
+                        list: ['The front desk tells you which plans can freeze, and for how long', 'Ask the front desk before the freeze starts']
                     },
                     {
                         heading: 'Refunds',

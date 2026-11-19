@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { defer, delay, dematerialize, materialize, Observable, of, throwError } from 'rxjs';
 
+import { PASSWORD_CHANGE_REQUIRED } from '@core/models/staff.model';
 import { environment } from '@env/environment';
 
 import { ATTENDANCE_ROUTES } from './handlers/attendance.handlers';
@@ -8,9 +9,12 @@ import { accountFromToken, AUTH_ROUTES } from './handlers/auth.handlers';
 import { CLASS_ROUTES } from './handlers/classes.handlers';
 import { DASHBOARD_ROUTES } from './handlers/dashboard.handlers';
 import { MEMBER_ROUTES } from './handlers/members.handlers';
+import { PHASE2_ROUTES } from './handlers/phase2.handlers';
+import { PLAN_ROUTES } from './handlers/plans.handlers';
 import { PORTAL_ROUTES } from './handlers/portal.handlers';
 import { SALES_ROUTES } from './handlers/sales.handlers';
 import { SETTINGS_ROUTES } from './handlers/settings.handlers';
+import { STAFF_ROUTES } from './handlers/staff.handlers';
 import { abilityFor, type Ctx, httpError, MockError, type Route } from './http';
 import { dhakaNow } from './seed/clock';
 import { db, fastMode } from './store';
@@ -19,11 +23,14 @@ const ROUTES: Route[] = [
     ...AUTH_ROUTES,
     ...MEMBER_ROUTES,
     ...SALES_ROUTES,
+    ...PLAN_ROUTES,
+    ...PHASE2_ROUTES,
     ...ATTENDANCE_ROUTES,
     ...CLASS_ROUTES,
     ...DASHBOARD_ROUTES,
     ...PORTAL_ROUTES,
-    ...SETTINGS_ROUTES
+    ...SETTINGS_ROUTES,
+    ...STAFF_ROUTES
 ];
 
 /**
@@ -51,6 +58,11 @@ function handle(req: HttpRequest<unknown>, path: string, route: Route): Observab
         const account = route.scope === 'public' ? null : accountFromToken(req.headers.get('Authorization'));
         if (route.scope !== 'public' && !account) return throwError(() => httpError(401, 'Token expired or invalid'));
         const user = account?.user ?? null;
+        // A temporary password (D-054): only /auth/me, change-password and sign-out answer until it is replaced.
+        if (user?.must_change_password && !/^\/v1\/auth\/(me|change-password|logout)$/.test(path))
+            return throwError(() =>
+                httpError(403, 'Set a new password to continue', [{ path: PASSWORD_CHANGE_REQUIRED, message: 'Set a new password to continue' }])
+            );
 
         let branch = null;
         const header = req.headers.get('X-Branch-Id');

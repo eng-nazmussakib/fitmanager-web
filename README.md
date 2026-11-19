@@ -1,6 +1,6 @@
 # fitmanager-web
 
-The FitManager web app: the public gym pages, the branch console, the HQ console and the member portal, all in one Angular 22 app (zoneless, signals, Tailwind 4). There is no UI component library: the kit in `src/app/shared/ui` is built on native `<dialog>` and the Popover API (D-007). The plan, decisions and phase checklists are in [`../fitmanager-infra/docs`](../fitmanager-infra/docs/README.md).
+The FitManager web app: the public gym pages, the branch console, the HQ console and the member portal, all in one Angular 22 app (zoneless, signals, Tailwind 4). FitManager is a hobby project, always run as a free demo (D-075): every build is static, and the app uses no outside services (no Sentry, no reCAPTCHA, no SSO). There is no UI component library: the kit in `src/app/shared/ui` is built on native `<dialog>` and the Popover API (D-007). The plan, decisions and phase checklists are in [`../fitmanager-infra/docs`](../fitmanager-infra/docs/README.md).
 
 ## Quick start
 
@@ -23,7 +23,7 @@ Open `/demo` to pick an account (the same list as below), or sign in at `/auth/s
 
 The mock (`src/app/mock`) enforces what the API will: tokens, `X-Branch-Id` against the user's branch assignments, and the CASL rules of the role at that branch. Its data is seeded the same way on every machine for the current day. Changes (a sale, a check-in) are kept in `localStorage` and survive a reload. "Reset demo data" in the demo banner clears them. [`../fitmanager-infra/docs/demo-script.md`](../fitmanager-infra/docs/demo-script.md) is the walk-through for a showcase.
 
-Against the real API: build its database with `npm run seed` in [`../fitmanager-infra/db`](../fitmanager-infra/db/README.md), `npm run dev` in [`../fitmanager-api`](../fitmanager-api), then `API_TARGET=http://localhost:3000 npm run start:proxy`. The API signs in the same staff accounts (not `member.demo` yet) and returns the same `/v1/auth/me` shape (D-034). Most console screens still need endpoints that arrive in phase 2.
+Against the real API: build its database with `npm run seed` in [`../fitmanager-infra/db`](../fitmanager-infra/db/README.md), `npm run dev` in [`../fitmanager-api`](../fitmanager-api), then `API_TARGET=http://localhost:3000 npm run start:proxy`. The API signs in the same staff accounts and returns the same `/v1/auth/me` shape (D-034); members get portal access from the desk (a temporary password, D-064).
 
 ## Scripts
 
@@ -31,10 +31,9 @@ Against the real API: build its database with `npm run seed` in [`../fitmanager-
 | ------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `npm start` / `start:demo`            | dev server on the mock / the demo build (mock + demo banner)                                |
 | `npm run start:proxy`                 | dev server against a real API through a proxy (`API_TARGET=…`)                              |
-| `npm run build:prod`                  | **Cloudflare** build: static output, public pages prerendered, mock left out, sitemap      |
+| `npm run build:prod`                  | the hosted demo's build: static output, public pages prerendered, mock left out, sitemap  |
 | `npm run build:cloudflare`            | `build:prod` + both checks below; the build command Cloudflare's Git integration runs      |
-| `npm run build:vm`                    | **VM** build: Node SSR server (`npm run serve:ssr`), public pages rendered per request     |
-| `npm run build:demo`                  | the showcase build (mock API inside)                                                        |
+| `npm run build:demo`                  | the offline showcase build: static too, mock API inside, demo banner                        |
 | `npm run check:prerender`             | after `build:prod`: every public route was prerendered with its title and canonical URL    |
 | `npm run check:no-mock`               | after `build:prod`: no mock code or demo passwords in the bundle                            |
 | `npm test` / `test:ci`                | unit tests (Vitest), watch / one run with coverage                                          |
@@ -47,14 +46,14 @@ Against the real API: build its database with `npm run seed` in [`../fitmanager-
 ```
 src/app/
 ├── app.routes.ts            public pages, /auth, /console/:branch, /hq, /me, /demo, /dev/ui
-├── app.routes.server.ts     render mode per route: public pages prerendered (Cloudflare) or server-rendered (VM), the rest client-rendered
+├── app.routes.server.ts     render mode per route: public pages prerendered at build time, the rest client-rendered
 ├── config/                  the build-time brand config (name, colours, landing page content)
 ├── core/
 │   ├── auth/                AuthService, branch-aware CASL ability, guards
 │   ├── branch/              active branch from the URL, branch/HQ/member route matchers
-│   ├── http/                ApiService, interceptors (auth, X-Branch-Id, server-side API URL, errors → toasts)
+│   ├── http/                ApiService, interceptors (auth, X-Branch-Id, errors → toasts)
 │   ├── models/              wire types: branch, user, member, plan, subscription, payment, settings…
-│   └── seo/ services/ platform/ routing/ error/ utils/
+│   └── seo/ services/ platform/ routing/ utils/
 ├── layout/                  public site, console (sidebar, branch switcher), portal, auth shell, demo banner
 ├── shared/ui/               the in-house kit: button, forms, select, date picker, dialog, menu, tooltip, tabs,
 │                            toast, data table, chart, icons, a11y helpers. Live gallery at /dev/ui
@@ -72,8 +71,8 @@ e2e/                         Playwright: auth, permissions, the demo script, lan
 
 ## Hosting
 
-- **Cloudflare (primary, D-026, D-027, D-046):** Cloudflare's Git integration runs `npm run build:cloudflare` and `npx wrangler deploy` on each push to `main`; there is no CI/CD pipeline. Public pages are static files, and client routes get `index.csr.html` through the Worker. Steps in [`../fitmanager-infra/cloudflare/web.md`](../fitmanager-infra/cloudflare/web.md).
-- **VM (kept for later):** `npm run build:vm` or the `Dockerfile` (Node SSR behind nginx). Set `NG_ALLOWED_HOSTS` to the site's host names. Steps in [`../fitmanager-infra/vm/README.md`](../fitmanager-infra/vm/README.md).
+- **Cloudflare, the only host (D-026, D-046, D-075):** Cloudflare's Git integration runs `npm run build:cloudflare` and `npx wrangler deploy` on each push to `main`; there is no CI/CD pipeline. Public pages are static files, and client routes get `index.csr.html` through the Worker. Steps in [`../fitmanager-infra/cloudflare/web.md`](../fitmanager-infra/cloudflare/web.md) and [`demo-deploy.md`](../fitmanager-infra/cloudflare/demo-deploy.md).
+- **Offline demo:** `npm run build:demo` writes static files with the mock API inside; serve `dist/browser` from any static host (client routes need a fallback to `index.csr.html`).
 
 ## Rules worth knowing
 

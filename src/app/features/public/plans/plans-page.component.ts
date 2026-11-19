@@ -112,7 +112,7 @@ export class PlansPageComponent {
     protected readonly tiers = this._site.plans;
     protected readonly period = signal(this.periods[0]?.id ?? 'monthly');
     protected readonly byBranch = toSignal(inject(PublicContentService).plans(), { initialValue: [] });
-    protected readonly vatText = computed(() => vatNote(this.byBranch()[0]?.vat_rate));
+    protected readonly vatText = computed(() => vatNote(this.byBranch()[0]?.vat_rate, this.byBranch()[0]?.vat_inclusive));
     protected readonly periodLabel = computed(() => this.periods.find(p => p.id === this.period())?.label ?? '');
 
     constructor() {

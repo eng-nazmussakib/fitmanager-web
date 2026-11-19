@@ -629,6 +629,8 @@ textarea.fm-input {
 
 /* ── Dialog (native <dialog>) ─────────────────────────────────────────────────────────────── */
 .fm-dialog {
+    /* Centred: the CSS reset removes the browser's own margin: auto for modal dialogs (drawers set theirs below). */
+    margin: auto;
     width: min(var(--fm-dialog-w, 32rem), calc(100vw - 2rem));
     max-height: calc(100dvh - 2rem);
     padding: 0;

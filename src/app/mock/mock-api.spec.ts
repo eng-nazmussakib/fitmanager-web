@@ -141,4 +141,40 @@ describe('mock API', () => {
         expect(pub.data.find(r => r.key === 'blog')).toMatchObject({ section: false, page: true });
         expect(pub.data.filter(r => r.required).map(r => r.key)).toEqual(['hero', 'services', 'plans', 'facilities']);
     });
+
+    it('phase 2 (D-059, D-067, D-068): a visitor trains anywhere; refunds and suspensions follow the API’s rules', async () => {
+        const send = <T>(method: 'POST', path: string, body: unknown, token: string, branch: string): Promise<Res<T>> =>
+            firstValueFrom(http.request<Res<T>>(method, `${base}${path}`, { body, headers: { Authorization: `Bearer ${token}`, 'X-Branch-Id': branch } }));
+        const deskDha = await login('desk.dhanmondi', 'Desk@123');
+        const visitor = await send<{ failures: { rule: string }[]; member: { visitor: boolean } }>(
+            'POST',
+            '/v1/attendance/evaluate',
+            { code: 'MEM-GUL-000001' },
+            deskDha,
+            'br-dha'
+        );
+        expect(visitor.data.failures.map(f => f.rule)).not.toContain('branch');
+        expect(visitor.data.member.visitor).toBe(true);
+
+        const desk = await login('desk.gulshan', 'Desk@123');
+        const manager = await login('manager.gulshan', 'Manager@123');
+        const page = await get<{ rows: { oid: string; status: string }[] }>('/v1/members?size=100&status=Active', desk, 'br-gul');
+        const member = page.data.rows[0]?.oid ?? '';
+        expect(await status(send('POST', `/v1/members/${member}/suspend`, { reason: 'Behaviour' }, desk, 'br-gul'))).toBe(403);
+        expect(await status(send('POST', `/v1/members/${member}/suspend`, { reason: 'Behaviour' }, manager, 'br-gul'))).toBe(200);
+        expect(await status(send('POST', `/v1/members/${member}/unsuspend`, {}, manager, 'br-gul'))).toBe(200);
+
+        const invoices = await get<{ oid: string; paid: number; issued_at: string }[]>(`/v1/members/${member}/invoices`, desk, 'br-gul');
+        const old = invoices.data.find(i => i.paid > 0);
+        if (old) {
+            // An old, used invoice: the desk cannot refund it; a manager can refund part of it.
+            const paidBefore = old.paid; // the mock answers with live rows: read the number first
+            expect(await status(send('POST', `/v1/invoices/${old.oid}/refund`, { reason: 'Goodwill' }, desk, 'br-gul'))).toBe(403);
+            const r = await send<{ paid: number }>('POST', `/v1/invoices/${old.oid}/refund`, { amount: 100, reason: 'Goodwill' }, manager, 'br-gul');
+            expect(r.data.paid).toBe(paidBefore - 100);
+        }
+        const closing = await send<{ expected_cash: number }>('POST', '/v1/cash-closing', { counted_cash: 0 }, desk, 'br-gul');
+        expect(typeof closing.data.expected_cash).toBe('number');
+        expect(await status(send('POST', '/v1/cash-closing', { counted_cash: 0 }, desk, 'br-gul'))).toBe(409);
+    });
 });

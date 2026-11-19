@@ -65,8 +65,9 @@ export function memberState(m: MemberRow, today: string): MemberState {
     const freeze = current?.freezes.find(f => f.from <= today && today <= f.to) ?? null;
     const dues = (i.invoices.get(m.oid) ?? []).reduce((sum, inv) => sum + inv.due, 0);
     let status: MemberStatus;
-    if (m.pending) status = 'Pending';
-    else if (m.suspended) status = 'Suspended';
+    // A suspension outranks everything, a join request included (the API's order).
+    if (m.suspended) status = 'Suspended';
+    else if (m.pending) status = 'Pending';
     else if (current) status = freeze ? 'Frozen' : 'Active';
     else if (upcoming) status = 'Active';
     else status = 'Expired';

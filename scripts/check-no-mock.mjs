@@ -1,5 +1,5 @@
 // The production bundle contains no mock code: no seed data, no demo password, no mock interceptor.
-// Run after `npm run build:prod` (or build:vm). Exits 1 if any marker is found.
+// Run after `npm run build:prod`. Exits 1 if any marker is found.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 

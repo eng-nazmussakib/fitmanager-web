@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 
 /**
  * Saves a blob response and takes the file name from `Content-Disposition` when the server sends it.
- * Used for report / pay-slip / Excel downloads (OMS, SIB, Policy-Repo).
+ * Used for report / pay-slip / Excel downloads.
  */
 export function saveHttpBlob(res: HttpResponse<Blob>, fallbackName: string): void {
     if (!res.body) return;
@@ -29,7 +29,7 @@ export function exportCsv<T extends object>(rows: T[], columns: { key: keyof T; 
     saveAs(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), fileName);
 }
 
-/** Opens a PDF blob in a new tab instead of downloading it (OMS FileViewComponent). */
+/** Opens a PDF blob in a new tab instead of downloading it. */
 export function openBlobInNewTab(blob: Blob): void {
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank', 'noopener');

@@ -18,19 +18,21 @@ export function accountFromToken(header: string | null): ReturnType<typeof db>['
     if (scheme !== 'Bearer' || !token) return null;
     const [prefix, username, issuedAt] = token.split(':');
     if (prefix !== 'mock' || Date.now() - Number(issuedAt) > ACCESS_TTL_MS) return null;
-    return db().accounts.find(a => a.username === username) ?? null;
+    // A deactivated account's token stops working at once, as the API's profile check does.
+    return db().accounts.find(a => a.username === username && a.status !== 'Inactive') ?? null;
 }
 
 function login(ctx: Ctx): HttpResponse<unknown> {
     const username = str(ctx.body['username']).toLowerCase();
     const account = db().accounts.find(a => a.username === username);
     if (!account || account.password !== ctx.body['password']) fail(400, 'Invalid username or password');
+    if (account.status === 'Inactive') fail(403, 'This account is not active');
     return ok(issueTokens(account.username), 'Signed in');
 }
 
 function refresh(ctx: Ctx): HttpResponse<unknown> {
     const [prefix, username] = str(ctx.body['refresh_token']).split(':');
-    if (prefix !== 'mock-refresh' || !db().accounts.some(a => a.username === username)) fail(401, 'Refresh token invalid');
+    if (prefix !== 'mock-refresh' || !db().accounts.some(a => a.username === username && a.status !== 'Inactive')) fail(401, 'Refresh token invalid');
     return ok(issueTokens(username), 'Token refreshed');
 }
 

@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { type Observable, of, switchMap } from 'rxjs';
 
 import type { Gender } from '@core/models/member.model';
+import { dataUrlToBlob, FilesService } from '@core/services/files.service';
 import { revealErrors } from '@core/utils/form.utils';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { ButtonComponent } from '@shared/ui/button/button.component';
@@ -59,7 +61,7 @@ const HEALTH = ['Asthma', 'Diabetes', 'High blood pressure', 'Heart condition', 
                     </div>
                     <div class="grid flex-1 gap-4 sm:grid-cols-2">
                         <fm-field class="sm:col-span-2" label="Full name" required><input autocomplete="off" fmInput formControlName="name" /></fm-field>
-                        <fm-field hint="01XXXXXXXXX, for OTP sign-in and SMS" label="Mobile" required>
+                        <fm-field hint="01XXXXXXXXX: the member's contact number, unique across branches" label="Mobile" required>
                             <span class="text-sm" fmPrefix>+88</span>
                             <input autocomplete="off" fmInput formControlName="phone" inputmode="tel" style="--fm-prefix-w: 2.75rem" />
                         </fm-field>
@@ -119,6 +121,7 @@ export class MemberFormPageComponent {
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
     private readonly _fb = inject(NonNullableFormBuilder);
+    private readonly _files = inject(FilesService);
 
     protected readonly today = todayIso();
     protected readonly health = HEALTH;
@@ -163,19 +166,26 @@ export class MemberFormPageComponent {
         }
         const v = this.form.getRawValue();
         this.saving.set(true);
-        this._service
-            .createMember({
-                name: v.name,
-                phone: v.phone,
-                gender: v.gender,
-                email: v.email || null,
-                date_of_birth: v.date_of_birth,
-                address: v.address || null,
-                emergency_contact: v.emergency.name ? v.emergency : null,
-                health_flags: this.flags(),
-                health_declared: v.health_declared,
-                photo_url: this.photo()
-            })
+        // The photo goes to the file store first (D-058); the member then points at the checked file.
+        const photo = this.photo();
+        const photoFile$: Observable<string | null> = photo ? this._files.upload('member_photo', dataUrlToBlob(photo), 'photo.jpg') : of(null);
+        photoFile$
+            .pipe(
+                switchMap(photoFileOid =>
+                    this._service.createMember({
+                        name: v.name,
+                        phone: v.phone,
+                        gender: v.gender,
+                        email: v.email || null,
+                        date_of_birth: v.date_of_birth,
+                        address: v.address || null,
+                        emergency_contact: v.emergency.name ? v.emergency : null,
+                        health_flags: this.flags(),
+                        health_declared: v.health_declared,
+                        photo_file_oid: photoFileOid
+                    })
+                )
+            )
             .subscribe({
                 next: m => void this._router.navigate(['..', m.oid, 'subscribe'], { relativeTo: this._route }),
                 error: () => this.saving.set(false)

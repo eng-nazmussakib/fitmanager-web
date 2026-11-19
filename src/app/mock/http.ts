@@ -53,8 +53,8 @@ export function ok<T>(data: T, message = 'Success'): HttpResponse<unknown> {
     return new HttpResponse({ status: 200, body: { code: 200, message, data } });
 }
 
-export function httpError(status: number, message: string): HttpErrorResponse {
-    return new HttpErrorResponse({ status, statusText: message, error: { code: status, message } });
+export function httpError(status: number, message: string, errors?: { path: string; message: string }[]): HttpErrorResponse {
+    return new HttpErrorResponse({ status, statusText: message, error: { code: status, message, data: null, ...(errors ? { errors } : {}) } });
 }
 
 export function abilityFor(user: CurrentUser | null, branch: Branch | null): AppAbility {

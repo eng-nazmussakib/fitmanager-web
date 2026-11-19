@@ -18,7 +18,7 @@ export const AppValidators = {
 
     /**
      * Group-level validator: `fb.group({...}, { validators: AppValidators.match('password', 'confirm') })`.
-     * Unlike OMS `MustMatch`, it does not call setErrors() on a child control (that overwrote the child's other errors).
+     * It does not call setErrors() on a child control (that would overwrite the child's other errors).
      * It returns the error on the group, and the template reads `form.hasError('mismatch')`.
      */
     match(field: string, confirmField: string): ValidatorFn {

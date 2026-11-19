@@ -5,10 +5,20 @@ import { ApiService } from '@core/http/api.service';
 import type { AccessDecision, CheckIn, CheckInRequest, Occupancy } from '@core/models/attendance.model';
 import type { BranchRef } from '@core/models/branch.model';
 import type { ClassSession, ClassSessionDetail, ClassType, Trainer } from '@core/models/class.model';
-import type { Measurement, Member, MemberListItem, MemberPayload, MemberQuery, TimelineEvent } from '@core/models/member.model';
-import type { CashClosing, Invoice, PaymentRecord, PaymentRequest } from '@core/models/payment.model';
+import type {
+    Measurement,
+    Member,
+    MemberDocument,
+    MemberListItem,
+    MemberNotification,
+    MemberPayload,
+    MemberQuery,
+    TimelineEvent
+} from '@core/models/member.model';
+import type { CashClosing, Invoice, PaymentRecord, PaymentRequest, RefundRequest } from '@core/models/payment.model';
 import type { Plan } from '@core/models/plan.model';
-import type { Quote, Subscription, SubscriptionRequest } from '@core/models/subscription.model';
+import type { OrgRules } from '@core/models/settings.model';
+import type { PaymentMethod, Quote, Subscription, SubscriptionRequest } from '@core/models/subscription.model';
 
 export interface MemberPage {
     rows: MemberListItem[];
@@ -87,6 +97,67 @@ export class ConsoleService {
 
     sell(body: SubscriptionRequest): Observable<{ subscription: Subscription; invoice: Invoice }> {
         return this._api.post('/v1/subscriptions', body);
+    }
+
+    /** VAT and the freeze rule, as HQ set them. */
+    rules(): Observable<OrgRules> {
+        return this._api.get<OrgRules>('/v1/rules');
+    }
+
+    suspend(oid: string, reason: string): Observable<Member> {
+        return this._api.post<Member>(`/v1/members/${oid}/suspend`, { reason });
+    }
+
+    unsuspend(oid: string): Observable<Member> {
+        return this._api.post<Member>(`/v1/members/${oid}/unsuspend`, {});
+    }
+
+    transfer(oid: string, body: { to_branch_oid: string; reason: string }): Observable<{ oid: string; code: string; branch_oid: string; branch_name: string }> {
+        return this._api.post(`/v1/members/${oid}/transfer`, body);
+    }
+
+    anonymise(oid: string, confirmCode: string): Observable<{ oid: string; anonymised: boolean }> {
+        return this._api.post(`/v1/members/${oid}/anonymise`, { confirm_code: confirmCode });
+    }
+
+    /** D-064: a temporary password; the username is the member code. */
+    portalAccess(oid: string, password: string): Observable<{ username: string; must_change_password: boolean; reset: boolean }> {
+        return this._api.post(`/v1/members/${oid}/portal-access`, { password });
+    }
+
+    documents(oid: string): Observable<MemberDocument[]> {
+        return this._api.get<MemberDocument[]>(`/v1/members/${oid}/documents`);
+    }
+
+    notifications(oid: string): Observable<MemberNotification[]> {
+        return this._api.get<MemberNotification[]>(`/v1/members/${oid}/notifications`);
+    }
+
+    cancelSubscription(oid: string, reason: string): Observable<Subscription> {
+        return this._api.post<Subscription>(`/v1/subscriptions/${oid}/cancel`, { reason });
+    }
+
+    upgrade(
+        oid: string,
+        body: { plan_oid: string; payment: { method: PaymentMethod; amount: number; reference?: string | null } }
+    ): Observable<{ subscription: Subscription; invoice: Invoice; credit: number }> {
+        return this._api.post(`/v1/subscriptions/${oid}/upgrade`, body);
+    }
+
+    refund(invoiceOid: string, body: RefundRequest): Observable<Invoice> {
+        return this._api.post<Invoice>(`/v1/invoices/${invoiceOid}/refund`, body);
+    }
+
+    closeDay(body: {
+        counted_cash: number;
+        note?: string | null;
+    }): Observable<{ day: string; expected_cash: number; counted_cash: number; difference: number }> {
+        return this._api.post('/v1/cash-closing', body);
+    }
+
+    /** Every open branch (a transfer's target): the public list, since a manager is assigned to one branch only. */
+    branchOptions(): Observable<BranchRef[]> {
+        return this._api.get<BranchRef[]>('/v1/public/branches');
     }
 
     freeze(subscriptionOid: string, body: { from: string; days: number; reason: string }): Observable<Subscription> {

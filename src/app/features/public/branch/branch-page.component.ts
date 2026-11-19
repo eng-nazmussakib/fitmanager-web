@@ -159,7 +159,7 @@ export class BranchPageComponent {
     /** The branch's entry in the brand config: its opening, ladies-only and combined hours. */
     private readonly _siteBranch = computed(() => this._site.branches.find(b => toSlug(b.name) === this.slug()));
     protected readonly timetable = computed(() => this._siteBranch()?.timetable ?? []);
-    protected readonly vatText = computed(() => vatNote(this._plans()[0]?.vat_rate));
+    protected readonly vatText = computed(() => vatNote(this._plans()[0]?.vat_rate, this._plans()[0]?.vat_inclusive));
     /** The branch's plans grouped by tier (Single, Duo, Group), periods in order. */
     protected readonly tiers = computed(() => {
         const plans = this._plans()[0]?.plans ?? [];
@@ -182,13 +182,13 @@ export class BranchPageComponent {
             this._seo.update({
                 path: `/branches/${b.slug}`,
                 title,
-                description: `${this.brand} ${b.name} at ${b.address}. Opening hours, facilities, membership plans and this week's classes.`,
+                description: `${this.brand} ${b.name} at ${b.address ?? b.name}. Opening hours, facilities, membership plans and this week's classes.`,
                 jsonLd: {
                     '@context': 'https://schema.org',
                     '@type': 'ExerciseGym',
                     name: `${this.brand} ${b.name}`,
                     address: { '@type': 'PostalAddress', streetAddress: b.address, addressLocality: 'Dhaka', addressCountry: 'BD' },
-                    telephone: b.phone || undefined,
+                    telephone: b.phone ?? undefined,
                     // The hours the page shows, from the brand config: never a second copy.
                     openingHoursSpecification: openingHoursSpec(this._siteBranch()?.hours ?? []),
                     amenityFeature: b.facilities.map(f => ({ '@type': 'LocationFeatureSpecification', name: f, value: true })),

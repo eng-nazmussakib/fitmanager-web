@@ -3,8 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 /**
  * Subscribe-time error handler for user-triggered API calls:
  *   .subscribe({ next: …, error: ignoreHandledApiError })
- * The error was already shown by notifyInterceptor. Handling it here keeps it away from ErrorHandler/Sentry.
- * Without an `error` callback, every 400 from a form submit would be reported to Sentry as a crash.
+ * The error was already shown by notifyInterceptor. Handling it here keeps it away from the global ErrorHandler:
+ * without an `error` callback, every 400 from a form submit would be logged as a crash.
  */
 export const ignoreHandledApiError = (): void => undefined;
 

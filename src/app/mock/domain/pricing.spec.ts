@@ -1,4 +1,4 @@
-import { endDate, type PriceInput, type Promo, quote } from './pricing';
+import { endDate, invoiceDue, invoiceStatus, type PriceInput, type Promo, quote } from './pricing';
 
 const PROMOS: Promo[] = [
     { code: 'NOADMISSION', label: 'No admission fee', waive_admission: true, from: '2026-11-01', to: '2026-11-30' },
@@ -17,6 +17,7 @@ function input(over: Partial<PriceInput> = {}): PriceInput {
         start_date: '2026-11-15',
         today: '2026-11-15',
         vat_rate: 0.05,
+        vat_inclusive: false,
         promos: PROMOS,
         ...over
     };
@@ -52,5 +53,33 @@ describe('pricing', () => {
         ['2026-08-31', 6, '2027-02-28']
     ])('a membership from %s for %i month(s) ends on %s', (start, months, end) => {
         expect(endDate(start, months)).toBe(end);
+    });
+});
+
+describe('pricing, VAT inclusive (D-057)', () => {
+    it.each([
+        ['15% inside 5000', input({ vat_rate: 0.15, vat_inclusive: true }), 5000, 0, 652, 5000],
+        ['5% inside 3150 after a discount', input({ vat_inclusive: true, discount: { kind: 'amount', value: 1850 } }), 5000, 1850, 150, 3150],
+        ['rate 0: no VAT either way', input({ vat_rate: 0, vat_inclusive: true }), 5000, 0, 0, 5000]
+    ])('%s', (_name, i, subtotal, discount, vat, total) => {
+        const q = quote(i);
+        expect([q.subtotal, q.discount, q.vat, q.total]).toEqual([subtotal, discount, vat, total]);
+        expect(q.vat_inclusive).toBe(true);
+    });
+});
+
+describe('invoice dues and status after refunds (D-067 a)', () => {
+    it.each([
+        // total, paid in, refunded → due, status
+        [6325, 0, 0, 6325, 'Due'],
+        [6325, 3000, 0, 3325, 'Partial'],
+        [6325, 6325, 0, 0, 'Paid'],
+        [6325, 6325, 6325, 0, 'Refunded'], // full refund: the plan was taken back
+        [6325, 3000, 3000, 0, 'Refunded'], // a part-paid invoice refunded in full owes nothing either
+        [12650, 12650, 2000, 0, 'Paid'], // partial refund: the refund never becomes dues
+        [12650, 5000, 1000, 7650, 'Partial'] // what was never paid is still owed
+    ])('total %i, paid %i, refunded %i → due %i, %s', (total, paid, refunded, due, status) => {
+        expect(invoiceDue(total, paid, refunded)).toBe(due);
+        expect(invoiceStatus(total, paid, refunded)).toBe(status);
     });
 });

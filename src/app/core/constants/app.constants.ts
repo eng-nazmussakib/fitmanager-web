@@ -1,12 +1,13 @@
 /** App-wide constants. Use UPPER_CASE (guideline 2.3) and `as const` so values are literal types. */
 export const APP = {
     LOGIN_ROUTE: '/auth/sign-in',
+    /** Change password and the user's sessions; forced while a temporary password is set (D-054). */
+    PASSWORD_ROUTE: '/account/password',
     HOME_ROUTE: '/home',
     PAGE_SIZE: 10,
     PAGE_SIZE_OPTIONS: [10, 20, 50, 100],
     TIME_ZONE: 'Asia/Dhaka',
-    MAX_UPLOAD_MB: 2,
-    OTP_SECONDS: 120
+    MAX_UPLOAD_MB: 2
 } as const;
 
 /** Keys for localStorage. Keep them in one place so a logout can clear everything it owns. */

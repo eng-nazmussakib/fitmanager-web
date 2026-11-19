@@ -7,7 +7,8 @@ import type { ApexAxisChartSeries } from 'ng-apexcharts';
 
 import { AuthService } from '@core/auth/auth.service';
 import type { Invoice } from '@core/models/payment.model';
-import { METHODS_NEEDING_REFERENCE, PAYMENT_METHOD_LABELS, type PaymentMethod } from '@core/models/subscription.model';
+import { METHODS_NEEDING_REFERENCE, PAYMENT_METHOD_LABELS, type PaymentMethod, type Subscription } from '@core/models/subscription.model';
+import { FilesService } from '@core/services/files.service';
 import { InvoiceViewComponent } from '@features/shared/invoice-view.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CanDirective } from '@shared/directives/can.directive';
@@ -29,6 +30,7 @@ import { TabDirective, TabsComponent } from '@shared/ui/tabs/tabs.component';
 import { ToastService } from '@shared/ui/toast/toast.service';
 
 import { ConsoleService } from '../console.service';
+import { MemberManageComponent } from './member-manage.component';
 
 const STATUS_TONE: Record<string, Tone> = {
     Active: 'success',
@@ -82,7 +84,8 @@ const TIMELINE_ICON: Record<string, IconName> = {
         SelectComponent,
         IconComponent,
         TabsComponent,
-        TabDirective
+        TabDirective,
+        MemberManageComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
@@ -168,6 +171,8 @@ const TIMELINE_ICON: Record<string, IconName> = {
                 }
             </fm-card>
 
+            <app-member-manage class="mb-5 block" [member]="m" (changed)="reloadAll()" />
+
             <fm-tabs label="Member details" [active]="tab() ?? 'overview'" (activeChange)="setTab($event)">
                 <ng-template fmTab="overview" label="Overview">
                     <div class="grid gap-4 lg:grid-cols-3">
@@ -245,6 +250,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
                                         <th class="fm-num" scope="col">Total</th>
                                         <th class="fm-num" scope="col">Due</th>
                                         <th scope="col">Status</th>
+                                        <th scope="col"><span class="fm-sr-only">Actions</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -264,11 +270,24 @@ const TIMELINE_ICON: Record<string, IconName> = {
                                             <td class="fm-num" [class.text-danger-fg]="s.due > 0">{{ s.due | taka: 0 }}</td>
                                             <td>
                                                 <fm-badge dot [tone]="tone(s.status)">{{ s.status }}</fm-badge>
+                                                @if (s.cancel_reason) {
+                                                    <span class="block text-xs text-fg-subtle">{{ s.cancel_reason }}</span>
+                                                }
+                                            </td>
+                                            <td class="fm-num whitespace-nowrap">
+                                                @if (s.status === 'Active' || s.status === 'Frozen' || s.status === 'Upcoming') {
+                                                    <ng-container *appCan="'update'; on: 'Subscription'">
+                                                        @if (s.status === 'Active') {
+                                                            <button fmButton size="sm" variant="ghost" (click)="openUpgrade(s)">Upgrade</button>
+                                                        }
+                                                        <button fmButton size="sm" variant="ghost" (click)="openCancel(s)">End plan</button>
+                                                    </ng-container>
+                                                }
                                             </td>
                                         </tr>
                                     } @empty {
                                         <tr>
-                                            <td colspan="6"><fm-empty-state icon="clipboard-list" title="No subscriptions yet" /></td>
+                                            <td colspan="7"><fm-empty-state icon="clipboard-list" title="No subscriptions yet" /></td>
                                         </tr>
                                     }
                                 </tbody>
@@ -302,12 +321,19 @@ const TIMELINE_ICON: Record<string, IconName> = {
                                             <td class="fm-num">{{ inv.paid | taka: 0 }}</td>
                                             <td class="fm-num" [class.text-danger-fg]="inv.due > 0">{{ inv.due | taka: 0 }}</td>
                                             <td>
-                                                <fm-badge dot [tone]="inv.status === 'Paid' ? 'success' : 'warning'">{{ inv.status }}</fm-badge>
+                                                <fm-badge dot [tone]="inv.status === 'Paid' ? 'success' : inv.status === 'Refunded' ? 'neutral' : 'warning'">
+                                                    {{ inv.status }}
+                                                </fm-badge>
                                             </td>
                                             <td class="fm-num whitespace-nowrap">
                                                 <button fmButton size="sm" variant="ghost" (click)="receipt.set(inv)">Receipt</button>
                                                 @if (inv.due > 0) {
                                                     <button *appCan="'create'; on: 'Payment'" fmButton size="sm" (click)="openPay(inv)">Pay</button>
+                                                }
+                                                @if (inv.paid > 0) {
+                                                    <button *appCan="'create'; on: 'Payment'" fmButton size="sm" variant="ghost" (click)="openRefund(inv)">
+                                                        Refund
+                                                    </button>
                                                 }
                                             </td>
                                         </tr>
@@ -380,6 +406,68 @@ const TIMELINE_ICON: Record<string, IconName> = {
                     </fm-card>
                 </ng-template>
 
+                <ng-template fmTab="documents" label="Documents" [count]="documents.value()?.length ?? null">
+                    <fm-card subtitle="ID, medical notes, signed forms: PDF, JPEG or PNG up to 5 MB, at most 10." title="Documents">
+                        <ul class="grid gap-2">
+                            @for (d of documents.value() ?? []; track d.oid) {
+                                <li class="flex items-center gap-3 text-sm">
+                                    <fm-icon name="file-text" size="1rem" />
+                                    <a class="fm-link" rel="noopener" target="_blank" [href]="d.url">{{ d.name }}</a>
+                                    <span class="text-xs text-fg-subtle">
+                                        {{ d.created_at | appDate }}{{ d.created_by_name ? ' · ' + d.created_by_name : '' }}
+                                    </span>
+                                </li>
+                            } @empty {
+                                <li><fm-empty-state icon="file-question" title="No documents yet" /></li>
+                            }
+                        </ul>
+                        @if (!m.anonymised) {
+                            <label *appCan="'create'; on: 'Member'" class="fm-btn fm-btn-secondary fm-btn-sm mt-4 cursor-pointer">
+                                <fm-icon name="upload" size="1rem" />
+                                {{ uploading() ? 'Uploading…' : 'Add a document' }}
+                                <input #doc class="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" (change)="addDocument(doc)" />
+                            </label>
+                        }
+                    </fm-card>
+                </ng-template>
+
+                <ng-template fmTab="messages" label="Messages">
+                    <fm-card
+                        subtitle="Receipts, welcomes and expiry reminders. The member sees them in the portal; to reach them outside it, send one from your own phone or email."
+                        title="Messages"
+                    >
+                        <ul class="grid gap-3">
+                            @for (n of notifications.value() ?? []; track n.oid) {
+                                <li class="text-sm">
+                                    <p class="font-medium">{{ n.subject }}</p>
+                                    <p class="text-fg-muted">{{ n.body }}</p>
+                                    <p class="text-xs text-fg-subtle">{{ n.created_at | appDate: 'dd MMM yyyy, h:mm a' }}</p>
+                                    <p class="mt-1 flex flex-wrap gap-1">
+                                        @if (m.phone) {
+                                            <a fmButton size="sm" variant="ghost" [href]="smsLink(m.phone, n.body)">
+                                                <fm-icon name="message-square" size="0.875rem" />
+                                                SMS
+                                            </a>
+                                        }
+                                        @if (m.email) {
+                                            <a fmButton size="sm" variant="ghost" [href]="mailLink(m.email, n.subject, n.body)">
+                                                <fm-icon name="mail" size="0.875rem" />
+                                                Email
+                                            </a>
+                                        }
+                                        <button fmButton size="sm" variant="ghost" (click)="copyMessage(n.body)">
+                                            <fm-icon name="copy" size="0.875rem" />
+                                            Copy
+                                        </button>
+                                    </p>
+                                </li>
+                            } @empty {
+                                <li><fm-empty-state icon="mail" title="No messages yet" /></li>
+                            }
+                        </ul>
+                    </fm-card>
+                </ng-template>
+
                 <ng-template fmTab="timeline" label="Timeline">
                     <fm-card>
                         <ol class="relative ml-3 border-l border-border">
@@ -429,18 +517,18 @@ const TIMELINE_ICON: Record<string, IconName> = {
                 </ng-container>
             </fm-dialog>
 
-            <fm-dialog
-                description="The days are added to the end of the plan. A plan can be frozen twice, 7 to 60 days each."
-                size="sm"
-                title="Freeze membership"
-                [(open)]="freezeOpen"
-            >
+            <fm-dialog size="sm" title="Freeze membership" [description]="freezeHelp()" [(open)]="freezeOpen">
                 <div class="grid gap-4">
                     <fm-field label="From">
                         <fm-date-picker [min]="today" [ngModel]="freezeFrom()" (ngModelChange)="freezeFrom.set($event ?? today)" />
                     </fm-field>
-                    <fm-field hint="7 to 60 days" label="Days">
-                        <fm-number-input [max]="60" [min]="7" [ngModel]="freezeDays()" (ngModelChange)="freezeDays.set($event ?? 14)" />
+                    <fm-field label="Days" [hint]="freezeRange()">
+                        <fm-number-input
+                            [max]="rules.value()?.freeze_max_days ?? 60"
+                            [min]="rules.value()?.freeze_min_days ?? 7"
+                            [ngModel]="freezeDays()"
+                            (ngModelChange)="freezeDays.set($event ?? 14)"
+                        />
                     </fm-field>
                     <fm-field label="Reason" required>
                         <input fmInput placeholder="e.g. Travelling abroad" [ngModel]="freezeReason()" (ngModelChange)="freezeReason.set($event)" />
@@ -449,6 +537,103 @@ const TIMELINE_ICON: Record<string, IconName> = {
                 <ng-container fmDialogFooter>
                     <button fmButton (click)="freezeOpen.set(false)">Cancel</button>
                     <button fmButton variant="primary" [disabled]="!freezeReason().trim()" [loading]="saving()" (click)="freeze()">Freeze</button>
+                </ng-container>
+            </fm-dialog>
+
+            <fm-dialog
+                size="sm"
+                title="End plan"
+                [description]="'From today ' + (endTarget()?.plan_name ?? '') + ' gives no access. No money moves: refund separately if needed.'"
+                [open]="!!endTarget()"
+                (openChange)="!$event && endTarget.set(null)"
+            >
+                <fm-field label="Reason" required>
+                    <input fmInput placeholder="e.g. Moving abroad" [ngModel]="endReason()" (ngModelChange)="endReason.set($event)" />
+                </fm-field>
+                <ng-container fmDialogFooter>
+                    <button fmButton (click)="endTarget.set(null)">Cancel</button>
+                    <button fmButton variant="danger" [disabled]="endReason().trim().length < 3" [loading]="saving()" (click)="endPlan()">End plan</button>
+                </ng-container>
+            </fm-dialog>
+
+            <fm-dialog
+                description="The new plan starts today. The unused days of the current one are credited on what was paid. Same or higher price only."
+                size="sm"
+                title="Upgrade plan"
+                [open]="!!upgradeTarget()"
+                (openChange)="!$event && upgradeTarget.set(null)"
+            >
+                <div class="grid gap-4">
+                    <fm-field label="New plan" required>
+                        <fm-select
+                            ariaLabel="New plan"
+                            placeholder="Choose a plan"
+                            [ngModel]="upgradePlan()"
+                            [options]="upgradeOptions()"
+                            (ngModelChange)="upgradePlan.set($event)"
+                        />
+                    </fm-field>
+                    <fm-field label="Method">
+                        <fm-select [ngModel]="payMethod()" [options]="methodOptions" (ngModelChange)="payMethod.set($event ?? 'cash')" />
+                    </fm-field>
+                    @if (needsRef()) {
+                        <fm-field label="Reference" required>
+                            <input autocomplete="off" fmInput [ngModel]="payRef()" (ngModelChange)="payRef.set($event)" />
+                        </fm-field>
+                    }
+                    <fm-field hint="0 to put it all on dues" label="Paid now">
+                        <fm-number-input taka [min]="0" [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)" />
+                    </fm-field>
+                </div>
+                <ng-container fmDialogFooter>
+                    <button fmButton (click)="upgradeTarget.set(null)">Cancel</button>
+                    <button
+                        fmButton
+                        variant="primary"
+                        [disabled]="!upgradePlan() || ((payAmount() ?? 0) > 0 && needsRef() && !payRef().trim())"
+                        [loading]="saving()"
+                        (click)="upgradeNow()"
+                    >
+                        Upgrade
+                    </button>
+                </ng-container>
+            </fm-dialog>
+
+            <fm-dialog
+                description="A full refund within 3 days of the sale, before the member has trained, ends the plan and can be done at the desk. Any other refund needs a branch manager."
+                size="sm"
+                title="Refund"
+                [open]="!!refundTarget()"
+                (openChange)="!$event && refundTarget.set(null)"
+            >
+                <div class="grid gap-4">
+                    <fm-field label="Amount" required [hint]="'Paid on ' + (refundTarget()?.number ?? '') + ': ' + (refundTarget()?.paid ?? 0 | taka: 0)">
+                        <fm-number-input
+                            taka
+                            [max]="refundTarget()?.paid ?? 0"
+                            [min]="1"
+                            [ngModel]="refundAmount()"
+                            (ngModelChange)="refundAmount.set($event)"
+                        />
+                    </fm-field>
+                    <fm-field label="Paid back by">
+                        <fm-select [ngModel]="payMethod()" [options]="methodOptions" (ngModelChange)="payMethod.set($event ?? 'cash')" />
+                    </fm-field>
+                    <fm-field label="Reason" required>
+                        <input fmInput placeholder="e.g. Changed their mind" [ngModel]="refundReason()" (ngModelChange)="refundReason.set($event)" />
+                    </fm-field>
+                </div>
+                <ng-container fmDialogFooter>
+                    <button fmButton (click)="refundTarget.set(null)">Cancel</button>
+                    <button
+                        fmButton
+                        variant="danger"
+                        [disabled]="!refundAmount() || refundReason().trim().length < 3"
+                        [loading]="saving()"
+                        (click)="refundNow()"
+                    >
+                        Refund {{ refundAmount() ?? 0 | taka: 0 }}
+                    </button>
                 </ng-container>
             </fm-dialog>
 
@@ -466,6 +651,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
 export class MemberProfilePageComponent {
     private readonly _service = inject(ConsoleService);
     private readonly _toast = inject(ToastService);
+    private readonly _files = inject(FilesService);
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
     protected readonly auth = inject(AuthService);
@@ -493,11 +679,40 @@ export class MemberProfilePageComponent {
     protected readonly payMethod = signal<PaymentMethod>('cash');
     protected readonly payRef = signal('');
     protected readonly payAmount = signal<number | null>(null);
+    /** HQ's freeze rule (D-063, D-067 e): the dialog shows it and the API enforces it. */
+    protected readonly rules = rxResource({ stream: () => this._service.rules() });
+    protected readonly freezeRange = computed(() => {
+        const r = this.rules.value();
+        return r ? `${r.freeze_min_days} to ${r.freeze_max_days} days` : '';
+    });
+    protected readonly freezeHelp = computed(() => {
+        const r = this.rules.value();
+        if (!r) return 'The days are added to the end of the plan.';
+        const times = r.freeze_max_count === 1 ? 'once' : r.freeze_max_count === 2 ? 'twice' : `${r.freeze_max_count} times`;
+        return `The days are added to the end of the plan. A plan can be frozen ${times}, ${r.freeze_min_days} to ${r.freeze_max_days} days each.`;
+    });
     protected readonly freezeOpen = signal(false);
     protected readonly freezeFrom = signal(todayIso());
     protected readonly freezeDays = signal(14);
     protected readonly freezeReason = signal('');
     protected readonly receipt = signal<Invoice | null>(null);
+    protected readonly documents = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.documents(params) });
+    protected readonly notifications = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.notifications(params) });
+    protected readonly uploading = signal(false);
+    protected readonly endTarget = signal<Subscription | null>(null);
+    protected readonly endReason = signal('');
+    protected readonly upgradeTarget = signal<Subscription | null>(null);
+    protected readonly upgradePlan = signal<string | null>(null);
+    private readonly _plans = rxResource({ params: () => this.upgradeTarget()?.oid, stream: () => this._service.plans() });
+    protected readonly upgradeOptions = computed<SelectOption<string>[]>(() => {
+        const current = this.upgradeTarget();
+        return (this._plans.value() ?? [])
+            .filter(p => p.oid !== current?.plan_oid)
+            .map(p => ({ value: p.oid, label: `${p.name} · ৳${p.price.toLocaleString('en-IN')}` }));
+    });
+    protected readonly refundTarget = signal<Invoice | null>(null);
+    protected readonly refundAmount = signal<number | null>(null);
+    protected readonly refundReason = signal('');
 
     protected readonly needsRef = computed(() => METHODS_NEEDING_REFERENCE.includes(this.payMethod()));
     protected readonly dueInvoices = computed<SelectOption<string>[]>(() =>
@@ -535,6 +750,25 @@ export class MemberProfilePageComponent {
 
     protected tone(status: string): Tone {
         return STATUS_TONE[status] ?? 'neutral';
+    }
+
+    /**
+     * Sending a message by hand (D-075: no SMS or email provider): open the staff member's own SMS or email app
+     * with the text filled in, or copy it for WhatsApp or anything else.
+     */
+    protected smsLink(phone: string, body: string): string {
+        return `sms:${phone}?body=${encodeURIComponent(body)}`;
+    }
+
+    protected mailLink(email: string, subject: string, body: string): string {
+        return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    protected copyMessage(body: string): void {
+        navigator.clipboard.writeText(body).then(
+            () => this._toast.success('Message copied'),
+            () => this._toast.show('Copy failed: select the text and copy it instead.', { tone: 'danger' })
+        );
     }
 
     protected timelineIcon(kind: string): IconName {
@@ -601,6 +835,96 @@ export class MemberProfilePageComponent {
             next: () => {
                 this.freezeOpen.set(false);
                 this.freezeReason.set('');
+                this._reload();
+            },
+            error: () => this.saving.set(false)
+        });
+    }
+
+    protected reloadAll(): void {
+        this._reload();
+        this.documents.reload();
+        this.notifications.reload();
+    }
+
+    protected addDocument(input: HTMLInputElement): void {
+        const file = input.files?.[0];
+        const m = this.member.value();
+        if (!file || !m) return;
+        this.uploading.set(true);
+        this._files.upload('member_document', file, file.name, m.oid).subscribe({
+            next: () => {
+                this.uploading.set(false);
+                input.value = '';
+                this._toast.success('Document saved');
+                this.documents.reload();
+            },
+            error: () => {
+                this.uploading.set(false);
+                input.value = '';
+            }
+        });
+    }
+
+    protected openCancel(s: Subscription): void {
+        this.endReason.set('');
+        this.endTarget.set(s);
+    }
+
+    protected endPlan(): void {
+        const s = this.endTarget();
+        if (!s) return;
+        this.saving.set(true);
+        this._service.cancelSubscription(s.oid, this.endReason().trim()).subscribe({
+            next: () => {
+                this.endTarget.set(null);
+                this._reload();
+            },
+            error: () => this.saving.set(false)
+        });
+    }
+
+    protected openUpgrade(s: Subscription): void {
+        this.upgradePlan.set(null);
+        this.payAmount.set(0);
+        this.payRef.set('');
+        this.upgradeTarget.set(s);
+    }
+
+    protected upgradeNow(): void {
+        const s = this.upgradeTarget();
+        const plan = this.upgradePlan();
+        if (!s || !plan) return;
+        this.saving.set(true);
+        this._service
+            .upgrade(s.oid, { plan_oid: plan, payment: { method: this.payMethod(), amount: this.payAmount() ?? 0, reference: this.payRef().trim() || null } })
+            .subscribe({
+                next: out => {
+                    this.upgradeTarget.set(null);
+                    this._toast.success(out.credit ? `Upgraded. ৳${out.credit.toLocaleString('en-IN')} credited for the unused days.` : 'Upgraded');
+                    this.receipt.set(out.invoice);
+                    this._reload();
+                },
+                error: () => this.saving.set(false)
+            });
+    }
+
+    protected openRefund(inv: Invoice): void {
+        this.refundAmount.set(inv.paid);
+        this.refundReason.set('');
+        this.payMethod.set('cash');
+        this.refundTarget.set(inv);
+    }
+
+    protected refundNow(): void {
+        const inv = this.refundTarget();
+        const amount = this.refundAmount();
+        if (!inv || !amount) return;
+        this.saving.set(true);
+        this._service.refund(inv.oid, { amount, method: this.payMethod(), reason: this.refundReason().trim() }).subscribe({
+            next: () => {
+                this.refundTarget.set(null);
+                this._toast.success('Refund recorded');
                 this._reload();
             },
             error: () => this.saving.set(false)

@@ -1,9 +1,8 @@
 import { type AccessClock, type AccessFacts, daysBetween, evaluateAccess } from './access-rules';
 
-/** Table-driven: each case is one rule outcome. Reused as the API's test cases in phase 2. */
+// Table-driven: the API's cases (fitmanager-api src/features/attendance/access-rules.test.ts), D-059: every branch.
 const BRANCH = {
-    oid: 'b-gul',
-    dues_limit: 1000,
+    name: 'Gulshan',
     hours: [
         { days: [0, 1, 2, 3, 4, 6], open: '07:00', close: '23:00' },
         { days: [5], open: '16:00', close: '21:00' }
@@ -13,14 +12,14 @@ const NOW: AccessClock = { date: '2026-11-15', time: '18:00', weekday: 0 };
 
 function facts(over: Omit<Partial<AccessFacts>, 'member'> & { member?: Partial<AccessFacts['member']> } = {}): AccessFacts {
     return {
-        member: { branch_oid: 'b-gul', branch_name: 'Gulshan', status: 'Active', dues: 0, ...over.member },
+        member: { status: 'Active', dues: 0, home_branch_name: 'Gulshan', dues_limit: 1000, ...over.member },
         subscription: over.subscription === undefined ? { start_date: '2026-11-01', end_date: '2026-11-30', freezes: [] } : over.subscription,
         branch: over.branch ?? BRANCH,
         open_check_in: over.open_check_in ?? null
     };
 }
 
-describe('access rules', () => {
+describe('access rules (D-059, D-061)', () => {
     const cases: [string, AccessFacts, AccessClock, string[], boolean[]][] = [
         ['allowed: active, no dues, open hours', facts(), NOW, [], []],
         [
@@ -41,13 +40,19 @@ describe('access rules', () => {
             [true]
         ],
         ['suspended', facts({ member: { status: 'Suspended' } }), NOW, ['suspended'], [true]],
-        ['dues over the limit', facts({ member: { dues: 2500 } }), NOW, ['dues'], [true]],
+        ['dues over the home branch’s limit', facts({ member: { dues: 2500 } }), NOW, ['dues'], [true]],
         ['dues at the limit are fine', facts({ member: { dues: 1000 } }), NOW, [], []],
+        [
+            'a visitor: the home branch’s limit applies, not this one’s',
+            facts({ member: { dues: 1200, dues_limit: 1500, home_branch_name: 'Uttara' } }),
+            NOW,
+            [],
+            []
+        ],
         ['before opening', facts(), { ...NOW, time: '06:30' }, ['hours'], [true]],
         ['Friday morning (opens 16:00)', facts(), { date: '2026-11-20', time: '10:00', weekday: 5 }, ['hours'], [true]],
         ['after closing', facts(), { ...NOW, time: '23:10' }, ['hours'], [true]],
-        ['already inside', facts({ open_check_in: '17:05' }), NOW, ['already_in'], [false]],
-        ['another branch', facts({ member: { branch_oid: 'b-dha', branch_name: 'Dhanmondi' } }), NOW, ['branch'], [false]],
+        ['already inside, anywhere', facts({ open_check_in: { branch_name: 'Dhanmondi', time: '17:05' } }), NOW, ['already_in'], [false]],
         ['join request without payment', facts({ member: { status: 'Pending' }, subscription: null }), NOW, ['pending'], [false]],
         ['no membership', facts({ subscription: null, member: { status: 'Expired' } }), NOW, ['membership'], [false]],
         ['starts in the future', facts({ subscription: { start_date: '2026-11-20', end_date: '2026-12-19', freezes: [] } }), NOW, ['membership'], [true]],
@@ -66,11 +71,13 @@ describe('access rules', () => {
         expect(result.map(f => f.overridable)).toEqual(overridable);
     });
 
-    it('says how long ago a subscription expired, with the taka amounts in lakh grouping', () => {
+    it('messages: how long ago, taka in lakh grouping, which branch', () => {
         const [expired] = evaluateAccess(facts({ subscription: { start_date: '2026-10-13', end_date: '2026-11-12', freezes: [] } }), NOW);
-        expect(expired.message).toBe('Subscription expired 3 days ago (12 Nov 2026).');
+        expect(expired?.message).toBe('Subscription expired 3 days ago (12 Nov 2026).');
         const [dues] = evaluateAccess(facts({ member: { dues: 125000 } }), NOW);
-        expect(dues.message).toBe('Dues ৳1,25,000 exceed the limit of ৳1,000.');
+        expect(dues?.message).toBe('Dues ৳1,25,000 exceed the limit of ৳1,000 (Gulshan).');
+        const [hours] = evaluateAccess(facts(), { ...NOW, time: '06:30' });
+        expect(hours?.message).toBe('Gulshan opens at 7:00 am today.');
     });
 
     it('counts days across months and years', () => {

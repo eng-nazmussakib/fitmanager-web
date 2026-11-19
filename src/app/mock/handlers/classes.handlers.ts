@@ -123,8 +123,16 @@ function publicBranch(ctx: Ctx): HttpResponse<unknown> {
 function publicPlans(ctx: Ctx): HttpResponse<unknown> {
     const slug = qStr(ctx, 'branch');
     const list = db().branches.filter(b => b.kind === 'BRANCH' && (!slug || b.slug === slug));
-    const vat = db().settings.vat_rate;
-    return ok(list.map(b => ({ branch: toRef(b), plans: db().plans.filter(p => p.branch_oid === b.oid && p.active), vat_rate: vat })));
+    const settings = db().settings;
+    if (slug && !list.length) fail(404, 'Branch not found');
+    return ok(
+        list.map(b => ({
+            branch: toRef(b),
+            plans: db().plans.filter(p => p.branch_oid === b.oid && p.sellable),
+            vat_rate: settings.vat_rate,
+            vat_inclusive: settings.vat_inclusive
+        }))
+    );
 }
 
 function publicClasses(ctx: Ctx): HttpResponse<unknown> {

@@ -7,7 +7,7 @@ import { AuthService } from '@core/auth/auth.service';
  * `<button *appCan="'create'; on: 'Member'">`  (reads as "can create on Item").
  *
  * Structural: an unauthorised element is never created.
- * OMS AccessControlDirective set `display: none`, which left the button in the DOM, where devtools could re-enable it.
+ * (Hiding it with `display: none` would leave the button in the DOM, where devtools could re-enable it.)
  * It re-renders when the ability changes (sign in as another user) through an effect().
  *
  * `@casl/angular` is not used: its `able` pipe is impure (runs on every change detection),

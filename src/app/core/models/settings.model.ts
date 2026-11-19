@@ -10,11 +10,25 @@ export interface OrgSettings {
     vat_rate: number;
     /** The business identification number printed on invoices (NBR "BIN"), when VAT-registered. */
     vat_bin: string | null;
+    /** true: prices already include VAT ("of which VAT"); false: VAT is added on top (D-057). */
+    vat_inclusive: boolean;
+    /** The freeze rule (D-063, D-067): how short and how long one freeze may be, and how many one plan may have. */
+    freeze_min_days: number;
+    freeze_max_days: number;
+    freeze_max_count: number;
     updated_at: string | null;
     updated_by: string | null;
 }
 
-export type OrgSettingsUpdate = Partial<Pick<OrgSettings, 'vat_rate' | 'vat_bin'>>;
+export type OrgSettingsUpdate = Partial<
+    Pick<OrgSettings, 'vat_rate' | 'vat_bin' | 'vat_inclusive' | 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count'>
+>;
+
+/** `GET /v1/rules`: the rules every staff member works by (read-only; HQ changes them in the settings). */
+export type OrgRules = Pick<OrgSettings, 'vat_rate' | 'vat_bin' | 'vat_inclusive' | 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count'>;
+
+/** Longest freeze HQ may allow (the API's limit). */
+export const MAX_FREEZE_DAYS = 365;
 
 /** Highest VAT rate the settings accept (a typo guard, well above Bangladesh's 15 % standard rate). */
 export const MAX_VAT_RATE = 0.5;

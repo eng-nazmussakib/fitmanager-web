@@ -2,7 +2,6 @@ import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalE
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideRouter, TitleStrategy, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 
-import { provideSentry } from '@core/error/sentry';
 import { provideAppHttpClient } from '@core/http/provide-app-http';
 import { AppTitleStrategy } from '@core/routing/app-title.strategy';
 import { ThemeService } from '@core/services/theme.service';
@@ -26,14 +25,13 @@ export const appConfig: ApplicationConfig = {
             // onSameUrlNavigation 'reload': clicking the same #section link again scrolls to it again (guards and resolvers are not re-run).
             withRouterConfig({ paramsInheritanceStrategy: 'always', onSameUrlNavigation: 'reload' })
         ),
-        // Public pages are prerendered (or server-rendered on the VM target) and hydrated in the browser.
+        // Public pages are prerendered at build time and hydrated in the browser.
         // Incremental hydration and event replay are on by default (Angular 22): a click before the bundle loads is not lost.
         provideClientHydration(),
         // "<page> | <brand>" tab titles from the route `title` (or the deepest `data.breadcrumb`).
         { provide: TitleStrategy, useClass: AppTitleStrategy },
         // Applies the colour theme (CSS variables) before the first render, on the server too.
         provideAppInitializer(() => void inject(ThemeService)),
-        provideAppHttpClient(), // XHR backend for upload progress; interceptors (see provide-app-http.ts)
-        ...provideSentry()
+        provideAppHttpClient() // XHR backend for upload progress; interceptors (see provide-app-http.ts)
     ]
 };

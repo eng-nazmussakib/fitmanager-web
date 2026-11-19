@@ -1,16 +1,16 @@
 import { createMongoAbility, type MongoAbility, type RawRuleOf } from '@casl/ability';
 
 /**
- * Authorization vocabulary, with CASL (`@casl/ability`) as the engine. The IB portals use the same stack.
+ * Authorization vocabulary, with CASL (`@casl/ability`) as the engine.
  *
  * A permission is an (action, subject) pair, not a free string like 'item:create'.
  * Both are closed unions, so `can('aprove', 'Member')` or `*appCan="'read'; on: 'Membr'"` is a COMPILE error.
- * IB learned this the hard way: a free-string subject that matched nothing silently removed a Save button
+ * A free-string subject that matched nothing silently removed a Save button
  * for every user, four times, before the subject was typed.
  *
  * Rules:
  * - One subject per screen/entity, never per menu group. Keying on a group let a user who was granted one
- *   screen reach its siblings by URL (IB).
+ *   screen reach its siblings by URL.
  * - A button is gated by the action IT performs, not by the workflow it belongs to.
  * - The UI check is a convenience. The backend must still authorise every call.
  */
@@ -24,6 +24,7 @@ export type Action = 'manage' | 'read' | 'create' | 'update' | 'delete' | 'expor
  * - Branch console: Dashboard, Member, Subscription, Payment, Invoice, CashClosing, Attendance,
  *   AttendanceOverride (letting someone in although a rule blocks them), Class, Booking, Plan, Trainer, Report.
  * - HQ: HqDashboard, Branch, PlanTemplate, Staff, Settings.
+ * - Both consoles: AuditLog (read only; HQ reads across its branches, a branch manager their own branch).
  * - Member portal: Portal.
  */
 export type Subject =
@@ -45,6 +46,7 @@ export type Subject =
     | 'PlanTemplate'
     | 'Staff'
     | 'Settings'
+    | 'AuditLog'
     | 'Portal'
     | 'all';
 
@@ -53,7 +55,7 @@ export type AppAbility = MongoAbility<[Action, Subject]>;
 /**
  * One rule as the backend sends it, e.g. `{ action: 'read', subject: ['Member', 'Plan'] }`.
  * CASL rules are plain JSON, so the profile endpoint can return them as-is.
- * If your backend sends strings ('item:read') or a menu tree (IB's menuJson), map them to rules in ONE place
+ * If your backend sends strings ('item:read') or a menu tree, map them to rules in ONE place
  * (AuthService) and keep the rest of the app on `can(action, subject)`.
  */
 export type AppRule = RawRuleOf<AppAbility>;

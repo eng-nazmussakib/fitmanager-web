@@ -14,7 +14,8 @@
         // Unmatched paths run the Worker (client routes get index.csr.html with noindex).
         "not_found_handling": "none"
     },
-    // Phase 1: the API Worker, called without a public round trip.
-    // "services": [{ "binding": "API", "service": "fitmanager-api" }],
+    // The API Worker, called without a public round trip (phase 1, D-036). Deploy the API Worker first: a binding to a
+    // Worker that does not exist yet fails the web deploy. Locally: `wrangler dev -c wrangler.jsonc -c ../fitmanager-api/wrangler.jsonc`.
+    "services": [{ "binding": "API", "service": "fitmanager-api" }],
     "observability": { "enabled": true }
 }

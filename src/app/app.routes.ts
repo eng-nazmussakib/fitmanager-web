@@ -31,6 +31,13 @@ export const routes: Routes = [
     ...(environment.demo || environment.useMockApi
         ? [{ path: 'demo', title: 'Demo', loadComponent: () => import('@features/demo/demo-page.component').then(m => m.DemoPageComponent) }]
         : []),
+    // Your own password and sessions; forced while a temporary password is set (D-054).
+    {
+        path: 'account/password',
+        title: 'Password',
+        canMatch: [authGuard],
+        loadComponent: () => import('@features/account/password-page.component').then(m => m.PasswordPageComponent)
+    },
     // After sign-in: owner → /hq, staff → their branch, member → /me (homeUrl).
     { path: 'home', canMatch: [authGuard, homeRedirect], children: [] },
     {

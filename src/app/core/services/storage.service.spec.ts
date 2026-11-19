@@ -4,7 +4,7 @@ import { StorageService } from './storage.service';
 
 /**
  * Also a guard for the test environment: on Node 25+ a native `localStorage` global can shadow jsdom's and break
- * every spec that touches storage (IB pinned Node 24 because of it). These pass on Node 26 + Vitest 5.
+ * every spec that touches storage. These pass on Node 26 + Vitest 5.
  */
 describe('StorageService', () => {
     let storage: StorageService;

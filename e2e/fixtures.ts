@@ -3,7 +3,7 @@ import { expect, type Page, test as base } from '@playwright/test';
 import { TENANT } from '../src/app/config/tenant';
 
 /**
- * Rules (from the IB portals' smoke-test guide):
+ * Rules:
  * - Sign in through the real form. Never inject a token: that stays green when login is broken.
  * - Select by role + accessible name (what a screen reader sees), never by data-testid.
  *   An element you cannot find by role usually has no accessible name: fix the component, not the test.

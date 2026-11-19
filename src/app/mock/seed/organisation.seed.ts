@@ -1,6 +1,6 @@
 import { TENANT } from '@config/tenant';
 import type { DayGroup, HoursBlock } from '@config/tenant.model';
-import type { Branch, BranchRef } from '@core/models/branch.model';
+import type { Branch, BranchRef, HoursBlock as WireHours } from '@core/models/branch.model';
 import type { OrgSettings, SiteGroup } from '@core/models/settings.model';
 
 import type { Promo } from '../domain/pricing';
@@ -15,15 +15,6 @@ const WEEKDAYS: Record<DayGroup, number[]> = {
     saturday: [6],
     sunday: [0],
     daily: [0, 1, 2, 3, 4, 5, 6]
-};
-const DAY_LABELS: Record<DayGroup, string> = {
-    satThu: 'Saturday–Thursday',
-    friday: 'Friday',
-    sunThu: 'Sunday–Thursday',
-    monFri: 'Monday–Friday',
-    saturday: 'Saturday',
-    sunday: 'Sunday',
-    daily: 'Every day'
 };
 
 /**
@@ -40,9 +31,9 @@ export function openingHours(branchName: string): { days: number[]; open: string
     return (hoursBlocks(branchName)[0]?.sessions ?? []).flatMap(s => s.ranges.map(([open, close]) => ({ days: WEEKDAYS[s.days], open, close })));
 }
 
-/** One block as the `Branch` wire model shows it. */
-function wireHours(block: HoursBlock | undefined): { days: string; open: string; close: string }[] {
-    return (block?.sessions ?? []).flatMap(s => s.ranges.map(([open, close]) => ({ days: DAY_LABELS[s.days], open, close })));
+/** One block as the `Branch` wire model shows it: weekday numbers, like the API. */
+function wireHours(block: HoursBlock | undefined): WireHours[] {
+    return (block?.sessions ?? []).flatMap(s => s.ranges.map(([open, close]) => ({ days: WEEKDAYS[s.days], open, close })));
 }
 
 function branchHours(branchName: string): Pick<Branch, 'hours' | 'ladies_hours'> {
@@ -133,12 +124,12 @@ export function toRef(b: Branch): BranchRef {
 }
 
 /** Promo codes valid around the seed day (the landing page's "no admission fee this month" offer among them). */
-export function seedPromos(today: string): Promo[] {
+export function seedPromos(today: string): (Promo & { active: boolean })[] {
     const monthStart = `${today.slice(0, 8)}01`;
     return [
-        { code: 'NOADMISSION', label: 'No admission fee this month', waive_admission: true, from: monthStart, to: addDaysIso(monthStart, 40) },
-        { code: 'STUDENT10', label: '10% student discount', percent: 10, from: addDaysIso(today, -200), to: addDaysIso(today, 200) },
-        { code: 'REFER500', label: 'Referral: ৳500 off', amount: 500, from: addDaysIso(today, -200), to: addDaysIso(today, 200) }
+        { code: 'NOADMISSION', label: 'No admission fee this month', waive_admission: true, from: monthStart, to: addDaysIso(monthStart, 40), active: true },
+        { code: 'STUDENT10', label: '10% student discount', percent: 10, from: addDaysIso(today, -200), to: addDaysIso(today, 200), active: true },
+        { code: 'REFER500', label: 'Referral: ৳500 off', amount: 500, from: addDaysIso(today, -200), to: addDaysIso(today, 200), active: true }
     ];
 }
 
@@ -147,7 +138,16 @@ export function seedPromos(today: string): Promo[] {
  * HQ changes it at `/hq/settings`; sales read `db().settings`, never this constant.
  */
 export function seedSettings(): OrgSettings {
-    return { vat_rate: 0.15, vat_bin: '000123456-0101', updated_at: null, updated_by: null };
+    return {
+        vat_rate: 0.15,
+        vat_bin: '000123456-0101',
+        vat_inclusive: false,
+        freeze_min_days: 7,
+        freeze_max_days: 60,
+        freeze_max_count: 2,
+        updated_at: null,
+        updated_by: null
+    };
 }
 
 /** The site groups and their switches: the same rows as migration 003_site_groups.sql (D-040). */

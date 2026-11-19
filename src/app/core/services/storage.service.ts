@@ -6,7 +6,7 @@ import { inject, Injectable, PLATFORM_ID } from '@angular/core';
  * On the server (prerendering, SSR) there is no storage: reads return `null` and writes do nothing, so a page
  * renders as a first-time guest.
  *
- * Why the values are NOT crypto-js "encrypted" (OMS/SPN/CU-Pay did that):
+ * Why the values are NOT crypto-js "encrypted":
  * the AES key ships inside the JS bundle, so anyone can decrypt the values.
  * It only obfuscates them. If tokens must be protected from XSS, the backend has to put them
  * in an httpOnly, Secure, SameSite cookie. Everything in JS-readable storage is readable by an attacker's script.

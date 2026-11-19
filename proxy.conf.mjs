@@ -1,6 +1,6 @@
 /**
  * DEV ONLY (`npm run start:proxy`). Forwards same-origin /api calls to a real backend, so the browser never
- * makes a cross-origin request and the backend needs no CORS allow-list entry for localhost (IB's dev proxy).
+ * makes a cross-origin request and the backend needs no CORS allow-list entry for localhost.
  *
  *   API_TARGET=https://dev.example.com npm run start:proxy
  *

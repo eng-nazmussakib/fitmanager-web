@@ -7,8 +7,5 @@ export const environment: Environment = {
     // The client's public domain (Q-006): canonical URLs, Open Graph, the sitemap. Set it before go-live.
     siteUrl: 'https://www.example.com',
     demo: false,
-    useMockApi: false,
-    sentryDsn: '',
-    recaptchaSiteKey: '',
-    auth: { type: 'password' }
+    useMockApi: false
 };

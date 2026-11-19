@@ -1,6 +1,7 @@
 import type { MockDb } from '../types';
 import { seedAttendance } from './attendance.seed';
 import { seedClasses } from './classes.seed';
+import { seedEveryCase } from './every-case.seed';
 import { SCRIPTED, seedMeasurements, seedMembers } from './members.seed';
 import { seedBranches, seedPromos, seedSettings, seedSiteGroups } from './organisation.seed';
 import { seedPlans } from './plans.seed';
@@ -24,6 +25,7 @@ export function seed(today: string, nowMinutes: number): MockDb {
         promos: seedPromos(today),
         settings: seedSettings(),
         siteGroups: seedSiteGroups(),
+        audit: [],
         members: [],
         subscriptions: [],
         invoices: [],
@@ -42,6 +44,7 @@ export function seed(today: string, nowMinutes: number): MockDb {
     db.accounts = seedAccounts(branches, 'mem-gul-1', SCRIPTED[0].code);
     seedMeasurements(db, today);
     seedAttendance(db, today, nowMinutes);
+    seedEveryCase(db, today);
     seedClasses(db, today);
     seedRoutines(db);
     return db;

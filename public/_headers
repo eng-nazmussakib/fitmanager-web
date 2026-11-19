@@ -1,4 +1,4 @@
-# Cloudflare Workers Static Assets headers (target A, D-026). Applied to files served from dist/browser.
+# Cloudflare Workers Static Assets headers (D-026). Applied to files served from dist/browser.
 # Private, client-rendered routes are answered by cloudflare/worker.mjs, which adds X-Robots-Tag itself.
 
 /*
@@ -7,7 +7,7 @@
   Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 
 # Hashed bundles never change: cache for a year.
 /*.js

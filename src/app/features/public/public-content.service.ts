@@ -5,7 +5,6 @@ import { catchError, defer, map, Observable, of, shareReplay, timeout } from 'rx
 
 import { TENANT } from '@config/tenant';
 import { NOTIFY, SKIP_AUTH } from '@core/http/http-context.tokens';
-import { API_INTERNAL_URL } from '@core/http/interceptors/server-api.interceptor';
 import type { ApiResponse } from '@core/models/api-response.model';
 import type { Branch, BranchRef } from '@core/models/branch.model';
 import type { ClassSession, Trainer } from '@core/models/class.model';
@@ -19,14 +18,16 @@ export type PublicBranch = Branch & { trainers: Trainer[] };
 export interface BranchPlans {
     branch: BranchRef;
     plans: Plan[];
-    /** The VAT rate in force (HQ setting). Absent in the config fallback, where the rate is not known. */
+    /** The VAT rate and mode in force (HQ settings). Absent in the config fallback, where they are not known. */
     vat_rate?: number;
+    vat_inclusive?: boolean;
 }
 
 /** The line under public prices: depends on the HQ VAT setting, which a prerendered page may not know. */
-export function vatNote(rate: number | undefined): string {
+export function vatNote(rate: number | undefined, inclusive = false): string {
     if (rate === undefined) return 'Prices exclude VAT.';
-    return rate > 0 ? `Prices exclude VAT (${vatPercent(rate)} %).` : 'Prices include everything: no VAT is added.';
+    if (rate === 0) return 'Prices include everything: no VAT is added.';
+    return inclusive ? `Prices include VAT (${vatPercent(rate)} %).` : `Prices exclude VAT (${vatPercent(rate)} %).`;
 }
 
 const quiet = (): HttpContext => new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'none');
@@ -43,10 +44,10 @@ export class PublicContentService {
     private readonly _http = inject(HttpClient);
     private readonly _base = `${environment.apiBaseUrl}/v1/public`;
     /**
-     * Is there an API to ask? In the browser, yes. On the server only with the mock or an internal API address:
-     * a Cloudflare prerender has no API (a relative `/api` call would reach the prerender server itself).
+     * Is there an API to ask? In the browser, yes. While prerendering only with the mock: the build has no API (a
+     * relative `/api` call would reach the prerender server itself).
      */
-    private readonly _api = isPlatformBrowser(inject(PLATFORM_ID)) || environment.useMockApi || !!inject(API_INTERNAL_URL);
+    private readonly _api = isPlatformBrowser(inject(PLATFORM_ID)) || environment.useMockApi;
 
     /**
      * The site groups' section and page switches HQ sets (D-040), or null when there is no API to ask or it does not
@@ -150,7 +151,10 @@ function configPlans(branchSlug: string): BranchPlans[] {
                         persons: 1,
                         features: tier.features ?? [],
                         featured: !!tier.featured,
-                        active: true
+                        freezable: true,
+                        active: true,
+                        template_active: true,
+                        sellable: true
                     }))
             )
         }));

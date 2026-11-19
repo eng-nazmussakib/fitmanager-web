@@ -84,6 +84,20 @@ export const CONSOLE_ROUTES: Routes = [
         loadComponent: () => import('@features/shared/placeholder-page.component').then(m => m.PlaceholderPageComponent)
     },
     {
+        path: 'staff',
+        title: 'Staff',
+        data: { breadcrumb: 'Staff', level: 'branch' },
+        canMatch: [canMatchAbility('read', 'Staff')],
+        loadComponent: () => import('@features/staff/staff-page.component').then(m => m.StaffPageComponent)
+    },
+    {
+        path: 'audit',
+        title: 'Audit log',
+        data: { breadcrumb: 'Audit log', level: 'branch' },
+        canMatch: [canMatchAbility('read', 'AuditLog')],
+        loadComponent: () => import('@features/staff/audit-page.component').then(m => m.AuditPageComponent)
+    },
+    {
         path: 'reports',
         title: 'Reports',
         data: { breadcrumb: 'Reports', title: 'Reports', phase: '7', icon: 'chart-column' },

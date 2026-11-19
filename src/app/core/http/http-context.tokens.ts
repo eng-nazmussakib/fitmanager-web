@@ -6,7 +6,7 @@ import { HttpContext, HttpContextToken } from '@angular/common/http';
  * - 'errors' → only errors (default for GET)
  * - 'none'   → silent: background polling, refresh token, autocomplete search
  *
- * Replaces the `isNotify: boolean` positional argument on every OMS HttpService method.
+ * Replaces an `isNotify: boolean` positional argument on every call.
  */
 export type NotifyMode = 'all' | 'errors' | 'none';
 export const NOTIFY = new HttpContextToken<NotifyMode>(() => 'errors');

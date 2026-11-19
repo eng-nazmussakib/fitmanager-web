@@ -31,7 +31,7 @@ export class ApiService {
         return this._http.get<ApiResponse<T>>(this._url(path), { params: toHttpParams(params), context: this._ctx(options, 'errors') }).pipe(unwrap());
     }
 
-    /** Offset-paginated list. Empty filter values are dropped from the query string (OMS `getList$`). */
+    /** Offset-paginated list. Empty filter values are dropped from the query string. */
     getPage<T>(path: string, query: ListQuery, options: RequestOptions = {}): Observable<PageData<T>> {
         return this.get<PageData<T>>(path, query, options);
     }
@@ -52,7 +52,7 @@ export class ApiService {
         return this._http.delete<ApiResponse<T>>(this._url(path), { params: toHttpParams(params), context: this._ctx(options, 'all') }).pipe(unwrap());
     }
 
-    /** Fetches dropdown lists by key in one round-trip (OMS `getDDLData`). */
+    /** Fetches dropdown lists by key in one round-trip. */
     ddl(keys: string[]): Observable<DdlResponse> {
         return this.get<DdlResponse>(API.DDL, { ddl_key: keys });
     }

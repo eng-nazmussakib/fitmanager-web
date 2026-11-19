@@ -8,6 +8,7 @@ import { idx, listItem, memberDetail, memberState } from '../queries';
 import { addDaysIso, dateOf, timeOf } from '../seed/clock';
 import { commit, db, newOid } from '../store';
 import type { MemberRow } from '../types';
+import { photoUrl } from './phase2.handlers';
 
 /** A member of the request's branch, or 404 (never another branch's: tenancy). */
 export function branchMember(ctx: Ctx, oid: string): MemberRow {
@@ -30,7 +31,7 @@ function list(ctx: Ctx): HttpResponse<unknown> {
         .map(m => listItem(m, today))
         .filter(
             m =>
-                (!q || m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q) || (digits.length >= 3 && m.phone.includes(digits))) &&
+                (!q || m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q) || (digits.length >= 3 && (m.phone ?? '').includes(digits))) &&
                 (!status || m.status === status) &&
                 (!plan || (m.plan_name ?? '').toLowerCase().startsWith(plan.toLowerCase())) &&
                 (flag !== 'expiring' || (m.status === 'Active' && m.days_left !== null && m.days_left >= 0 && m.days_left <= 7)) &&
@@ -79,16 +80,23 @@ function validate(body: Record<string, unknown>, partial: boolean): Partial<Memb
     if ('health_flags' in body)
         out.health_flags = Array.isArray(body['health_flags']) ? (body['health_flags'] as string[]).filter(f => typeof f === 'string') : [];
     if ('health_declared' in body) out.health_declared = body['health_declared'] === true;
-    if ('photo_url' in body) out.photo_url = str(body['photo_url']) || null;
+
     return out;
 }
 
+/** `photo_file_oid` from an upload (D-058) → the photo's link; `null` removes the photo. */
+function photoOf(ctx: Ctx): Partial<MemberRow> {
+    if (!('photo_file_oid' in ctx.body)) return {};
+    const oid = str(ctx.body['photo_file_oid']);
+    return { photo_url: oid ? photoUrl(ctx, oid) : null };
+}
+
 function create(ctx: Ctx): HttpResponse<unknown> {
-    const fields = validate(ctx.body, false);
+    const fields = { ...validate(ctx.body, false), ...photoOf(ctx) };
     if (!fields.health_declared) fail(400, 'The member must sign the health declaration.');
     const d = db();
-    if (d.members.some(m => m.branch_oid === ctx.branch!.oid && m.phone === fields.phone))
-        fail(409, 'A member with this mobile number already exists at this branch.');
+    // One mobile number, one member, across every branch (D-068 a).
+    if (d.members.some(m => m.phone === fields.phone)) fail(409, 'This mobile number already belongs to a member (at this or another branch).');
     const code = ctx.branch!.code;
     const seq = (d.counters[`member:${code}`] ?? 0) + 1;
     const row: MemberRow = {
@@ -120,7 +128,8 @@ function create(ctx: Ctx): HttpResponse<unknown> {
 
 function update(ctx: Ctx): HttpResponse<unknown> {
     const m = branchMember(ctx, ctx.params[0]);
-    const patch = validate(ctx.body, true);
+    if (m.anonymised) fail(409, 'This member was anonymised: the record cannot be changed');
+    const patch = { ...validate(ctx.body, true), ...photoOf(ctx) };
     commit({ t: 'member.update', oid: m.oid, patch });
     return ok(memberDetail(m, ctx.now.date), 'Member updated');
 }

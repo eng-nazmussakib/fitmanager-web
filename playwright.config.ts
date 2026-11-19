@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * End-to-end ("smoke") tests with Playwright, the IB portals' third test leg: does it work for a real user?
+ * End-to-end ("smoke") tests with Playwright: does it work for a real user?
  *
  * A dev server starts automatically on the mock API, so no backend is needed.
  *

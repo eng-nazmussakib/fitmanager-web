@@ -4,7 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 
 import { AuthService } from '@core/auth/auth.service';
 import { ApiService } from '@core/http/api.service';
-import { MAX_VAT_RATE, type OrgSettings, type OrgSettingsUpdate, vatPercent } from '@core/models/settings.model';
+import { MAX_FREEZE_DAYS, MAX_VAT_RATE, type OrgSettings, type OrgSettingsUpdate, vatPercent } from '@core/models/settings.model';
 import { revealErrors } from '@core/utils/form.utils';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
@@ -13,6 +13,7 @@ import { ButtonComponent } from '@shared/ui/button/button.component';
 import { AlertComponent, CardComponent, CardFooterDirective, SkeletonComponent } from '@shared/ui/display/display';
 import { FieldComponent, InputDirective } from '@shared/ui/forms/field.component';
 import { NumberInputComponent } from '@shared/ui/forms/number-input.component';
+import { SwitchComponent } from '@shared/ui/forms/switch.component';
 
 import { SiteGroupsCardComponent } from './site-groups-card.component';
 
@@ -20,7 +21,8 @@ import { SiteGroupsCardComponent } from './site-groups-card.component';
 const SAMPLE = 3000;
 
 /**
- * `/hq/settings`: organisation-wide settings owned by HQ: VAT (D-037) and what the public site shows (D-040). The rate applies to every quote and
+ * `/hq/settings`: organisation-wide settings owned by HQ: VAT and its mode (D-037, D-057), the freeze rule (D-063, D-067 e)
+ * and what the public site shows (D-040). The rate applies to every quote and
  * sale from the moment it is saved; invoices already issued keep the rate they carry.
  */
 @Component({
@@ -38,6 +40,7 @@ const SAMPLE = 3000;
         FieldComponent,
         InputDirective,
         NumberInputComponent,
+        SwitchComponent,
         SiteGroupsCardComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,8 +57,13 @@ const SAMPLE = 3000;
                             <input autocomplete="off" fmInput formControlName="vat_bin" inputmode="numeric" placeholder="000000000-0000" />
                         </fm-field>
                     </div>
+                    <fm-field class="mt-4 block" hint="Off: VAT is added on top of the price. On: the price already includes it.">
+                        <fm-switch formControlName="vat_inclusive">Prices include VAT</fm-switch>
+                    </fm-field>
                     <p class="mt-4 text-sm text-fg-muted" aria-live="polite">
-                        @if (previewVat() > 0) {
+                        @if (previewVat() > 0 && inclusive()) {
+                            A {{ sample | taka: 0 }} plan costs {{ sample | taka: 0 }}, of which {{ previewVat() | taka: 0 }} is VAT.
+                        } @else if (previewVat() > 0) {
                             A {{ sample | taka: 0 }} plan comes to {{ sample + previewVat() | taka: 0 }} ({{ previewVat() | taka: 0 }} VAT).
                         } @else {
                             No VAT is charged: a {{ sample | taka: 0 }} plan costs {{ sample | taka: 0 }}.
@@ -64,6 +72,23 @@ const SAMPLE = 3000;
                     <fm-alert class="mt-4 block" tone="info">
                         A new rate applies to quotes and sales from the moment you save. Invoices already issued keep the rate printed on them.
                     </fm-alert>
+                </fm-card>
+                <fm-card subtitle="Which plans may freeze is set on each plan template." title="Freezes">
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <fm-field label="Shortest (days)" required>
+                            <fm-number-input formControlName="freeze_min_days" [max]="maxFreeze" [min]="1" />
+                        </fm-field>
+                        <fm-field label="Longest (days)" required>
+                            <fm-number-input formControlName="freeze_max_days" [max]="maxFreeze" [min]="1" />
+                        </fm-field>
+                        <fm-field hint="0 turns freezes off." label="Freezes per plan" required>
+                            <fm-number-input formControlName="freeze_max_count" [max]="12" [min]="0" />
+                        </fm-field>
+                    </div>
+                    @if (rangeError()) {
+                        <p class="mt-3 text-sm text-danger" role="alert">The shortest freeze must not be longer than the longest.</p>
+                    }
+                    <p class="mt-3 text-sm text-fg-muted">The frozen days are added to the end of the plan.</p>
                     @if (s.updated_at) {
                         <p class="mt-3 text-xs text-fg-subtle">Last changed by {{ s.updated_by }} on {{ s.updated_at | appDate: 'dd MMM yyyy, h:mm a' }}.</p>
                     }
@@ -93,11 +118,23 @@ export class HqSettingsPageComponent {
 
     protected readonly form = this._fb.group({
         vat_percent: [0, [Validators.required, Validators.min(0), Validators.max(this.maxPercent)]],
-        vat_bin: ['', Validators.pattern(/^[0-9-]{9,20}$/)]
+        vat_bin: ['', Validators.pattern(/^[0-9-]{9,20}$/)],
+        vat_inclusive: [false],
+        freeze_min_days: [7, [Validators.required, Validators.min(1), Validators.max(MAX_FREEZE_DAYS)]],
+        freeze_max_days: [60, [Validators.required, Validators.min(1), Validators.max(MAX_FREEZE_DAYS)]],
+        freeze_max_count: [2, [Validators.required, Validators.min(0), Validators.max(12)]]
     });
+    protected readonly maxFreeze = MAX_FREEZE_DAYS;
+    private readonly _value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+    protected readonly inclusive = computed(() => !!this._value().vat_inclusive);
+    protected readonly rangeError = computed(() => Number(this._value().freeze_min_days) > Number(this._value().freeze_max_days));
 
     private readonly _percent = toSignal(this.form.controls.vat_percent.valueChanges, { initialValue: 0 });
-    protected readonly previewVat = computed(() => Math.round((SAMPLE * (Number(this._percent()) || 0)) / 100));
+    /** The same rounding as pricing: inclusive takes the VAT out of the price, exclusive adds it. */
+    protected readonly previewVat = computed(() => {
+        const rate = (Number(this._percent()) || 0) / 100;
+        return Math.round(this.inclusive() ? (SAMPLE * rate) / (1 + rate) : SAMPLE * rate);
+    });
 
     constructor() {
         if (!this.canEdit) this.form.disable();
@@ -108,16 +145,30 @@ export class HqSettingsPageComponent {
     }
 
     protected reset(s: OrgSettings): void {
-        this.form.reset({ vat_percent: Number(vatPercent(s.vat_rate)), vat_bin: s.vat_bin ?? '' });
+        this.form.reset({
+            vat_percent: Number(vatPercent(s.vat_rate)),
+            vat_bin: s.vat_bin ?? '',
+            vat_inclusive: s.vat_inclusive,
+            freeze_min_days: s.freeze_min_days,
+            freeze_max_days: s.freeze_max_days,
+            freeze_max_count: s.freeze_max_count
+        });
     }
 
     protected save(): void {
-        if (this.form.invalid) {
+        if (this.form.invalid || this.rangeError()) {
             revealErrors(this.form);
             return;
         }
         const v = this.form.getRawValue();
-        const body: OrgSettingsUpdate = { vat_rate: Math.round(Number(v.vat_percent) * 100) / 10000, vat_bin: v.vat_bin.trim() || null };
+        const body: OrgSettingsUpdate = {
+            vat_rate: Math.round(Number(v.vat_percent) * 100) / 10000,
+            vat_bin: v.vat_bin.trim() || null,
+            vat_inclusive: v.vat_inclusive,
+            freeze_min_days: Number(v.freeze_min_days),
+            freeze_max_days: Number(v.freeze_max_days),
+            freeze_max_count: Number(v.freeze_max_count)
+        };
         this.saving.set(true);
         this._api.patch<OrgSettings>('/v1/hq/settings', body).subscribe({
             next: s => {

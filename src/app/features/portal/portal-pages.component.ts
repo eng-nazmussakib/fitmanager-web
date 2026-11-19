@@ -3,7 +3,9 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { format, parseISO } from 'date-fns';
 import type { ApexAxisChartSeries } from 'ng-apexcharts';
+import { of } from 'rxjs';
 
+import { LATER_FEATURES } from '@core/constants/later-features';
 import type { Invoice } from '@core/models/payment.model';
 import { InvoiceViewComponent } from '@features/shared/invoice-view.component';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
@@ -87,8 +89,10 @@ import { PortalService } from './portal.service';
                     @if (s.next_booking; as b) {
                         <p class="mt-1 font-semibold">{{ b.session.title }}</p>
                         <p class="text-sm text-fg-muted">{{ b.session.starts_at | appDate: 'EEE d MMM, h:mm a' }}</p>
-                    } @else {
+                    } @else if (later) {
                         <a class="mt-1 inline-block text-sm text-accent" routerLink="bookings">Book a class</a>
+                    } @else {
+                        <p class="mt-1 text-sm text-fg-subtle">Ask the front desk about classes.</p>
                     }
                 </fm-card>
             </div>
@@ -112,7 +116,8 @@ export class PortalHomeComponent {
     private readonly _service = inject(PortalService);
 
     protected readonly summary = rxResource({ stream: () => this._service.summary() });
-    protected readonly routine = rxResource({ stream: () => this._service.routine() });
+    protected readonly later = LATER_FEATURES;
+    protected readonly routine = rxResource({ stream: () => (LATER_FEATURES ? this._service.routine() : of(null)) });
 
     protected clamp(left: number, total: number): number {
         return Math.max(0, Math.min(left, total));

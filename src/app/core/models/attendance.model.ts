@@ -1,6 +1,7 @@
 import type { MemberStatus } from './member.model';
 
-export type AccessRuleId = 'membership' | 'expired' | 'frozen' | 'suspended' | 'dues' | 'hours' | 'branch' | 'already_in' | 'pending';
+/** No 'branch' rule: a member trains at every branch (D-059). */
+export type AccessRuleId = 'membership' | 'expired' | 'frozen' | 'suspended' | 'dues' | 'hours' | 'already_in' | 'pending';
 
 /** One failed rule, with the reason shown to the front desk. */
 export interface RuleFailure {
@@ -24,6 +25,9 @@ export interface AccessDecision {
         valid_until: string | null;
         days_left: number | null;
         dues: number;
+        /** Another branch's member (D-059): the plan and dues stay with their home branch. */
+        visitor?: boolean;
+        home_branch_name?: string;
     };
     /** Every failure can be overridden (and the user may: `create AttendanceOverride`). */
     can_override: boolean;
@@ -39,11 +43,19 @@ export interface CheckIn {
     checked_out_at: string | null;
     override: { reason: string; by: string } | null;
     by: string;
+    /** A visitor from another branch (D-066), and their home branch. */
+    visitor?: boolean;
+    home_branch_name?: string;
+    /** Closed automatically at closing time (D-070 a, D-075). */
+    auto_out?: boolean;
+    backdated?: boolean;
 }
 
 /** `POST /v1/attendance/check-in`. */
 export interface CheckInRequest {
-    member_oid: string;
+    member_oid?: string;
+    /** The scanned code: any branch's member (D-059). */
+    code?: string;
     override?: { reason: string } | null;
 }
 

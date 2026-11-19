@@ -24,10 +24,10 @@ export const HQ_ROUTES: Routes = [
     },
     {
         path: 'plans',
-        title: 'Plan templates',
-        data: { breadcrumb: 'Plan templates' },
+        title: 'Plans and prices',
+        data: { breadcrumb: 'Plans' },
         canMatch: [canMatchAbility('read', 'PlanTemplate')],
-        loadComponent: () => import('./hq-pages.component').then(m => m.HqTemplatesPageComponent)
+        loadComponent: () => import('./hq-plans-page.component').then(m => m.HqPlansPageComponent)
     },
     {
         path: 'reports',
@@ -39,9 +39,16 @@ export const HQ_ROUTES: Routes = [
     {
         path: 'staff',
         title: 'Staff and roles',
-        data: { breadcrumb: 'Staff', title: 'Staff and roles', phase: '1', icon: 'shield-check' },
+        data: { breadcrumb: 'Staff', level: 'hq' },
         canMatch: [canMatchAbility('read', 'Staff')],
-        loadComponent: placeholder
+        loadComponent: () => import('@features/staff/staff-page.component').then(m => m.StaffPageComponent)
+    },
+    {
+        path: 'audit',
+        title: 'Audit log',
+        data: { breadcrumb: 'Audit log', level: 'hq' },
+        canMatch: [canMatchAbility('read', 'AuditLog')],
+        loadComponent: () => import('@features/staff/audit-page.component').then(m => m.AuditPageComponent)
     },
     {
         path: 'settings',

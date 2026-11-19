@@ -23,7 +23,9 @@ export interface StaffAssignment {
  */
 export interface CurrentUser {
     user_id: string;
+    username?: string;
     name: string;
+    email?: string | null;
     kind: 'staff' | 'member';
     /** Shown in the user menu: the role at the active branch, else the first. */
     photo_url?: string | null;
@@ -32,6 +34,8 @@ export interface CurrentUser {
     assignments: StaffAssignment[];
     /** HQ staff (owner): every branch is reachable, with the role of the HQ assignment. */
     all_branches: boolean;
+    /** A temporary password is set (D-054): every screen except the password page is closed until it is changed. */
+    must_change_password?: boolean;
     /** Members only. */
     member?: { oid: string; code: string; branch: BranchRef } | null;
 }

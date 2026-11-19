@@ -1,5 +1,5 @@
 /**
- * Every backend path lives here (OMS `api-endpoint.ts` / per-module `*-endpoint.ts`).
+ * Every backend path lives here.
  * Large apps: one `<feature>.endpoints.ts` per feature folder, same shape.
  */
 export const API = {
@@ -7,7 +7,18 @@ export const API = {
         LOGIN: '/v1/auth/login',
         REFRESH: '/v1/auth/refresh',
         LOGOUT: '/v1/auth/logout',
-        ME: '/v1/auth/me'
+        ME: '/v1/auth/me',
+        CHANGE_PASSWORD: '/v1/auth/change-password',
+        SESSIONS: '/v1/auth/sessions'
+    },
+    /** Staff management (D-055): the HQ console sees every account, a branch the people assigned there. */
+    STAFF: {
+        HQ: '/v1/hq/staff',
+        BRANCH: '/v1/branch/staff'
+    },
+    AUDIT: {
+        HQ: '/v1/hq/audit',
+        BRANCH: '/v1/branch/audit'
     },
     /** Public: a visitor asks to join a branch (sign-up page). */
     JOIN_REQUESTS: '/v1/public/join-requests',

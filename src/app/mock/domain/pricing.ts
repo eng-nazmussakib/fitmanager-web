@@ -1,6 +1,11 @@
 /**
- * Membership pricing: plan price, admission fee, discount or promo code, VAT. PURE TypeScript, ported to the
- * API in phase 2. All amounts are whole taka; rounding happens once per line, here, never in the UI.
+ * Membership pricing: plan price, admission fee, discount or promo code, VAT, with the VAT-inclusive mode
+ * (D-057). A pure function, the same code as the API's (fitmanager-api src/features/pricing/pricing.ts): keep
+ * them in step. Every amount is whole taka; rounding happens once per line, here, never in the UI.
+ *
+ * - Exclusive (`vat_inclusive: false`): VAT = round(taxable × rate), added on top: total = taxable + VAT.
+ * - Inclusive (`vat_inclusive: true`): the prices already contain VAT: total = taxable, and the VAT inside it is
+ *   round(taxable × rate ÷ (1 + rate)), shown as "of which VAT".
  */
 import type { DiscountKind, Quote } from '@core/models/subscription.model';
 
@@ -24,9 +29,11 @@ export interface PriceInput {
     charge_admission: boolean;
     discount: { kind: DiscountKind; value: number; code?: string };
     start_date: string;
+    /** Today in Dhaka, `yyyy-MM-dd` (promo validity). */
     today: string;
     vat_rate: number;
-    promos: Promo[];
+    vat_inclusive: boolean;
+    promos: readonly Promo[];
 }
 
 /**
@@ -61,13 +68,13 @@ export function quote(input: PriceInput): Quote {
 
     let discount = 0;
     let label: string | null = null;
-    const v = Math.max(0, input.discount.value || 0);
-    if (input.discount.kind === 'amount' && v) {
-        discount = Math.round(v);
+    const value = Math.max(0, input.discount.value || 0);
+    if (input.discount.kind === 'amount' && value) {
+        discount = Math.round(value);
         label = 'Discount';
-    } else if (input.discount.kind === 'percent' && v) {
-        discount = Math.round((input.price * Math.min(v, 100)) / 100);
-        label = `Discount (${Math.min(v, 100)}%)`;
+    } else if (input.discount.kind === 'percent' && value) {
+        discount = Math.round((input.price * Math.min(value, 100)) / 100);
+        label = `Discount (${Math.min(value, 100)}%)`;
     } else if (promo) {
         discount = Math.round(promo.amount ?? (input.price * (promo.percent ?? 0)) / 100);
         label = `Promo ${promo.code}: ${promo.label}`;
@@ -75,7 +82,7 @@ export function quote(input: PriceInput): Quote {
     discount = Math.min(discount, subtotal);
 
     const taxable = subtotal - discount;
-    const vat = Math.round(taxable * input.vat_rate);
+    const vat = input.vat_inclusive ? Math.round((taxable * input.vat_rate) / (1 + input.vat_rate)) : Math.round(taxable * input.vat_rate);
     return {
         plan_name: input.plan_name,
         start_date: input.start_date,
@@ -84,9 +91,29 @@ export function quote(input: PriceInput): Quote {
         subtotal,
         discount,
         discount_label: label,
+        discount_percent: input.price > 0 ? Math.round((discount / input.price) * 10000) / 100 : 0,
         vat_rate: input.vat_rate,
+        vat_inclusive: input.vat_inclusive,
         vat,
-        total: taxable + vat,
+        total: input.vat_inclusive ? taxable : taxable + vat,
+        promo_code: promo ? promo.code : null,
         promo_error: promoError
     };
+}
+
+/**
+ * What an invoice still owes, and its status (D-067 a). A refund never creates dues: after a full refund (nothing
+ * kept) the invoice owes nothing, because the plan was taken back; after a partial refund the plan carries on and
+ * the member owes only what was never paid (`total − payments received`, the refund not counted).
+ * `paidIn` is the sum of the payments, `refunded` the sum of the refunds.
+ */
+export function invoiceDue(total: number, paidIn: number, refunded: number): number {
+    if (refunded > 0 && paidIn - refunded <= 0) return 0;
+    return Math.max(0, total - paidIn);
+}
+
+export function invoiceStatus(total: number, paidIn: number, refunded: number): 'Paid' | 'Partial' | 'Due' | 'Refunded' {
+    if (refunded > 0 && paidIn - refunded <= 0) return 'Refunded';
+    if (invoiceDue(total, paidIn, refunded) === 0) return 'Paid';
+    return paidIn > 0 ? 'Partial' : 'Due';
 }

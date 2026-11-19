@@ -17,7 +17,6 @@ import { AvatarComponent } from '@shared/ui/display/display';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 import { MenuComponent, MenuItemDirective, MenuTriggerDirective } from '@shared/ui/menu/menu';
 import { BreadcrumbComponent } from '@shared/ui/navigation/breadcrumb.component';
-import { ThemeToggleComponent } from '@shared/ui/navigation/theme-toggle.component';
 import { TooltipDirective } from '@shared/ui/tooltip/tooltip.directive';
 
 import { BranchSwitcherComponent } from './branch-switcher.component';
@@ -30,7 +29,7 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
  * Frame of the branch console (`/console/:branch`) and the HQ console (`/hq`), chosen by `data.area`.
  * - Sidebar: "FitManager" at the top (the software, not the gym, D-019), the menu filtered by the role at the
  *   active branch; collapsible to icons on desktop, a drawer on phones and tablets.
- * - Top bar: menu button, branch switcher, breadcrumb, theme toggle, user menu.
+ * - Top bar: menu button, branch switcher, breadcrumb, user menu.
  * Client-rendered only (never indexed). Uses semantic tokens, so it works in light and dark mode.
  */
 @Component({
@@ -48,7 +47,6 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
         MenuItemDirective,
         MenuTriggerDirective,
         BreadcrumbComponent,
-        ThemeToggleComponent,
         TooltipDirective,
         BranchSwitcherComponent
     ],
@@ -144,7 +142,6 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
                     <app-branch-switcher />
                     <fm-breadcrumb class="ml-2 hidden min-w-0 truncate xl:block" />
                     <span class="flex-1"></span>
-                    <fm-theme-toggle />
                     <button
                         class="gap-2 px-1.5 sm:px-2"
                         fmButton
@@ -160,9 +157,9 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
                     </button>
                     <fm-menu #userMenu label="Account">
                         <p class="fm-menu-label" aria-hidden="true">{{ user()?.name }}</p>
-                        <a fmMenuItem routerLink="/">
-                            <fm-icon name="house" size="1rem" />
-                            Public site
+                        <a fmMenuItem routerLink="/account/password">
+                            <fm-icon name="lock" size="1rem" />
+                            Password and sessions
                         </a>
                         <div class="fm-menu-sep" role="separator"></div>
                         <button danger fmMenuItem (click)="signOut()">

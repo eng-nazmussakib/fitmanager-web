@@ -9,12 +9,15 @@ export interface MockAccount {
     username: string;
     password: string;
     user: CurrentUser;
+    /** Staff management (phase 1): a deactivated account cannot sign in. */
+    status?: 'Active' | 'Inactive';
+    created_at?: string;
     /** For trainers: their trainer row ("My classes"). */
     trainer_oid?: string;
 }
 
 /**
- * CASL rules per role, the same JSON the API sends (fitmanager-infra/db/migrations/002_branches_and_staff.sql:
+ * CASL rules per role, the same JSON the API sends (fitmanager-infra/db/migrations/002_branches_and_staff.sql, 004, 006:
  * change both together). One subject per screen or entity;
  * a button is gated by the action IT performs.
  */
@@ -23,11 +26,15 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
     HQ_ADMIN: [
         // Only HQ changes the plans a branch sells (D-044): HQ_ADMIN manages Plan; branch roles only read it.
         { action: 'manage', subject: ['HqDashboard', 'Branch', 'PlanTemplate', 'Plan', 'Staff', 'Settings', 'Report'] },
-        { action: 'read', subject: ['Dashboard', 'Member', 'Subscription', 'Payment', 'Invoice', 'CashClosing', 'Attendance', 'Class', 'Trainer'] }
+        { action: 'read', subject: ['Dashboard', 'Member', 'Subscription', 'Payment', 'Invoice', 'CashClosing', 'Attendance', 'Class', 'Trainer', 'AuditLog'] }
     ],
     BRANCH_MANAGER: [
-        { action: 'manage', subject: ['Member', 'Subscription', 'Payment', 'Invoice', 'CashClosing', 'Attendance', 'AttendanceOverride', 'Class', 'Booking'] },
-        { action: 'read', subject: ['Dashboard', 'Plan', 'Trainer', 'Report'] }
+        // Staff: front desk and trainers at their own branch only (D-055; the API enforces the narrowing).
+        {
+            action: 'manage',
+            subject: ['Member', 'Subscription', 'Payment', 'Invoice', 'CashClosing', 'Attendance', 'AttendanceOverride', 'Class', 'Booking', 'Staff']
+        },
+        { action: 'read', subject: ['Dashboard', 'Plan', 'Trainer', 'Report', 'AuditLog'] }
     ],
     FRONT_DESK: [
         { action: ['read', 'create', 'update'], subject: ['Member', 'Attendance'] },
@@ -82,7 +89,10 @@ export function seedAccounts(branches: Branch[], demoMemberOid: string, demoMemb
         trainer_oid: trainerOid,
         user: {
             user_id: `u-${username}`,
+            username,
             name,
+            email: null,
+            must_change_password: false,
             kind: 'staff',
             photo_url: null,
             rules: [],

@@ -20,7 +20,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
         @if (branches(); as list) {
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 @for (b of list; track b.oid) {
-                    <fm-card [subtitle]="b.address" [title]="b.name">
+                    <fm-card [subtitle]="b.address ?? undefined" [title]="b.name">
                         <fm-badge fmCardActions>{{ b.code }}</fm-badge>
                         <dl class="grid grid-cols-2 gap-3 text-sm">
                             <div>
@@ -61,50 +61,4 @@ export class HqBranchesPageComponent {
     private readonly _data = rxResource({ stream: () => this._service.branches() });
 
     protected readonly branches = computed(() => this._data.value()?.filter(b => b.kind === 'BRANCH') ?? null);
-}
-
-/** `/hq/plans`: the HQ plan templates every branch sells at its own price (HQ master data, D-023). */
-@Component({
-    selector: 'app-hq-templates-page',
-    imports: [PageHeaderComponent, TakaPipe, CardComponent, SkeletonComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    template: `
-        <app-page-header subtitle="Master data owned by HQ. Branches set their own price for each template." title="Plan templates" />
-        @if (templates.value(); as list) {
-            <fm-card flush>
-                <div class="overflow-x-auto">
-                    <table class="fm-table">
-                        <caption class="fm-sr-only">Plan templates</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Tier</th>
-                                <th scope="col">Period</th>
-                                <th class="fm-num" scope="col">Persons</th>
-                                <th class="fm-num" scope="col">Base price</th>
-                                <th class="fm-num" scope="col">Branches</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (t of list; track t.oid) {
-                                <tr>
-                                    <td class="font-medium">{{ t.tier_name }}</td>
-                                    <td>{{ t.period_label }}</td>
-                                    <td class="fm-num">{{ t.persons }}</td>
-                                    <td class="fm-num">{{ t.base_price | taka: 0 }}</td>
-                                    <td class="fm-num">{{ t.branches_using }}</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </fm-card>
-        } @else {
-            <fm-skeleton height="12rem" />
-        }
-    `
-})
-export class HqTemplatesPageComponent {
-    private readonly _service = inject(DashboardService);
-
-    protected readonly templates = rxResource({ stream: () => this._service.templates() });
 }

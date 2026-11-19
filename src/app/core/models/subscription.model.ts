@@ -1,4 +1,4 @@
-export type SubscriptionStatus = 'Active' | 'Upcoming' | 'Expired' | 'Frozen' | 'Cancelled';
+export type SubscriptionStatus = 'Active' | 'Upcoming' | 'Expired' | 'Frozen' | 'Cancelled' | 'Upgraded';
 
 export interface Freeze {
     from: string;
@@ -20,6 +20,12 @@ export interface Subscription {
     invoice_oid: string;
     freezes: Freeze[];
     created_at: string;
+    /** From the template (D-063). */
+    freezable?: boolean;
+    cancelled_at?: string | null;
+    cancel_reason?: string | null;
+    /** The plan it was upgraded to (D-067 b). */
+    upgraded_to?: string | null;
 }
 
 export type DiscountKind = 'none' | 'amount' | 'percent' | 'promo';
@@ -44,9 +50,15 @@ export interface Quote {
     subtotal: number;
     discount: number;
     discount_label: string | null;
+    /** Discount as a share of the plan price, 0–100 (above 20 % needs a manager). */
+    discount_percent: number;
     vat_rate: number;
+    /** true: the prices include VAT and `vat` is the part of the total that is VAT. */
+    vat_inclusive: boolean;
     vat: number;
     total: number;
+    /** The promo code applied, upper case. */
+    promo_code: string | null;
     /** Set when a promo code was rejected. */
     promo_error: string | null;
 }

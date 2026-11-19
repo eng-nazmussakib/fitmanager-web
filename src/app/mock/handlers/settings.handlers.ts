@@ -1,12 +1,26 @@
 import type { HttpResponse } from '@angular/common/http';
 
-import { MAX_VAT_RATE, type OrgSettingsUpdate, type SiteGroupUpdate, vatPercent } from '@core/models/settings.model';
+import { MAX_FREEZE_DAYS, MAX_VAT_RATE, type OrgRules, type OrgSettingsUpdate, type SiteGroupUpdate, vatPercent } from '@core/models/settings.model';
 
 import { type Ctx, fail, ok, type Route } from '../http';
 import { commit, db } from '../store';
 
 function read(): HttpResponse<unknown> {
     return ok(db().settings);
+}
+
+/** `GET /v1/rules`: what every staff member works by (the API's settings route, read-only). */
+function rules(): HttpResponse<unknown> {
+    const s = db().settings;
+    const body: OrgRules = {
+        vat_rate: s.vat_rate,
+        vat_bin: s.vat_bin,
+        vat_inclusive: s.vat_inclusive,
+        freeze_min_days: s.freeze_min_days,
+        freeze_max_days: s.freeze_max_days,
+        freeze_max_count: s.freeze_max_count
+    };
+    return ok(body);
 }
 
 /**
@@ -30,6 +44,22 @@ function update(ctx: Ctx): HttpResponse<unknown> {
         if (value && !/^[0-9-]{9,20}$/.test(value)) fail(400, 'A BIN is 9 to 20 digits (dashes allowed).');
         patch.vat_bin = value || null;
     }
+    if ('vat_inclusive' in ctx.body) {
+        if (typeof ctx.body['vat_inclusive'] !== 'boolean') fail(400, 'Choose whether prices include VAT.');
+        patch.vat_inclusive = ctx.body['vat_inclusive'];
+    }
+    const whole = (key: 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count', min: number, max: number, message: string): void => {
+        if (!(key in ctx.body)) return;
+        const n = ctx.body[key];
+        if (typeof n !== 'number' || !Number.isInteger(n) || n < min || n > max) fail(400, message);
+        patch[key] = n;
+    };
+    whole('freeze_min_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
+    whole('freeze_max_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
+    whole('freeze_max_count', 0, 12, 'Allow 0 to 12 freezes per plan.');
+    const min = patch.freeze_min_days ?? db().settings.freeze_min_days;
+    const max = patch.freeze_max_days ?? db().settings.freeze_max_days;
+    if (min > max) fail(400, `The shortest freeze (${min} days) is longer than the longest (${max} days)`);
     if (!Object.keys(patch).length) fail(400, 'Nothing to change.');
     commit({ t: 'settings.update', patch, at: ctx.now.iso, by: ctx.user?.name ?? 'HQ' });
     return ok(db().settings, 'Settings saved');
@@ -63,7 +93,28 @@ function updateGroup(ctx: Ctx): HttpResponse<unknown> {
     const patch: SiteGroupUpdate = {};
     if (typeof section === 'boolean') patch.section = section;
     if (typeof page === 'boolean') patch.page = page;
+    const before = { ...g };
     commit({ t: 'group.update', key: g.key, patch, at: ctx.now.iso, by: ctx.user?.name ?? 'HQ' });
+    // Audited like the API (site.routes.ts): one entry at HQ with the row before and after.
+    const hq = ctx.branch!;
+    commit({
+        t: 'audit.add',
+        row: {
+            oid: `aud-${db().audit.length + 1}-${Date.now()}`,
+            branch_oid: hq.oid,
+            branch_code: hq.code,
+            branch_name: hq.name,
+            actor_oid: ctx.user?.user_id ?? null,
+            actor_name: ctx.user?.name ?? null,
+            action: 'update',
+            entity: 'site_group',
+            entity_key: g.key,
+            before,
+            after: { ...g },
+            request_id: null,
+            created_at: ctx.now.iso
+        }
+    });
     const part = (name: string, on: boolean | null): string | null => (on === null ? null : `${name} ${on ? 'shown' : 'hidden'}`);
     return ok(g, `${g.name}: ${[part('section', g.section), part('page', g.page)].filter(Boolean).join(', ')}`);
 }
@@ -72,6 +123,7 @@ export const SETTINGS_ROUTES: Route[] = [
     { method: 'GET', path: /^\/v1\/public\/site-groups$/, scope: 'public', handler: publicGroups },
     { method: 'GET', path: /^\/v1\/hq\/site-groups$/, scope: 'hq', can: ['read', 'Settings'], handler: () => ok(db().siteGroups) },
     { method: 'PATCH', path: /^\/v1\/hq\/site-groups\/([\w-]+)$/, scope: 'hq', can: ['update', 'Settings'], handler: updateGroup },
+    { method: 'GET', path: /^\/v1\/rules$/, scope: 'user', handler: rules },
     { method: 'GET', path: /^\/v1\/hq\/settings$/, scope: 'hq', can: ['read', 'Settings'], handler: read },
     { method: 'PATCH', path: /^\/v1\/hq\/settings$/, scope: 'hq', can: ['update', 'Settings'], handler: update }
 ];

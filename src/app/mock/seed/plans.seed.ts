@@ -32,6 +32,11 @@ export function seedPlans(branches: Branch[]): { templates: PlanTemplate[]; plan
                 months: period.months,
                 base_price: base,
                 persons: PERSONS[tier.id] ?? 1,
+                features: tier.features ?? [],
+                featured: !!tier.featured,
+                freezable: true,
+                sort_order: templates.length * 10,
+                active: true,
                 branches_using: sellers.length
             });
             for (const b of sellers) {
@@ -51,7 +56,10 @@ export function seedPlans(branches: Branch[]): { templates: PlanTemplate[]; plan
                     persons: PERSONS[tier.id] ?? 1,
                     features: tier.features ?? [],
                     featured: !!tier.featured,
-                    active: true
+                    freezable: true,
+                    active: true,
+                    template_active: true,
+                    sellable: true
                 });
             }
         }

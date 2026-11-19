@@ -163,7 +163,12 @@ const AUTO_KEY = 'app.checkin-auto';
                             <fm-avatar class="self-center sm:self-start" size="7.5rem" [name]="d.member.name" [src]="d.member.photo_url" />
                             <div class="min-w-0 flex-1">
                                 <h2 class="text-xl font-semibold">{{ d.member.name }}</h2>
-                                <p class="text-sm text-fg-muted">{{ d.member.code }}</p>
+                                <p class="text-sm text-fg-muted">
+                                    {{ d.member.code }}
+                                    @if (d.member.visitor) {
+                                        <fm-badge class="ms-1" tone="info">Visitor from {{ d.member.home_branch_name }}</fm-badge>
+                                    }
+                                </p>
                                 <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
                                     <div>
                                         <dt class="text-fg-subtle">Status</dt>
@@ -211,13 +216,20 @@ const AUTO_KEY = 'app.checkin-auto';
                                             </button>
                                         }
                                     }
-                                    @if (hasRule(d, 'expired') || hasRule(d, 'membership') || hasRule(d, 'pending')) {
-                                        <a fmButton size="lg" [routerLink]="['../members', d.member.oid, 'subscribe']">Renew membership</a>
+                                    <!-- A visitor's plan and money belong to their home branch (D-059, D-066): send them there. -->
+                                    @if (!d.member.visitor) {
+                                        @if (hasRule(d, 'expired') || hasRule(d, 'membership') || hasRule(d, 'pending')) {
+                                            <a fmButton size="lg" [routerLink]="['../members', d.member.oid, 'subscribe']">Renew membership</a>
+                                        }
+                                        @if (d.member.dues > 0) {
+                                            <a fmButton size="lg" [queryParams]="{ tab: 'payments' }" [routerLink]="['../members', d.member.oid]">
+                                                Take payment
+                                            </a>
+                                        }
+                                        <a fmButton size="lg" variant="ghost" [routerLink]="['../members', d.member.oid]">Open profile</a>
+                                    } @else if (!d.allowed) {
+                                        <p class="self-center text-sm text-fg-muted">Renewals and payments are at {{ d.member.home_branch_name }}.</p>
                                     }
-                                    @if (d.member.dues > 0) {
-                                        <a fmButton size="lg" [queryParams]="{ tab: 'payments' }" [routerLink]="['../members', d.member.oid]">Take payment</a>
-                                    }
-                                    <a fmButton size="lg" variant="ghost" [routerLink]="['../members', d.member.oid]">Open profile</a>
                                 </div>
                             </div>
                         </div>
@@ -248,6 +260,9 @@ const AUTO_KEY = 'app.checkin-auto';
                                             [routerLink]="['../members', c.member_oid]"
                                         >
                                             {{ c.member_name }}
+                                            @if (c.visitor) {
+                                                <span class="text-xs text-fg-subtle">· from {{ c.home_branch_name }}</span>
+                                            }
                                         </a>
                                         <span class="block text-xs text-fg-subtle">
                                             {{ c.checked_in_at | appDate: 'h:mm a'
@@ -413,7 +428,7 @@ export class CheckInPageComponent {
         const d = this.decision();
         if (!d) return;
         this.saving.set(true);
-        this._service.checkIn({ member_oid: d.member.oid, override: override ? { reason: this.reason().trim() } : null }).subscribe({
+        this._service.checkIn({ code: d.member.code, override: override ? { reason: this.reason().trim() } : null }).subscribe({
             next: () => {
                 this.saving.set(false);
                 this.checkedIn.set(override ? 'override' : 'yes');

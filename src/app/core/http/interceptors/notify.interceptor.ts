@@ -8,7 +8,7 @@ import { NOTIFY } from '../http-context.tokens';
 
 /**
  * Shows a toast (ToastService) from the response envelope.
- * The OMS `traceRes()` operator did this, but it had to be piped onto every call by hand.
+ * No operator has to be piped onto every call by hand.
  * As an interceptor it covers every request, and each request opts out with `withNotify('none')`.
  */
 export const notifyInterceptor: HttpInterceptorFn = (req, next) => {

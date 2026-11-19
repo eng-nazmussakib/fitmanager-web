@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core/auth/auth.service';
+import { LATER_FEATURES } from '@core/constants/later-features';
 import { LogoComponent } from '@shared/components/logo/logo.component';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { AvatarComponent } from '@shared/ui/display/display';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 import type { IconName } from '@shared/ui/icon/icons';
 import { MenuComponent, MenuItemDirective, MenuTriggerDirective } from '@shared/ui/menu/menu';
-import { ThemeToggleComponent } from '@shared/ui/navigation/theme-toggle.component';
 
 interface PortalTab {
     label: string;
@@ -19,9 +19,14 @@ interface PortalTab {
 
 const TABS: PortalTab[] = [
     { label: 'Home', icon: 'house', link: '/me', exact: true },
-    { label: 'Classes', icon: 'calendar-days', link: '/me/bookings' },
-    { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
-    { label: 'Progress', icon: 'trending-up', link: '/me/progress' },
+    // Classes, routines and progress stay in the demo until the API has them (D-070 c).
+    ...(LATER_FEATURES
+        ? ([
+              { label: 'Classes', icon: 'calendar-days', link: '/me/bookings' },
+              { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
+              { label: 'Progress', icon: 'trending-up', link: '/me/progress' }
+          ] satisfies PortalTab[])
+        : []),
     { label: 'Payments', icon: 'receipt', link: '/me/payments' }
 ];
 
@@ -41,8 +46,7 @@ const TABS: PortalTab[] = [
         IconComponent,
         MenuComponent,
         MenuItemDirective,
-        MenuTriggerDirective,
-        ThemeToggleComponent
+        MenuTriggerDirective
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: { class: 'block min-h-dvh bg-bg text-fg' },
@@ -52,16 +56,11 @@ const TABS: PortalTab[] = [
             <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
                 <a class="text-fg no-underline" aria-label="My membership, home" routerLink="/me"><app-logo size="sm" /></a>
                 <span class="flex-1"></span>
-                <fm-theme-toggle />
                 <button aria-label="Account" fmButton iconOnly variant="ghost" [fmMenuTrigger]="account">
                     <fm-avatar size="2rem" [name]="user()?.name ?? '?'" [src]="user()?.photo_url" />
                 </button>
                 <fm-menu #account label="Account">
                     <p class="fm-menu-label" aria-hidden="true">{{ user()?.name }} · {{ user()?.member?.code }}</p>
-                    <a fmMenuItem routerLink="/">
-                        <fm-icon name="house" size="1rem" />
-                        Public site
-                    </a>
                     <div class="fm-menu-sep" role="separator"></div>
                     <button danger fmMenuItem (click)="auth.logout()">
                         <fm-icon name="log-out" size="1rem" />

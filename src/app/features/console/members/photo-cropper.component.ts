@@ -5,7 +5,7 @@ import { ButtonComponent } from '@shared/ui/button/button.component';
 
 /**
  * Crops a member photo to a square (ngx-image-cropper, browser-only: load it inside `@defer`). Emits a small
- * base64 JPEG for the mock; against the real API this becomes a Blob upload with progress (ApiService.upload).
+ * base64 JPEG; the form turns it into a Blob and uploads it through FilesService (D-058).
  */
 @Component({
     selector: 'app-photo-cropper',

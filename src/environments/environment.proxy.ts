@@ -11,8 +11,5 @@ export const environment: Environment = {
     apiBaseUrl: '/api',
     siteUrl: '',
     demo: false,
-    useMockApi: false,
-    sentryDsn: '',
-    recaptchaSiteKey: '',
-    auth: { type: 'password' }
+    useMockApi: false
 };

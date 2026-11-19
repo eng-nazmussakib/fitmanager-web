@@ -242,24 +242,10 @@
     color-scheme: dark;
 }
 
-/* ngx-editor ships its own CSS and is themed through CSS variables (no ::ng-deep needed). */
+/* Fallback until ThemeService applies the active theme at startup (src/app/config/tenant.ts). */
 :root {
-    /* Fallback until ThemeService applies the active theme at startup (src/app/config/tenant.ts). */
     --brand-primary: #d90a14;
     --brand-secondary: #cd4e17;
-
-    --ngx-editor-border-radius: 6px;
-    --ngx-editor-focus-ring-color: var(--color-primary-400);
-    --ngx-editor-menu-item-active-color: var(--color-primary-500);
-    --ngx-editor-menu-item-active-bg-color: var(--color-primary-50);
-}
-.dark {
-    --ngx-editor-background-color: var(--color-night-900);
-    --ngx-editor-menubar-bg-color: var(--color-night-800);
-    --ngx-editor-text-color: #e5e7eb;
-    --ngx-editor-border-color: var(--color-night-700);
-    --ngx-editor-wrapper-border-color: var(--color-night-700);
-    --ngx-editor-popup-bg-color: var(--color-night-800);
 }
 
 /* Public-site button classes (Button sheet). The consoles use the kit's `fmButton` (styles/ui.css). */
@@ -368,7 +354,7 @@ input:-webkit-autofill {
     -webkit-text-fill-color: var(--fm-fg);
 }
 
-/* Hide chrome when printing (OMS `do-not-print`). */
+/* Hide chrome when printing. */
 @media print {
     .do-not-print {
         display: none !important;

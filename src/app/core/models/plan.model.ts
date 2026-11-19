@@ -17,7 +17,13 @@ export interface Plan {
     persons: number;
     features: string[];
     featured: boolean;
+    /** From the template: whether this plan may be frozen (D-063). */
+    freezable: boolean;
+    /** The plan's own switch. */
     active: boolean;
+    /** The template's switch; the desk sells a plan only when both are on (`sellable`). */
+    template_active: boolean;
+    sellable: boolean;
 }
 
 export interface PlanTemplate {
@@ -29,5 +35,11 @@ export interface PlanTemplate {
     months: number;
     base_price: number;
     persons: number;
+    features: string[];
+    featured: boolean;
+    freezable: boolean;
+    sort_order: number;
+    active: boolean;
+    /** Branches with an active plan from this template. */
     branches_using: number;
 }

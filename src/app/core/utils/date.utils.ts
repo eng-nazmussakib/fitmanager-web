@@ -7,7 +7,6 @@ import { APP } from '@core/constants/app.constants';
  * Dates use date-fns + @date-fns/tz, which replace moment / moment-timezone.
  * moment is in maintenance mode, mutable and not tree-shakeable (~300 kB with timezones).
  * date-fns is pure functions, so only the functions you import end up in the bundle.
- * OMS had already started moving to it.
  */
 export type DateInput = Date | string | number | null | undefined;
 

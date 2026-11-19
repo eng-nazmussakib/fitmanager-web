@@ -5,11 +5,11 @@ description: Conventions and workflow for the FitManager web app (Angular 22, zo
 
 # FitManager Web
 
-Angular app for **FitManager**, a gym management system built for **one client** in Bangladesh. Each **branch is a tenant**. One app holds every area:
+Angular app for **FitManager**, a gym management system for a multi-branch gym in Bangladesh. **It is a hobby project, always run as a free demo (D-075).** Each **branch is a tenant**. One app holds every area:
 
 | Area | Path | Rendering |
 |---|---|---|
-| Public gym pages (SEO) | `/`, `/branches/:slug`, `/plans`, `/join`, … | **Prerendered** at build time on Cloudflare; per-request SSR on the VM target (D-026, D-027) |
+| Public gym pages (SEO) | `/`, `/branches/:slug`, `/plans`, `/join`, … | **Prerendered** at build time (D-026, D-075) |
 | Auth | `/auth/…` | Browser only |
 | Member portal (PWA) | `/me/…` | Browser only |
 | Branch console | `/console/:branch/…` | Browser only |
@@ -38,7 +38,7 @@ npm run e2e             # Playwright (starts its own dev server on :4300); first
 npm run lint && npm run format:check
 npm run validate        # format + lint + unit tests. No CI for now (D-046): run it before saying work is done.
 npm run build:prod && npm run check:prerender && npm run check:no-mock   # Cloudflare build checks
-npm run build:vm        # VM build; npm run serve:ssr, then curl localhost:4000/healthz
+npm run build:demo      # the offline showcase build (static, mock inside)
 ```
 
 Check UI work visually. Run the dev server, then take screenshots with Playwright (`chromium.launch()` from `playwright-core` in `node_modules`) at desktop (1440×900) and mobile (390×844) sizes. Look at the result before reporting.
@@ -98,9 +98,11 @@ Follow `features/public/landing/` as the pattern:
 - Seed data is deterministic and relative to the seed day; scripted Gulshan members `MEM-GUL-000001…7` cover every check-in outcome (docs/demo-script.md).
 - Pure domain logic (for example the access rules and pricing) goes in framework-free files with table-driven specs, because it will be ported to the API.
 
-## Hosting: Cloudflare Workers, Free plan, plus a VM target (D-024, D-026, D-027)
+## Hosting: Cloudflare Workers, Free plan, static only (D-024, D-026, D-075)
 
-The web app deploys to Cloudflare as static files (Workers Static Assets). The Free plan allows only 10 ms CPU per request, which per-request SSR would exceed, so the **public pages are prerendered at build time** (`RenderMode.Prerender`) and every other route is client-rendered. Content changes need a rebuild and deploy. Server-side code must not use Node-only APIs (`fs`, Node `http`); never rely on a paid Cloudflare product. The **VM target** (Docker, Node SSR server, nginx) is kept for future hosting: public routes use `RenderMode.Server` there, chosen by a build flag, and the Dockerfile and `nginx.conf` must keep building and passing their health check.
+The web app deploys to Cloudflare as static files (Workers Static Assets); there is no other host and no SSR server. The Free plan allows only 10 ms CPU per request, so the **public pages are prerendered at build time** (`RenderMode.Prerender`) and every other route is client-rendered (`cloudflare/worker.mjs` serves `index.csr.html`, D-036). Content changes need a rebuild and deploy; in the browser the public pages also read live data from the API. Server-side code (it runs only while prerendering) must not use Node-only APIs (`fs`, Node `http`). App code (`src/app/`) never touches Cloudflare APIs. Never rely on a paid Cloudflare product.
+
+**No outside services (D-075):** no Sentry, analytics, reCAPTCHA, SSO or third-party scripts. A feature that would need one gets a free manual stand-in, for example the member profile's "SMS / Email / Copy" buttons on each in-app message (an `sms:` or `mailto:` link that opens the staff member's own app).
 
 ## Before finishing a task
 
@@ -120,4 +122,3 @@ Log the task in `../fitmanager-infra/docs/CHANGELOG.md` before reporting it as d
 
 - `package.json` pins `overrides.vite.rolldown = 1.2.16`, because newer rolldown crashes on CPUs without AVX2. Keep it.
 - ng-icons looks icons up by camelCase name: the kit registers `fmChevronDown` for `<fm-icon name="chevron-down">` (`registryName()` in `icons.ts`).
-- The SSR engine only renders allowed hosts: set `NG_ALLOWED_HOSTS` for the VM server (localhost is the default).

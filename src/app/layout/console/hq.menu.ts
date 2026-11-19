@@ -15,7 +15,8 @@ export const HQ_MENU: MenuGroup[] = [
         items: [
             { label: 'Plan templates', icon: 'clipboard-list', route: 'plans', can: ['read', 'PlanTemplate'] },
             { label: 'Staff and roles', icon: 'shield-check', route: 'staff', can: ['read', 'Staff'] },
-            { label: 'Settings', icon: 'settings', route: 'settings', can: ['read', 'Settings'] }
+            { label: 'Settings', icon: 'settings', route: 'settings', can: ['read', 'Settings'] },
+            { label: 'Audit log', icon: 'list-checks', route: 'audit', can: ['read', 'AuditLog'] }
         ]
     }
 ];

@@ -14,8 +14,11 @@ export interface MemberListItem {
     /** Printed on the member card as a barcode: `MEM-GUL-000123`. */
     code: string;
     name: string;
-    phone: string;
-    gender: Gender;
+    /** `+8801712345678` from the API (any Bangladeshi format is accepted when sent). Null once anonymised. */
+    phone: string | null;
+    /** Null only for a web join request, until the desk fills it in. */
+    gender: Gender | null;
+    /** A signed link that works for an hour (D-058): never stored, never shared. */
     photo_url: string | null;
     status: MemberStatus;
     plan_name: string | null;
@@ -41,6 +44,37 @@ export interface Member extends MemberListItem {
     trainer_name: string | null;
     current_subscription_oid: string | null;
     notes: string | null;
+    /** The uploaded photo's file (send it back to keep or replace the photo). */
+    photo_file_oid?: string | null;
+    suspended_reason?: string | null;
+    /** "Delete my data" was done (D-068 c): the record keeps only its code. */
+    anonymised?: boolean;
+    frozen_until?: string | null;
+    /** Where the member came from: the desk, or the public site's forms (D-022). */
+    source?: 'desk' | 'web';
+}
+
+/** `GET /v1/members/:oid/documents`. */
+export interface MemberDocument {
+    oid: string;
+    name: string;
+    content_type: string;
+    size_bytes: number | null;
+    created_at: string;
+    created_by_name: string | null;
+    /** Signed, 1 hour. */
+    url: string;
+}
+
+/** `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (D-075: no email or SMS provider). */
+export interface MemberNotification {
+    oid: string;
+    kind: 'receipt' | 'expiry_7d' | 'expiry_1d' | 'welcome';
+    channel: 'email' | 'sms' | 'log';
+    subject: string;
+    body: string;
+    status: 'logged' | 'sent' | 'failed' | 'skipped';
+    created_at: string;
 }
 
 export interface MemberQuery {
@@ -65,7 +99,8 @@ export interface MemberPayload {
     emergency_contact?: { name: string; phone: string; relation: string } | null;
     health_flags: string[];
     health_declared: boolean;
-    photo_url?: string | null;
+    /** From `POST /v1/files` (kind `member_photo`) once completed. */
+    photo_file_oid?: string | null;
 }
 
 export type TimelineKind = 'joined' | 'subscription' | 'payment' | 'freeze' | 'check_in' | 'override' | 'note' | 'status';

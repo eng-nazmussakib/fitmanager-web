@@ -1,5 +1,5 @@
 /**
- * Client-side PDF of something already on screen (a receipt, a detail card): jsPDF + html2canvas, as in IB.
+ * Client-side PDF of something already on screen (a receipt, a detail card): jsPDF + html2canvas.
  *
  * Why rasterise instead of jsPDF's text API: jsPDF cannot shape Bangla (conjuncts, vowel signs break apart)
  * unless you embed and subset a Bangla font. A screenshot of the DOM renders exactly what the browser rendered.
@@ -8,7 +8,7 @@
  * - `html2canvas-pro`, not `html2canvas`: html2canvas 1.4 throws on modern CSS colours (`oklch()`,
  *   `color-mix()`), and Tailwind v4 plus this app's brand palette use them everywhere.
  * - Both libraries (~600 kB) are imported INSIDE the function, so they form a lazy chunk downloaded on the
- *   first click, never at startup. (IB lazy-imports the whole helper module for the same reason.)
+ *   first click, never at startup.
  */
 
 const A4 = { width: 210, height: 297 }; // mm

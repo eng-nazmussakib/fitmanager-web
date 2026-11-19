@@ -13,12 +13,10 @@ import { StorageService } from '@core/services/storage.service';
 import { environment } from '@env/environment';
 
 import { type Action, createAppAbility, type Subject } from './ability';
-import { OAuthService } from './oauth/oauth.service';
 
 export interface LoginPayload {
     username: string;
     password: string;
-    recaptcha_token?: string;
 }
 
 /**
@@ -30,7 +28,6 @@ export class AuthService {
     private readonly _http = inject(HttpClient);
     private readonly _router = inject(Router);
     private readonly _storage = inject(StorageService);
-    private readonly _oauth = inject(OAuthService);
     private readonly _branch = inject(BranchContextService);
 
     private readonly _tokens = signal<AuthTokens | null>(this._storage.get<AuthTokens>(STORAGE_KEYS.AUTH_TOKENS));
@@ -59,12 +56,6 @@ export class AuthService {
         );
     }
 
-    /** `environment.auth.type === 'oauth'`: tokens come from the identity provider (see OAuthCallbackComponent). */
-    completeOAuthLogin(tokens: AuthTokens): Observable<CurrentUser> {
-        this._setTokens(tokens);
-        return this.loadCurrentUser();
-    }
-
     loadCurrentUser(): Observable<CurrentUser> {
         return this._http.get<ApiResponse<CurrentUser>>(`${environment.apiBaseUrl}${API.AUTH.ME}`).pipe(
             map(res => res.data),
@@ -78,16 +69,9 @@ export class AuthService {
      */
     refreshTokens(): Observable<AuthTokens> {
         const refreshToken = this._tokens()?.refresh_token ?? '';
-        const request$ =
-            environment.auth.type === 'oauth'
-                ? this._oauth.refresh(refreshToken)
-                : this._http
-                      .post<ApiResponse<AuthTokens>>(
-                          `${environment.apiBaseUrl}${API.AUTH.REFRESH}`,
-                          { refresh_token: refreshToken },
-                          { context: publicContext('none') }
-                      )
-                      .pipe(map(res => res.data));
+        const request$ = this._http
+            .post<ApiResponse<AuthTokens>>(`${environment.apiBaseUrl}${API.AUTH.REFRESH}`, { refresh_token: refreshToken }, { context: publicContext('none') })
+            .pipe(map(res => res.data));
         // Refresh tokens are usually rotated on use: two parallel refreshes would invalidate each other and log the user out.
         this._refreshInFlight$ ??= request$.pipe(
             tap(tokens => this._setTokens(tokens)),
@@ -95,6 +79,23 @@ export class AuthService {
             shareReplay({ bufferSize: 1, refCount: false })
         );
         return this._refreshInFlight$;
+    }
+
+    /**
+     * Sets the user's own password (D-054: replaces a temporary one). The API ends every session and answers with
+     * the tokens of a new one, so the user stays signed in here and is signed out everywhere else.
+     */
+    changePassword(currentPassword: string, newPassword: string): Observable<CurrentUser> {
+        return this._http
+            .post<ApiResponse<AuthTokens>>(`${environment.apiBaseUrl}${API.AUTH.CHANGE_PASSWORD}`, {
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+            .pipe(
+                map(res => res.data),
+                tap(tokens => this._setTokens(tokens)),
+                switchMap(() => this.loadCurrentUser())
+            );
     }
 
     can(action: Action, subject: Subject): boolean {

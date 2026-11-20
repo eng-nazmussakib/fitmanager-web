@@ -104,7 +104,7 @@ export function seedAccounts(branches: Branch[], demoMemberOid: string, demoMemb
     const branchesOnly = branches.filter(b => b.kind === 'BRANCH');
     return [
         staff('owner', 'Owner@123', 'Kamrul Chowdhury', [[hq, 'OWNER'], ...branchesOnly.map((b): [Branch, StaffRole] => [b, 'OWNER'])], undefined, true),
-        staff('admin.hq', 'Admin@123', 'Nusrat Jahan', [[hq, 'HQ_ADMIN'], ...branchesOnly.map((b): [Branch, StaffRole] => [b, 'HQ_ADMIN'])], undefined, true),
+        staff('admin.hq', 'Admin@123', 'Shirin Akhter', [[hq, 'HQ_ADMIN'], ...branchesOnly.map((b): [Branch, StaffRole] => [b, 'HQ_ADMIN'])], undefined, true),
         staff('manager.gulshan', 'Manager@123', 'Ashraf Siddique', [[byCode('GUL'), 'BRANCH_MANAGER']]),
         staff('desk.gulshan', 'Desk@123', 'Lamia Haque', [[byCode('GUL'), 'FRONT_DESK']]),
         staff('trainer.gulshan', 'Trainer@123', 'Sam Cole', [[byCode('GUL'), 'TRAINER']], 'tr-gul-1'),

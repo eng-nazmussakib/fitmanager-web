@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { ApiService } from '@core/http/api.service';
 import type { Booking, ClassSession } from '@core/models/class.model';
 import type { Invoice } from '@core/models/payment.model';
-import type { PortalSummary, Progress, RoutineDay } from '@core/models/portal.model';
+import type { PortalSummary } from '@core/models/portal.model';
+import type { MemberPt, PortalBookings, PtSession, PtSlots } from '@core/models/scheduling.model';
 
 export type UpcomingBooking = Booking & { session: ClassSession };
 
@@ -17,8 +18,24 @@ export class PortalService {
         return this._api.get<PortalSummary>('/v1/me/summary');
     }
 
-    bookings(): Observable<{ upcoming: UpcomingBooking[]; available: ClassSession[] }> {
-        return this._api.get('/v1/me/bookings');
+    bookings(): Observable<PortalBookings> {
+        return this._api.get<PortalBookings>('/v1/me/bookings');
+    }
+
+    pt(): Observable<MemberPt> {
+        return this._api.get<MemberPt>('/v1/me/pt');
+    }
+
+    ptSlots(date: string): Observable<PtSlots> {
+        return this._api.get<PtSlots>('/v1/me/pt/slots', { date });
+    }
+
+    bookPt(date: string, startTime: string): Observable<PtSession> {
+        return this._api.post<PtSession>('/v1/me/pt-sessions', { date, start_time: startTime });
+    }
+
+    cancelPt(oid: string): Observable<null> {
+        return this._api.post<null>(`/v1/me/pt-sessions/${oid}/cancel`, {});
     }
 
     book(sessionOid: string): Observable<Booking> {
@@ -27,18 +44,6 @@ export class PortalService {
 
     cancel(bookingOid: string): Observable<null> {
         return this._api.delete<null>(`/v1/me/bookings/${bookingOid}`);
-    }
-
-    routine(): Observable<RoutineDay | null> {
-        return this._api.get<RoutineDay | null>('/v1/me/routine/today');
-    }
-
-    logWorkout(): Observable<unknown> {
-        return this._api.post('/v1/me/workouts', {});
-    }
-
-    progress(): Observable<Progress> {
-        return this._api.get<Progress>('/v1/me/progress');
     }
 
     payments(): Observable<Invoice[]> {

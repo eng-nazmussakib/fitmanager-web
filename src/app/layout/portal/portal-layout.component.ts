@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core/auth/auth.service';
-import { LATER_FEATURES } from '@core/constants/later-features';
 import { LogoComponent } from '@shared/components/logo/logo.component';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { AvatarComponent } from '@shared/ui/display/display';
@@ -19,14 +18,10 @@ interface PortalTab {
 
 const TABS: PortalTab[] = [
     { label: 'Home', icon: 'house', link: '/me', exact: true },
-    // Classes, routines and progress stay in the demo until the API has them (D-070 c).
-    ...(LATER_FEATURES
-        ? ([
-              { label: 'Classes', icon: 'calendar-days', link: '/me/bookings' },
-              { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
-              { label: 'Progress', icon: 'trending-up', link: '/me/progress' }
-          ] satisfies PortalTab[])
-        : []),
+    { label: 'Classes', icon: 'calendar-days', link: '/me/bookings' },
+    { label: 'PT', icon: 'users-round', link: '/me/pt' },
+    { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
+    { label: 'Progress', icon: 'trending-up', link: '/me/progress' },
     { label: 'Payments', icon: 'receipt', link: '/me/payments' }
 ];
 
@@ -97,7 +92,7 @@ const TABS: PortalTab[] = [
             class="fixed inset-x-0 bottom-0 z-[var(--z-sticky)] border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
             aria-label="Portal"
         >
-            <ul class="mx-auto grid max-w-lg grid-cols-5">
+            <ul class="mx-auto grid max-w-lg grid-cols-6">
                 @for (t of tabs; track t.link) {
                     <li>
                         <a

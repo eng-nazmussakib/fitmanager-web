@@ -77,11 +77,46 @@ export const CONSOLE_ROUTES: Routes = [
         loadComponent: () => import('./plans/plans-page.component').then(m => m.BranchPlansPageComponent)
     },
     {
+        path: 'pt',
+        title: 'Personal training',
+        data: { breadcrumb: 'PT' },
+        canMatch: [canMatchAbility('read', 'PtSession')],
+        loadComponent: () => import('./pt/pt-page.component').then(m => m.PtPageComponent)
+    },
+    {
+        path: 'exercises',
+        title: 'Exercise library',
+        data: { breadcrumb: 'Exercises' },
+        canMatch: [canMatchAbility('read', 'Exercise')],
+        loadComponent: () => import('@features/training/exercises-page.component').then(m => m.ExercisesPageComponent)
+    },
+    {
+        path: 'routines',
+        title: 'Routines',
+        data: { breadcrumb: 'Routines' },
+        canMatch: [canMatchAbility('read', 'Routine')],
+        loadComponent: () => import('@features/training/routines-page.component').then(m => m.RoutinesPageComponent)
+    },
+    {
         path: 'trainers',
-        title: 'Trainers',
-        data: { breadcrumb: 'Trainers', title: 'Trainers', phase: '3', icon: 'dumbbell' },
+        data: { breadcrumb: 'Trainers' },
         canMatch: [canMatchAbility('read', 'Trainer')],
-        loadComponent: () => import('@features/shared/placeholder-page.component').then(m => m.PlaceholderPageComponent)
+        children: [
+            { path: '', title: 'Trainers', loadComponent: () => import('./trainers/trainers-page.component').then(m => m.TrainersPageComponent) },
+            {
+                path: ':id',
+                title: 'Trainer',
+                data: { breadcrumb: 'Trainer' },
+                loadComponent: () => import('./trainers/trainer-detail-page.component').then(m => m.TrainerDetailPageComponent)
+            }
+        ]
+    },
+    {
+        path: 'facilities',
+        title: 'Facilities',
+        data: { breadcrumb: 'Facilities' },
+        canMatch: [canMatchAbility('read', 'Locker')],
+        loadComponent: () => import('./facilities/facilities-page.component').then(m => m.FacilitiesPageComponent)
     },
     {
         path: 'staff',

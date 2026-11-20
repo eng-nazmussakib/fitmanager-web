@@ -100,7 +100,12 @@ function createSale(ctx: Ctx): HttpResponse<unknown> {
     if (!METHODS.includes(method)) fail(400, 'Choose a payment method.');
     if (amount < 0 || amount > q.total) fail(400, `The payment must be between ৳0 and ৳${q.total.toLocaleString('en-IN')}.`);
     if (amount > 0 && METHODS_NEEDING_REFERENCE.includes(method) && !str(pay?.reference)) fail(400, 'Enter the transaction reference for this payment method.');
-    const overlapping = (idx().subs.get(member.oid) ?? []).find(s => s.end_date >= sale.start_date && s.start_date <= endDate(sale.start_date, plan.months));
+    // Memberships may not overlap; a PT package runs next to one, and only with one (D-079).
+    const memberships = idx().subs.get(member.oid) ?? [];
+    if (plan.kind === 'pt' && !memberships.some(s => !s.cancelled_at && s.end_date >= sale.start_date))
+        fail(409, 'A PT package goes with a membership. Sell the membership first.');
+    const overlapping =
+        plan.kind === 'pt' ? undefined : memberships.find(s => s.end_date >= sale.start_date && s.start_date <= endDate(sale.start_date, plan.months));
     if (overlapping) fail(409, `This overlaps the ${overlapping.plan_name} plan that runs until ${overlapping.end_date}. Start the day after.`);
 
     const d = db();
@@ -156,7 +161,10 @@ function createSale(ctx: Ctx): HttpResponse<unknown> {
         due: q.total - amount,
         invoice_oid: invoiceOid,
         freezes: [],
-        created_at: ctx.now.iso
+        created_at: ctx.now.iso,
+        freezable: plan.kind !== 'pt' && plan.freezable,
+        kind: plan.kind,
+        sessions: plan.sessions
     };
     commit({ t: 'subscription.create', sub, invoice, invoiceSeq });
     return ok(

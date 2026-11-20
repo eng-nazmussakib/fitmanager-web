@@ -6,7 +6,7 @@ import { ApiService } from '@core/http/api.service';
 import { NOTIFY, SKIP_AUTH } from '@core/http/http-context.tokens';
 import { environment } from '@env/environment';
 
-export type FileKind = 'member_photo' | 'member_document';
+export type FileKind = 'member_photo' | 'member_document' | 'trainer_photo' | 'exercise_photo' | 'exercise_video' | 'measurement_photo';
 
 /** `POST /v1/files`: a pending file and where to PUT its bytes (D-058). */
 interface UploadStart {
@@ -24,12 +24,16 @@ export class FilesService {
     private readonly _api = inject(ApiService);
     private readonly _http = inject(HttpClient);
 
-    /** Uploads one file; emits the ready file's oid. */
-    upload(kind: FileKind, blob: Blob, name: string, memberOid?: string): Observable<string> {
+    /**
+     * Uploads one file; emits the ready file's oid. `portal`: a member's own progress photo (`/v1/me/files`, at their
+     * home branch, D-089).
+     */
+    upload(kind: FileKind, blob: Blob, name: string, memberOid?: string, portal = false): Observable<string> {
+        const base = portal ? '/v1/me/files' : '/v1/files';
         return this._api
             .post<UploadStart>(
-                '/v1/files',
-                { kind, name, content_type: blob.type, size: blob.size, ...(memberOid && { member_oid: memberOid }) },
+                base,
+                { kind, name, content_type: blob.type, size: blob.size, ...(memberOid && !portal && { member_oid: memberOid }) },
                 { notify: 'errors' }
             )
             .pipe(
@@ -41,7 +45,7 @@ export class FilesService {
                             context: new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'errors')
                         })
                         .pipe(
-                            switchMap(() => this._api.post<{ oid: string }>(`/v1/files/${start.file.oid}/complete`, {}, { notify: 'errors' })),
+                            switchMap(() => this._api.post<{ oid: string }>(`${base}/${start.file.oid}/complete`, {}, { notify: 'errors' })),
                             map(f => f.oid)
                         )
                 )

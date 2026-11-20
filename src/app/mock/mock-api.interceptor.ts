@@ -13,14 +13,18 @@ import { PHASE2_ROUTES } from './handlers/phase2.handlers';
 import { PLAN_ROUTES } from './handlers/plans.handlers';
 import { PORTAL_ROUTES } from './handlers/portal.handlers';
 import { SALES_ROUTES } from './handlers/sales.handlers';
+import { SCHEDULING_ROUTES } from './handlers/scheduling.handlers';
 import { SETTINGS_ROUTES } from './handlers/settings.handlers';
 import { STAFF_ROUTES } from './handlers/staff.handlers';
+import { TRAINING_ROUTES } from './handlers/training.handlers';
 import { abilityFor, type Ctx, httpError, MockError, type Route } from './http';
 import { dhakaNow } from './seed/clock';
 import { db, fastMode } from './store';
 
 const ROUTES: Route[] = [
     ...AUTH_ROUTES,
+    ...SCHEDULING_ROUTES,
+    ...TRAINING_ROUTES,
     ...MEMBER_ROUTES,
     ...SALES_ROUTES,
     ...PLAN_ROUTES,
@@ -66,7 +70,7 @@ function handle(req: HttpRequest<unknown>, path: string, route: Route): Observab
 
         let branch = null;
         const header = req.headers.get('X-Branch-Id');
-        if (route.scope === 'branch' || route.scope === 'hq') {
+        if (route.scope === 'branch' || route.scope === 'hq' || route.scope === 'staff') {
             if (user?.kind !== 'staff') return throwError(() => httpError(403, 'Staff only'));
             const assignment = user.assignments.find(a => a.branch.oid === header);
             if (!header || !assignment) return throwError(() => httpError(403, 'You do not work at this branch'));

@@ -1,5 +1,6 @@
 import type { HttpResponse } from '@angular/common/http';
 
+import type { Action, Subject } from '@core/auth/ability';
 import type { MemberDocument, MemberNotification } from '@core/models/member.model';
 import type { CashClosing, Invoice, PaymentRecord } from '@core/models/payment.model';
 import type { PaymentMethod, Subscription } from '@core/models/subscription.model';
@@ -15,6 +16,7 @@ import { toRef } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
 import type { FileRow, MemberRow } from '../types';
 import { branchMember } from './members.handlers';
+import { memberTraining } from './training.handlers';
 
 /**
  * Phase 2's new actions, as the API answers them (fitmanager-api: members, sales, files, portal, join):
@@ -36,13 +38,50 @@ const manager = (ctx: Ctx, subject: 'Member' | 'Subscription' | 'Payment', actio
 
 /** Bytes the mock was sent, by file, until "complete" turns them into an object URL (this session only). */
 const uploads = new Map<string, Blob>();
-const RULES = {
-    member_photo: { types: ['image/jpeg', 'image/png', 'image/webp'], max: 2 * 1024 * 1024, label: 'A photo is a JPEG, PNG or WebP of at most 2 MB' },
-    member_document: { types: ['application/pdf', 'image/jpeg', 'image/png'], max: 5 * 1024 * 1024, label: 'A document is a PDF, JPEG or PNG of at most 5 MB' }
-} as const;
+
+/** The bytes sent for a file, taken once on completion (the portal's own uploads, training.handlers.ts). */
+export function takeUpload(oid: string): Blob | undefined {
+    const blob = uploads.get(oid);
+    uploads.delete(oid);
+    return blob;
+}
+const MB = 1024 * 1024;
+const IMAGES = ['image/jpeg', 'image/png', 'image/webp'];
+/** The API's FILE_RULES and KIND_RULES (files.service.ts, files.routes.ts): types, size, who may upload, and where. */
+const RULES: Record<FileRow['kind'], { types: readonly string[]; max: number; label: string; can: [Action, Subject]; hq: boolean }> = {
+    member_photo: { types: IMAGES, max: 2 * MB, label: 'A photo is a JPEG, PNG or WebP of at most 2 MB', can: ['create', 'Member'], hq: false },
+    member_document: {
+        types: ['application/pdf', 'image/jpeg', 'image/png'],
+        max: 5 * MB,
+        label: 'A document is a PDF, JPEG or PNG of at most 5 MB',
+        can: ['create', 'Member'],
+        hq: false
+    },
+    trainer_photo: { types: IMAGES, max: 2 * MB, label: 'A photo is a JPEG, PNG or WebP of at most 2 MB', can: ['update', 'Trainer'], hq: false },
+    exercise_photo: {
+        types: IMAGES,
+        max: 300 * 1024,
+        label: 'An exercise photo is a JPEG, PNG or WebP of at most 300 KB',
+        can: ['create', 'Exercise'],
+        hq: true
+    },
+    exercise_video: {
+        types: ['video/mp4', 'video/webm'],
+        max: 8 * MB,
+        label: 'An exercise video is an MP4 or WebM of at most 8 MB',
+        can: ['create', 'Exercise'],
+        hq: true
+    },
+    measurement_photo: {
+        types: IMAGES,
+        max: 300 * 1024,
+        label: 'A progress photo is a JPEG, PNG or WebP of at most 300 KB',
+        can: ['create', 'Measurement'],
+        hq: false
+    }
+};
 /** The API's `FILE_STORAGE_LIMIT_MB` default (D-074): every branch's files together, inside R2's free 10 GB. */
 const FILE_STORAGE_LIMIT_BYTES = 6144 * 1024 * 1024;
-const MB = 1024 * 1024;
 
 /** Like the API: ready files plus pending uploads, across every branch; 409 when `adding` would pass the limit. */
 function checkStorage(adding: number): void {
@@ -58,9 +97,10 @@ function checkStorage(adding: number): void {
 function startUpload(ctx: Ctx): HttpResponse<unknown> {
     const kind = str(ctx.body['kind']) as FileRow['kind'];
     const rule = RULES[kind] as (typeof RULES)[keyof typeof RULES] | undefined;
-    if (!rule) fail(400, 'member_photo or member_document');
+    if (!rule) fail(400, 'Unknown kind of file');
+    if ((ctx.branch?.kind === 'HQ' && !rule.hq) || !ctx.ability.can(...rule.can)) fail(403, 'You do not have permission to do this');
     const type = str(ctx.body['content_type']).toLowerCase();
-    if (!(rule.types as readonly string[]).includes(type)) fail(415, rule.label);
+    if (!rule.types.includes(type)) fail(415, rule.label);
     if (num(ctx.body['size']) > rule.max) fail(413, rule.label);
     const memberOid = str(ctx.body['member_oid']) || null;
     if (memberOid) branchMember(ctx, memberOid);
@@ -167,6 +207,7 @@ function transfer(ctx: Ctx): HttpResponse<unknown> {
     if (dues > 0) fail(409, `Clear the dues of ৳${dues.toLocaleString('en-IN')} before the transfer.`);
     if (idx().openCheckIn.has(m.oid)) fail(409, 'Check the member out first');
     commit({ t: 'member.update', oid: m.oid, patch: { branch_oid: to.oid } });
+    memberTraining.move(m.oid, to.oid, ctx.now.date);
     recordAudit(ctx, 'transfer_out', 'member', m.code, { branch_oid: ctx.branch!.oid }, { to: { oid: to.oid, name: to.name }, reason });
     return ok({ oid: m.oid, code: m.code, branch_oid: to.oid, branch_name: to.name }, `${m.code} moved to ${to.name}`);
 }
@@ -176,6 +217,7 @@ function anonymise(ctx: Ctx): HttpResponse<unknown> {
     const m = branchMember(ctx, ctx.params[0] ?? '');
     if (m.anonymised) fail(409, 'Already anonymised');
     if (str(ctx.body['confirm_code']).toUpperCase() !== m.code) fail(400, `Type the member code ${m.code} to confirm`);
+    memberTraining.remove(m.oid);
     commit({
         t: 'member.update',
         oid: m.oid,
@@ -249,6 +291,8 @@ function messages(ctx: Ctx): HttpResponse<unknown> {
             });
         }
     }
+    for (const r of db().messages.filter(x => x.member_oid === m.oid))
+        rows.push({ oid: r.oid, kind: r.kind, channel, subject: r.subject, body: r.body, status, created_at: r.created_at });
     return ok(rows.sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 50));
 }
 
@@ -462,9 +506,9 @@ function closeDay(ctx: Ctx): HttpResponse<unknown> {
 }
 
 export const PHASE2_ROUTES: Route[] = [
-    { method: 'POST', path: /^\/v1\/files$/, scope: 'branch', can: ['create', 'Member'], handler: startUpload },
+    { method: 'POST', path: /^\/v1\/files$/, scope: 'staff', handler: startUpload },
     { method: 'PUT', path: /^\/v1\/files\/([\w-]+)\/content$/, scope: 'public', handler: receive },
-    { method: 'POST', path: /^\/v1\/files\/([\w-]+)\/complete$/, scope: 'branch', can: ['create', 'Member'], handler: complete },
+    { method: 'POST', path: /^\/v1\/files\/([\w-]+)\/complete$/, scope: 'staff', handler: complete },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/documents$/, scope: 'branch', can: ['read', 'Member'], handler: documents },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/notifications$/, scope: 'branch', can: ['read', 'Member'], handler: messages },
     { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/suspend$/, scope: 'branch', can: ['read', 'Member'], handler: ctx => suspend(ctx, true) },

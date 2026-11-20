@@ -3,19 +3,19 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { addDays, format, parseISO } from 'date-fns';
-import type { ApexAxisChartSeries } from 'ng-apexcharts';
+import { of } from 'rxjs';
 
 import { AuthService } from '@core/auth/auth.service';
 import type { Invoice } from '@core/models/payment.model';
 import { METHODS_NEEDING_REFERENCE, PAYMENT_METHOD_LABELS, type PaymentMethod, type Subscription } from '@core/models/subscription.model';
 import { FilesService } from '@core/services/files.service';
 import { InvoiceViewComponent } from '@features/shared/invoice-view.component';
+import { MemberTrainingComponent } from '@features/training/member-training.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CanDirective } from '@shared/directives/can.directive';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { TakaPipe } from '@shared/pipes/taka.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
-import { ChartComponent } from '@shared/ui/chart/chart.component';
 import { DialogComponent } from '@shared/ui/dialog/dialog.component';
 import { DialogFooterDirective } from '@shared/ui/dialog/dialog-shell.component';
 import { AlertComponent, AvatarComponent, BadgeComponent, CardComponent, SkeletonComponent, type Tone } from '@shared/ui/display/display';
@@ -30,6 +30,7 @@ import { TabDirective, TabsComponent } from '@shared/ui/tabs/tabs.component';
 import { ToastService } from '@shared/ui/toast/toast.service';
 
 import { ConsoleService } from '../console.service';
+import { SchedulingService } from '../scheduling.service';
 import { MemberManageComponent } from './member-manage.component';
 
 const STATUS_TONE: Record<string, Tone> = {
@@ -60,6 +61,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
 @Component({
     selector: 'app-member-profile-page',
     imports: [
+        MemberTrainingComponent,
         FormsModule,
         RouterLink,
         InvoiceViewComponent,
@@ -68,7 +70,6 @@ const TIMELINE_ICON: Record<string, IconName> = {
         AppDatePipe,
         TakaPipe,
         ButtonComponent,
-        ChartComponent,
         AlertComponent,
         AvatarComponent,
         BadgeComponent,
@@ -230,10 +231,38 @@ const TIMELINE_ICON: Record<string, IconName> = {
                                 </div>
                                 <div>
                                     <dt class="text-fg-subtle">Trainer</dt>
-                                    <dd>{{ m.trainer_name ?? 'None' }}</dd>
+                                    <dd>
+                                        @if (auth.can('update', 'Member') && trainerOptions().length) {
+                                            <fm-select
+                                                ariaLabel="Trainer"
+                                                [ngModel]="m.trainer_oid ?? ''"
+                                                [options]="trainerOptions()"
+                                                (ngModelChange)="assignTrainer(m.oid, $event)"
+                                            />
+                                        } @else {
+                                            {{ m.trainer_name ?? 'None' }}
+                                        }
+                                    </dd>
                                 </div>
                             </dl>
                         </fm-card>
+                        @if (pt.value(); as p) {
+                            <fm-card subtitle="Personal training (D-079)" title="PT">
+                                <ul class="grid gap-2 text-sm">
+                                    @for (k of p.packages; track k.oid) {
+                                        <li class="flex justify-between gap-2">
+                                            <span>{{ k.plan_name }}</span>
+                                            <span class="font-medium">{{ k.left }} of {{ k.sessions }} left · to {{ k.end_date | appDate }}</span>
+                                        </li>
+                                    } @empty {
+                                        <li class="text-fg-muted">No PT package. Sell one from Subscribe.</li>
+                                    }
+                                </ul>
+                                @if (p.upcoming[0]; as next) {
+                                    <p class="mt-3 text-sm">Next: {{ next.starts_at | appDate: 'EEE d MMM, h:mm a' }} with {{ next.trainer_name }}</p>
+                                }
+                            </fm-card>
+                        }
                     </div>
                 </ng-template>
 
@@ -386,24 +415,10 @@ const TIMELINE_ICON: Record<string, IconName> = {
                     </fm-card>
                 </ng-template>
 
-                <ng-template fmTab="progress" label="Progress">
-                    <fm-card subtitle="Measured by the trainer, about every 4 weeks" title="Weight">
-                        @if (measurements.value(); as list) {
-                            @if (list.length > 1) {
-                                @defer (on viewport) {
-                                    <fm-chart kind="line" label="Weight over time" [categories]="weightDates()" [series]="weightSeries()" />
-                                } @placeholder {
-                                    <fm-skeleton height="280px" />
-                                }
-                                <p class="mt-2 text-sm text-fg-muted">
-                                    From {{ list[0].weight_kg }} kg to {{ list[list.length - 1].weight_kg }} kg; waist {{ list[0].waist_cm }} →
-                                    {{ list[list.length - 1].waist_cm }} cm.
-                                </p>
-                            } @else {
-                                <fm-empty-state description="Measurements appear once a trainer records them." icon="activity" title="No measurements yet" />
-                            }
-                        }
-                    </fm-card>
+                <ng-template fmTab="training" label="Training">
+                    @defer {
+                        <app-member-training [memberOid]="id()" />
+                    }
                 </ng-template>
 
                 <ng-template fmTab="documents" label="Documents" [count]="documents.value()?.length ?? null">
@@ -669,7 +684,6 @@ export class MemberProfilePageComponent {
     protected readonly subscriptions = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.memberSubscriptions(params) });
     protected readonly invoices = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.memberInvoices(params) });
     protected readonly attendance = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.memberAttendance(params, 84) });
-    protected readonly measurements = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.measurements(params) });
     protected readonly timeline = rxResource({ params: () => this.id(), stream: ({ params }) => this._service.timeline(params) });
 
     protected readonly checking = signal(false);
@@ -681,6 +695,16 @@ export class MemberProfilePageComponent {
     protected readonly payAmount = signal<number | null>(null);
     /** HQ's freeze rule (D-063, D-067 e): the dialog shows it and the API enforces it. */
     protected readonly rules = rxResource({ stream: () => this._service.rules() });
+    private readonly _scheduling = inject(SchedulingService);
+    private readonly _trainers = rxResource({ stream: () => (this.auth.can('update', 'Member') ? this._scheduling.trainers() : of([])) });
+    protected readonly trainerOptions = computed<SelectOption<string>[]>(() => {
+        const list = (this._trainers.value() ?? []).filter(t => t.active !== false);
+        return list.length ? [{ value: '', label: 'None' }, ...list.map(t => ({ value: t.oid, label: t.name }))] : [];
+    });
+    protected readonly pt = rxResource({
+        params: () => this.id(),
+        stream: ({ params }) => (this.auth.can('read', 'PtSession') ? this._scheduling.memberPt(params) : of(null))
+    });
     protected readonly freezeRange = computed(() => {
         const r = this.rules.value();
         return r ? `${r.freeze_min_days} to ${r.freeze_max_days} days` : '';
@@ -743,11 +767,6 @@ export class MemberProfilePageComponent {
         return weeks;
     });
     protected readonly visitCount = computed(() => this.attendance.value()?.days.length ?? 0);
-    protected readonly weightDates = computed(() => (this.measurements.value() ?? []).map(m => format(parseISO(m.date), 'd MMM')));
-    protected readonly weightSeries = computed<ApexAxisChartSeries>(() => [
-        { name: 'Weight (kg)', data: (this.measurements.value() ?? []).map(m => m.weight_kg) }
-    ]);
-
     protected tone(status: string): Tone {
         return STATUS_TONE[status] ?? 'neutral';
     }
@@ -928,6 +947,13 @@ export class MemberProfilePageComponent {
                 this._reload();
             },
             error: () => this.saving.set(false)
+        });
+    }
+
+    protected assignTrainer(memberOid: string, trainerOid: string): void {
+        this._scheduling.assignTrainer(memberOid, trainerOid || null).subscribe(() => {
+            this.member.reload();
+            this.pt.reload();
         });
     }
 

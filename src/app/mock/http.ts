@@ -29,9 +29,10 @@ export interface Route {
     handler: Handler;
     /**
      * public: no token. user: any signed-in user. branch: staff with `X-Branch-Id` of a BRANCH they work at.
-     * hq: staff with an HQ assignment (`X-Branch-Id` = the HQ row). member: members only (portal).
+     * hq: staff with an HQ assignment (`X-Branch-Id` = the HQ row). staff: either (exercise media, the library).
+     * member: members only (portal).
      */
-    scope: 'public' | 'user' | 'branch' | 'hq' | 'member';
+    scope: 'public' | 'user' | 'branch' | 'hq' | 'staff' | 'member';
     can?: [Action, Subject];
 }
 

@@ -41,6 +41,7 @@ export interface Member extends MemberListItem {
     /** From the health declaration: e.g. 'Asthma', 'Knee injury'. */
     health_flags: string[];
     health_declared: boolean;
+    trainer_oid?: string | null;
     trainer_name: string | null;
     current_subscription_oid: string | null;
     notes: string | null;
@@ -69,7 +70,7 @@ export interface MemberDocument {
 /** `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (D-075: no email or SMS provider). */
 export interface MemberNotification {
     oid: string;
-    kind: 'receipt' | 'expiry_7d' | 'expiry_1d' | 'welcome';
+    kind: 'receipt' | 'expiry_7d' | 'expiry_1d' | 'welcome' | 'class_cancelled' | 'waitlist_promoted' | 'pt_booked' | 'pt_cancelled';
     channel: 'email' | 'sms' | 'log';
     subject: string;
     body: string;
@@ -113,12 +114,4 @@ export interface TimelineEvent {
     title: string;
     detail: string | null;
     by: string | null;
-}
-
-/** Weight and measurements, for the progress chart. */
-export interface Measurement {
-    date: string;
-    weight_kg: number;
-    body_fat_pct: number | null;
-    waist_cm: number | null;
 }

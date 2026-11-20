@@ -21,6 +21,8 @@ export interface Invoice {
     oid: string;
     /** "INV-GUL-2026-00123" */
     number: string;
+    /** A sale, an upgrade, or a locker rental (D-082). */
+    kind?: 'sale' | 'upgrade' | 'locker';
     branch: BranchRef;
     member_oid: string;
     member_name: string;

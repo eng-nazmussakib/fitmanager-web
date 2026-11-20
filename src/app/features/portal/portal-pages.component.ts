@@ -1,17 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { format, parseISO } from 'date-fns';
-import type { ApexAxisChartSeries } from 'ng-apexcharts';
-import { of } from 'rxjs';
 
-import { LATER_FEATURES } from '@core/constants/later-features';
 import type { Invoice } from '@core/models/payment.model';
 import { InvoiceViewComponent } from '@features/shared/invoice-view.component';
+import { ME, TrainingService } from '@features/training/training.service';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { TakaPipe } from '@shared/pipes/taka.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
-import { ChartComponent } from '@shared/ui/chart/chart.component';
 import { DialogComponent } from '@shared/ui/dialog/dialog.component';
 import { BarcodeComponent } from '@shared/ui/display/barcode.component';
 import { AlertComponent, BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/display/display';
@@ -20,7 +16,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 
 import { PortalService } from './portal.service';
 
-/** H6 home: the membership card (with the code as a barcode for the desk scanner), dues, today's routine, next class. */
+/** H6 home: the membership card (with the code as a barcode for the desk scanner), dues, the next workout, next class. */
 @Component({
     selector: 'app-portal-home',
     imports: [RouterLink, AppDatePipe, TakaPipe, BarcodeComponent, AlertComponent, BadgeComponent, CardComponent, SkeletonComponent, IconComponent],
@@ -89,21 +85,22 @@ import { PortalService } from './portal.service';
                     @if (s.next_booking; as b) {
                         <p class="mt-1 font-semibold">{{ b.session.title }}</p>
                         <p class="text-sm text-fg-muted">{{ b.session.starts_at | appDate: 'EEE d MMM, h:mm a' }}</p>
-                    } @else if (later) {
-                        <a class="mt-1 inline-block text-sm text-accent" routerLink="bookings">Book a class</a>
                     } @else {
-                        <p class="mt-1 text-sm text-fg-subtle">Ask the front desk about classes.</p>
+                        <a class="mt-1 inline-block text-sm text-accent" routerLink="bookings">Book a class</a>
                     }
                 </fm-card>
             </div>
-            @if (routine.value(); as r) {
+            @if (routine.value()?.current; as r) {
+                @let next = r.days[r.next_day ?? 0];
                 <a
                     class="mt-4 block rounded-[var(--radius-panel)] border border-border bg-surface p-5 text-fg no-underline hover:border-fg-subtle"
                     routerLink="routine"
                 >
-                    <p class="text-sm text-fg-muted">Today's workout</p>
-                    <p class="mt-1 font-semibold">{{ r.title }}: {{ r.focus }}</p>
-                    <p class="text-sm text-fg-subtle">{{ r.exercises.length }} exercises · {{ r.logged_today ? 'logged, well done' : 'not logged yet' }}</p>
+                    <p class="text-sm text-fg-muted">Next workout</p>
+                    <p class="mt-1 font-semibold">{{ next.name }}: {{ r.name }}</p>
+                    <p class="text-sm text-fg-subtle">
+                        {{ next.exercises.length }} exercises{{ r.last_workout_on ? ' · last one ' + (r.last_workout_on | appDate: 'EEE d MMM') : '' }}
+                    </p>
                 </a>
             }
         } @else {
@@ -116,22 +113,34 @@ export class PortalHomeComponent {
     private readonly _service = inject(PortalService);
 
     protected readonly summary = rxResource({ stream: () => this._service.summary() });
-    protected readonly later = LATER_FEATURES;
-    protected readonly routine = rxResource({ stream: () => (LATER_FEATURES ? this._service.routine() : of(null)) });
+    private readonly _training = inject(TrainingService);
+    protected readonly routine = rxResource({ stream: () => this._training.routine(ME) });
 
     protected clamp(left: number, total: number): number {
         return Math.max(0, Math.min(left, total));
     }
 }
 
-/** H6 bookings: my upcoming classes (cancel up to 2 hours before) and the next two weeks to book. */
+/**
+ * H6 bookings (D-081): my upcoming classes and what is open to book (7 days ahead by default). Cancelling inside the
+ * window counts like a missed class, and missing too many pauses booking for a while: both are said up front.
+ */
 @Component({
     selector: 'app-portal-bookings',
-    imports: [AppDatePipe, ButtonComponent, BadgeComponent, CardComponent, SkeletonComponent, EmptyStateComponent],
+    imports: [AppDatePipe, AlertComponent, ButtonComponent, BadgeComponent, CardComponent, SkeletonComponent, EmptyStateComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         <h1 class="mb-4 text-xl font-semibold">Classes</h1>
         @if (data.value(); as d) {
+            @if (d.rules.blocked_until) {
+                <fm-alert class="mb-4" title="Booking is paused" tone="warning">
+                    You missed several classes recently, so you can book again from {{ d.rules.blocked_until | appDate: 'EEE d MMM' }}.
+                </fm-alert>
+            }
+            <p class="mb-3 text-sm text-fg-muted">
+                Cancel at least {{ d.rules.cancel_hours }} hours before a class; later counts as a missed class. Up to {{ d.rules.max_active }} upcoming
+                bookings.
+            </p>
             <fm-card flush title="My bookings">
                 @if (d.upcoming.length) {
                     <ul class="divide-y divide-border">
@@ -210,124 +219,6 @@ export class PortalBookingsComponent {
         this.busy.set(null);
         this.data.reload();
     }
-}
-
-/** H6 routine: today's workout from the trainer, with sets and reps, and "Log workout". */
-@Component({
-    selector: 'app-portal-routine',
-    imports: [ButtonComponent, CardComponent, SkeletonComponent, EmptyStateComponent, IconComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    template: `
-        <h1 class="mb-4 text-xl font-semibold">Today's routine</h1>
-        @if (routine.hasValue()) {
-            @if (routine.value(); as r) {
-                <fm-card [subtitle]="'From ' + r.trainer_name" [title]="r.title + ': ' + r.focus">
-                    <ol class="flex flex-col divide-y divide-border">
-                        @for (e of r.exercises; track e.name; let i = $index) {
-                            <li class="flex gap-3 py-3">
-                                <span class="grid size-7 shrink-0 place-items-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
-                                    {{ i + 1 }}
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block font-medium">{{ e.name }}</span>
-                                    <span class="block text-sm text-fg-muted">{{ e.sets }} sets × {{ e.reps }} · rest {{ e.rest_s }} s</span>
-                                    @if (e.note) {
-                                        <span class="block text-xs text-fg-subtle">{{ e.note }}</span>
-                                    }
-                                </span>
-                            </li>
-                        }
-                    </ol>
-                    <footer class="mt-4">
-                        <button
-                            block
-                            fmButton
-                            size="lg"
-                            [disabled]="r.logged_today"
-                            [loading]="saving()"
-                            [variant]="r.logged_today ? 'secondary' : 'primary'"
-                            (click)="log()"
-                        >
-                            <fm-icon [name]="r.logged_today ? 'circle-check' : 'check'" />
-                            {{ r.logged_today ? 'Logged today' : 'Log workout' }}
-                        </button>
-                    </footer>
-                </fm-card>
-            } @else {
-                <fm-card><fm-empty-state description="Ask a trainer at the front desk for a routine." icon="dumbbell" title="No routine yet" /></fm-card>
-            }
-        } @else {
-            <fm-skeleton height="20rem" />
-        }
-    `
-})
-export class PortalRoutineComponent {
-    private readonly _service = inject(PortalService);
-
-    protected readonly routine = rxResource({ stream: () => this._service.routine() });
-    protected readonly saving = signal(false);
-
-    protected log(): void {
-        this.saving.set(true);
-        this._service.logWorkout().subscribe({
-            next: () => {
-                this.saving.set(false);
-                this.routine.reload();
-            },
-            error: () => this.saving.set(false)
-        });
-    }
-}
-
-/** H6 progress: weight and measurements, visits per week, streak. */
-@Component({
-    selector: 'app-portal-progress',
-    imports: [ChartComponent, CardComponent, SkeletonComponent, EmptyStateComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    template: `
-        <h1 class="mb-4 text-xl font-semibold">Progress</h1>
-        @if (progress.value(); as p) {
-            <div class="grid gap-4">
-                <fm-card
-                    title="Weight"
-                    [subtitle]="p.measurements.length ? 'Now ' + last()?.weight_kg + ' kg, started at ' + p.measurements[0].weight_kg + ' kg' : ''"
-                >
-                    @if (p.measurements.length > 1) {
-                        @defer (on viewport) {
-                            <fm-chart kind="area" label="Weight over time" [categories]="dates()" [height]="240" [series]="weight()" />
-                        } @placeholder {
-                            <fm-skeleton height="240px" />
-                        }
-                    } @else {
-                        <fm-empty-state description="Your trainer records measurements about every 4 weeks." icon="activity" title="No measurements yet" />
-                    }
-                </fm-card>
-                <fm-card title="Visits per week" [subtitle]="'Current streak: ' + p.streak_days + ' days'">
-                    @defer (on viewport) {
-                        <fm-chart kind="bar" label="Visits per week, last 12 weeks" [categories]="weeks()" [colorSlot]="1" [height]="220" [series]="visits()" />
-                    } @placeholder {
-                        <fm-skeleton height="220px" />
-                    }
-                </fm-card>
-            </div>
-        } @else {
-            <fm-skeleton height="20rem" />
-        }
-    `
-})
-export class PortalProgressComponent {
-    private readonly _service = inject(PortalService);
-
-    protected readonly progress = rxResource({ stream: () => this._service.progress() });
-    protected readonly last = computed(() => this.progress.value()?.measurements.at(-1));
-    protected readonly dates = computed(() => (this.progress.value()?.measurements ?? []).map(m => format(parseISO(m.date), 'd MMM')));
-    protected readonly weight = computed<ApexAxisChartSeries>(() => [
-        { name: 'Weight (kg)', data: (this.progress.value()?.measurements ?? []).map(m => m.weight_kg) }
-    ]);
-    protected readonly weeks = computed(() => (this.progress.value()?.weekly_visits ?? []).map(w => format(parseISO(w.week), 'd MMM')));
-    protected readonly visits = computed<ApexAxisChartSeries>(() => [
-        { name: 'Visits', data: (this.progress.value()?.weekly_visits ?? []).map(w => w.visits) }
-    ]);
 }
 
 /** H6 payments: invoice history with receipt, PDF and print. */

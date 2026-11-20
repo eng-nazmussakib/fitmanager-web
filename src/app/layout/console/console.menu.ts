@@ -1,5 +1,4 @@
-import { LATER_FEATURES } from '@core/constants/later-features';
-import type { MenuGroup, MenuItem } from '@core/models/menu.model';
+import type { MenuGroup } from '@core/models/menu.model';
 
 /**
  * Branch console menu (`/console/:branch/…`). A typed `can` per item: the item shows only when the user's role at
@@ -11,7 +10,8 @@ export const CONSOLE_MENU: MenuGroup[] = [
         items: [
             { label: 'Dashboard', icon: 'layout-dashboard', route: 'dashboard', can: ['read', 'Dashboard'] },
             { label: 'Check-in', icon: 'scan-line', route: 'check-in', can: ['create', 'Attendance'] },
-            ...(LATER_FEATURES ? [{ label: 'Classes', icon: 'calendar-days', route: 'classes', can: ['read', 'Class'] } satisfies MenuItem] : [])
+            { label: 'Classes', icon: 'calendar-days', route: 'classes', can: ['read', 'Class'] },
+            { label: 'PT', icon: 'dumbbell', route: 'pt', can: ['read', 'PtSession'] }
         ]
     },
     {
@@ -23,9 +23,17 @@ export const CONSOLE_MENU: MenuGroup[] = [
         ]
     },
     {
+        group: 'Training',
+        items: [
+            { label: 'Exercises', icon: 'dumbbell', route: 'exercises', can: ['read', 'Exercise'] },
+            { label: 'Routines', icon: 'list-ordered', route: 'routines', can: ['read', 'Routine'] }
+        ]
+    },
+    {
         group: 'Branch',
         items: [
-            ...(LATER_FEATURES ? [{ label: 'Trainers', icon: 'dumbbell', route: 'trainers', can: ['read', 'Trainer'] } satisfies MenuItem] : []),
+            { label: 'Trainers', icon: 'users-round', route: 'trainers', can: ['read', 'Trainer'] },
+            { label: 'Facilities', icon: 'key-round', route: 'facilities', can: ['read', 'Locker'] },
             { label: 'Staff', icon: 'shield-check', route: 'staff', can: ['read', 'Staff'] },
             { label: 'Reports', icon: 'chart-column', route: 'reports', can: ['read', 'Report'] },
             { label: 'Audit log', icon: 'list-checks', route: 'audit', can: ['read', 'AuditLog'] }

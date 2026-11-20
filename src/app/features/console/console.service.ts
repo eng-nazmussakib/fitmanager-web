@@ -4,19 +4,11 @@ import { Observable } from 'rxjs';
 import { ApiService } from '@core/http/api.service';
 import type { AccessDecision, CheckIn, CheckInRequest, Occupancy } from '@core/models/attendance.model';
 import type { BranchRef } from '@core/models/branch.model';
-import type { ClassSession, ClassSessionDetail, ClassType, Trainer } from '@core/models/class.model';
-import type {
-    Measurement,
-    Member,
-    MemberDocument,
-    MemberListItem,
-    MemberNotification,
-    MemberPayload,
-    MemberQuery,
-    TimelineEvent
-} from '@core/models/member.model';
+import type { ClassSessionDetail } from '@core/models/class.model';
+import type { Member, MemberDocument, MemberListItem, MemberNotification, MemberPayload, MemberQuery, TimelineEvent } from '@core/models/member.model';
 import type { CashClosing, Invoice, PaymentRecord, PaymentRequest, RefundRequest } from '@core/models/payment.model';
 import type { Plan } from '@core/models/plan.model';
+import type { WeekSchedule } from '@core/models/scheduling.model';
 import type { OrgRules } from '@core/models/settings.model';
 import type { PaymentMethod, Quote, Subscription, SubscriptionRequest } from '@core/models/subscription.model';
 
@@ -28,14 +20,7 @@ export interface MemberPage {
     counts: Record<string, number>;
 }
 
-export interface WeekSchedule {
-    from: string;
-    to: string;
-    sessions: ClassSession[];
-    types: ClassType[];
-    trainers: Trainer[];
-    my_trainer_oid: string | null;
-}
+export type { WeekSchedule } from '@core/models/scheduling.model';
 
 export type PaymentRow = PaymentRecord & { invoice_number: string; member_name: string; member_oid: string; member_code: string; branch: BranchRef };
 
@@ -81,10 +66,6 @@ export class ConsoleService {
 
     memberAttendance(oid: string, days = 84): Observable<{ from: string; to: string; days: { date: string; count: number }[] }> {
         return this._api.get(`/v1/members/${oid}/attendance`, { days });
-    }
-
-    measurements(oid: string): Observable<Measurement[]> {
-        return this._api.get<Measurement[]>(`/v1/members/${oid}/measurements`);
     }
 
     plans(): Observable<Plan[]> {

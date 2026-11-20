@@ -203,8 +203,11 @@ function timeline(ctx: Ctx): HttpResponse<unknown> {
 function subscriptions(ctx: Ctx): HttpResponse<unknown> {
     const m = branchMember(ctx, ctx.params[0]);
     const today = ctx.now.date;
-    const list = [...(idx().subs.get(m.oid) ?? [])].reverse().map(s => ({
+    const used = (s: { oid: string }): number => db().ptSessions.filter(p => p.subscription_oid === s.oid && p.charged).length;
+    const list = [...(idx().allSubs.get(m.oid) ?? [])].reverse().map(s => ({
         ...s,
+        sessions_used: s.kind === 'pt' ? used(s) : 0,
+        sessions_left: s.kind === 'pt' && s.sessions ? Math.max(0, s.sessions - used(s)) : null,
         status: s.start_date > today ? 'Upcoming' : s.end_date < today ? 'Expired' : s.freezes.some(f => f.from <= today && today <= f.to) ? 'Frozen' : 'Active'
     }));
     return ok(list);
@@ -225,11 +228,6 @@ function attendance(ctx: Ctx): HttpResponse<unknown> {
     return ok({ from, to: ctx.now.date, days: [...counts].map(([date, count]) => ({ date, count })) });
 }
 
-function measurements(ctx: Ctx): HttpResponse<unknown> {
-    const m = branchMember(ctx, ctx.params[0]);
-    return ok(db().measurements[m.oid] ?? []);
-}
-
 export const MEMBER_ROUTES: Route[] = [
     { method: 'GET', path: /^\/v1\/members$/, scope: 'branch', can: ['read', 'Member'], handler: list },
     { method: 'GET', path: /^\/v1\/members\/lookup$/, scope: 'branch', can: ['read', 'Member'], handler: lookup },
@@ -239,6 +237,5 @@ export const MEMBER_ROUTES: Route[] = [
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/timeline$/, scope: 'branch', can: ['read', 'Member'], handler: timeline },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/subscriptions$/, scope: 'branch', can: ['read', 'Subscription'], handler: subscriptions },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/invoices$/, scope: 'branch', can: ['read', 'Invoice'], handler: invoices },
-    { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/attendance$/, scope: 'branch', can: ['read', 'Attendance'], handler: attendance },
-    { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/measurements$/, scope: 'branch', can: ['read', 'Member'], handler: measurements }
+    { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/attendance$/, scope: 'branch', can: ['read', 'Attendance'], handler: attendance }
 ];

@@ -10,16 +10,22 @@ export const PORTAL_ROUTES: Routes = [
         loadComponent: () => import('./portal-pages.component').then(m => m.PortalBookingsComponent)
     },
     {
+        path: 'pt',
+        title: 'Personal training',
+        data: { breadcrumb: 'PT' },
+        loadComponent: () => import('./portal-pt.component').then(m => m.PortalPtComponent)
+    },
+    {
         path: 'routine',
         title: 'Routine',
         data: { breadcrumb: 'Routine' },
-        loadComponent: () => import('./portal-pages.component').then(m => m.PortalRoutineComponent)
+        loadComponent: () => import('./portal-training.component').then(m => m.PortalRoutineComponent)
     },
     {
         path: 'progress',
         title: 'Progress',
         data: { breadcrumb: 'Progress' },
-        loadComponent: () => import('./portal-pages.component').then(m => m.PortalProgressComponent)
+        loadComponent: () => import('./portal-training.component').then(m => m.PortalProgressComponent)
     },
     {
         path: 'payments',

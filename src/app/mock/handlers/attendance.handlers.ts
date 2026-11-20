@@ -9,6 +9,7 @@ import { dateOf, timeOf } from '../seed/clock';
 import { openingHours } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
 import type { CheckInRow, MemberRow } from '../types';
+import { markArrival } from './scheduling.handlers';
 
 /** Finds the member by oid or by exact code (scanner), at ANY branch: the branch rule then explains a mismatch. */
 function findMember(ctx: Ctx): MemberRow {
@@ -109,7 +110,10 @@ function checkIn(ctx: Ctx): HttpResponse<unknown> {
         by: ctx.user!.name
     };
     commit({ t: 'checkin.create', row });
-    return ok(toCheckIn(row), decision.allowed ? `${m.name} checked in` : `${m.name} checked in with an override`);
+    // A booked class starting soon, or under way, at the member's home branch is marked Attended (D-081).
+    const classes = m.branch_oid === ctx.branch!.oid ? markArrival(m.oid, m.branch_oid, ctx.now.iso) : [];
+    const base = decision.allowed ? `${m.name} checked in` : `${m.name} checked in with an override`;
+    return ok(toCheckIn(row), classes.length ? `${base}; marked present for ${classes.join(', ')}` : base);
 }
 
 function checkOut(ctx: Ctx): HttpResponse<unknown> {

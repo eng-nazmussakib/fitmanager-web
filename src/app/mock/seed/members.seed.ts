@@ -1,5 +1,5 @@
 import type { Branch } from '@core/models/branch.model';
-import type { Gender, Measurement } from '@core/models/member.model';
+import type { Gender } from '@core/models/member.model';
 import type { Invoice, PaymentRecord } from '@core/models/payment.model';
 import type { Plan } from '@core/models/plan.model';
 import type { PaymentMethod, Subscription } from '@core/models/subscription.model';
@@ -301,26 +301,5 @@ function seedScripted(c: Ctx, m: MemberRow, branch: Branch, plan: (tier: string,
         m.suspended = { since: addDaysIso(today, -4), reason: 'Behaviour on the training floor (second warning)' };
     } else if (story === 'expiring') {
         addSubscription(c, m, branch, plan('duo', 'monthly'), addDaysIso(today, -27), true, 1);
-    }
-}
-
-/** Weight and measurements every ~4 weeks for members with a trainer (and the demo member). */
-export function seedMeasurements(db: MockDb, today: string): void {
-    const rng = new Rng(7);
-    for (const m of db.members) {
-        if (!m.trainer_oid || m.pending) continue;
-        const list: Measurement[] = [];
-        let weight = m.gender === 'Male' ? rng.around(82, 10, 60, 110) : rng.around(66, 8, 48, 95);
-        let fat = m.gender === 'Male' ? rng.around(24, 5, 12, 35) : rng.around(31, 5, 20, 42);
-        let waist = m.gender === 'Male' ? rng.around(92, 8, 70, 115) : rng.around(80, 7, 62, 105);
-        for (let w = 24; w >= 0; w -= 4) {
-            const date = addDaysIso(today, -w * 7 - rng.int(0, 3));
-            if (date < m.joined_on) continue;
-            list.push({ date, weight_kg: Math.round(weight * 10) / 10, body_fat_pct: Math.round(fat * 10) / 10, waist_cm: Math.round(waist) });
-            weight -= rng.around(0.9, 0.8, -0.6, 2.2);
-            fat -= rng.around(0.5, 0.4, -0.3, 1.2);
-            waist -= rng.around(0.7, 0.6, -0.5, 1.8);
-        }
-        if (list.length) db.measurements[m.oid] = list;
     }
 }

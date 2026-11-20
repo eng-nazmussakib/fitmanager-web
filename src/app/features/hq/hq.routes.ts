@@ -30,6 +30,27 @@ export const HQ_ROUTES: Routes = [
         loadComponent: () => import('./hq-plans-page.component').then(m => m.HqPlansPageComponent)
     },
     {
+        path: 'class-types',
+        title: 'Class types',
+        data: { breadcrumb: 'Class types' },
+        canMatch: [canMatchAbility('manage', 'ClassType')],
+        loadComponent: () => import('./hq-class-types-page.component').then(m => m.HqClassTypesPageComponent)
+    },
+    {
+        path: 'exercises',
+        title: 'Exercise library',
+        data: { breadcrumb: 'Exercises', hq: true },
+        canMatch: [canMatchAbility('read', 'Exercise')],
+        loadComponent: () => import('@features/training/exercises-page.component').then(m => m.ExercisesPageComponent)
+    },
+    {
+        path: 'routines',
+        title: 'Routines',
+        data: { breadcrumb: 'Routines', hq: true },
+        canMatch: [canMatchAbility('read', 'Routine')],
+        loadComponent: () => import('@features/training/routines-page.component').then(m => m.RoutinesPageComponent)
+    },
+    {
         path: 'reports',
         title: 'Reports',
         data: { breadcrumb: 'Reports', title: 'Reports', phase: '7', icon: 'chart-column' },

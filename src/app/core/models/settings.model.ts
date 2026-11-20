@@ -16,16 +16,22 @@ export interface OrgSettings {
     freeze_min_days: number;
     freeze_max_days: number;
     freeze_max_count: number;
+    /** Class booking (D-081): how far ahead classes open, upcoming bookings a member may hold, the free cancel window. */
+    booking_open_days: number;
+    booking_max_active: number;
+    booking_cancel_hours: number;
+    /** So many no-shows or late cancels within so many days pause booking for so many days. */
+    noshow_limit: number;
+    noshow_window_days: number;
+    noshow_block_days: number;
     updated_at: string | null;
     updated_by: string | null;
 }
 
-export type OrgSettingsUpdate = Partial<
-    Pick<OrgSettings, 'vat_rate' | 'vat_bin' | 'vat_inclusive' | 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count'>
->;
+export type OrgSettingsUpdate = Partial<Omit<OrgSettings, 'updated_at' | 'updated_by'>>;
 
 /** `GET /v1/rules`: the rules every staff member works by (read-only; HQ changes them in the settings). */
-export type OrgRules = Pick<OrgSettings, 'vat_rate' | 'vat_bin' | 'vat_inclusive' | 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count'>;
+export type OrgRules = Omit<OrgSettings, 'updated_at' | 'updated_by'>;
 
 /** Longest freeze HQ may allow (the API's limit). */
 export const MAX_FREEZE_DAYS = 365;

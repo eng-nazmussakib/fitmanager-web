@@ -26,6 +26,11 @@ export interface Subscription {
     cancel_reason?: string | null;
     /** The plan it was upgraded to (D-067 b). */
     upgraded_to?: string | null;
+    /** A membership or a PT package (D-079); PT packages carry their sessions. */
+    kind?: 'membership' | 'pt';
+    sessions?: number | null;
+    sessions_used?: number;
+    sessions_left?: number | null;
 }
 
 export type DiscountKind = 'none' | 'amount' | 'percent' | 'promo';

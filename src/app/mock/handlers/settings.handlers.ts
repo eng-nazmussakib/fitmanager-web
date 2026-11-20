@@ -11,15 +11,9 @@ function read(): HttpResponse<unknown> {
 
 /** `GET /v1/rules`: what every staff member works by (the API's settings route, read-only). */
 function rules(): HttpResponse<unknown> {
-    const s = db().settings;
-    const body: OrgRules = {
-        vat_rate: s.vat_rate,
-        vat_bin: s.vat_bin,
-        vat_inclusive: s.vat_inclusive,
-        freeze_min_days: s.freeze_min_days,
-        freeze_max_days: s.freeze_max_days,
-        freeze_max_count: s.freeze_max_count
-    };
+    const body: OrgRules & { updated_at?: unknown; updated_by?: unknown } = { ...db().settings };
+    delete body.updated_at;
+    delete body.updated_by;
     return ok(body);
 }
 
@@ -48,7 +42,17 @@ function update(ctx: Ctx): HttpResponse<unknown> {
         if (typeof ctx.body['vat_inclusive'] !== 'boolean') fail(400, 'Choose whether prices include VAT.');
         patch.vat_inclusive = ctx.body['vat_inclusive'];
     }
-    const whole = (key: 'freeze_min_days' | 'freeze_max_days' | 'freeze_max_count', min: number, max: number, message: string): void => {
+    type WholeKey =
+        | 'freeze_min_days'
+        | 'freeze_max_days'
+        | 'freeze_max_count'
+        | 'booking_open_days'
+        | 'booking_max_active'
+        | 'booking_cancel_hours'
+        | 'noshow_limit'
+        | 'noshow_window_days'
+        | 'noshow_block_days';
+    const whole = (key: WholeKey, min: number, max: number, message: string): void => {
         if (!(key in ctx.body)) return;
         const n = ctx.body[key];
         if (typeof n !== 'number' || !Number.isInteger(n) || n < min || n > max) fail(400, message);
@@ -57,6 +61,13 @@ function update(ctx: Ctx): HttpResponse<unknown> {
     whole('freeze_min_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
     whole('freeze_max_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
     whole('freeze_max_count', 0, 12, 'Allow 0 to 12 freezes per plan.');
+    // Class booking (D-081), the API's ranges.
+    whole('booking_open_days', 1, 60, 'Classes open 1 to 60 days ahead.');
+    whole('booking_max_active', 1, 50, 'Allow 1 to 50 upcoming bookings.');
+    whole('booking_cancel_hours', 0, 72, 'The free cancel window is 0 to 72 hours.');
+    whole('noshow_limit', 1, 20, 'Pause booking after 1 to 20 missed classes.');
+    whole('noshow_window_days', 1, 365, 'Count missed classes over 1 to 365 days.');
+    whole('noshow_block_days', 1, 90, 'Pause booking for 1 to 90 days.');
     const min = patch.freeze_min_days ?? db().settings.freeze_min_days;
     const max = patch.freeze_max_days ?? db().settings.freeze_max_days;
     if (min > max) fail(400, `The shortest freeze (${min} days) is longer than the longest (${max} days)`);

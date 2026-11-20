@@ -1,12 +1,13 @@
 import type { MockDb } from '../types';
 import { seedAttendance } from './attendance.seed';
-import { seedClasses } from './classes.seed';
+import { seedClasses, seedFacilities } from './classes.seed';
 import { seedEveryCase } from './every-case.seed';
-import { SCRIPTED, seedMeasurements, seedMembers } from './members.seed';
+import { SCRIPTED, seedMembers } from './members.seed';
 import { seedBranches, seedPromos, seedSettings, seedSiteGroups } from './organisation.seed';
 import { seedPlans } from './plans.seed';
-import { seedRoutines } from './routines.seed';
+import { seedSchedulingCases } from './scheduling-cases.seed';
 import { seedAccounts, seedTrainers } from './staff.seed';
+import { seedTraining } from './training.seed';
 
 /**
  * Builds the whole demo world for `today` (Dhaka date). Deterministic: the same day and the same code give the
@@ -33,19 +34,30 @@ export function seed(today: string, nowMinutes: number): MockDb {
         classTypes: [],
         sessions: [],
         bookings: [],
-        measurements: {},
-        routines: {},
-        workoutLog: {},
+        exercises: [],
+        routines: [],
+        workouts: [],
+        measurements: [],
         notes: [],
         enquiries: [],
+        messages: [],
+        rooms: [],
+        rules: [],
+        availability: [],
+        leave: [],
+        ptSessions: [],
+        lockers: [],
+        rentals: [],
+        blocks: [],
         counters: {}
     };
     seedMembers(db, today);
     db.accounts = seedAccounts(branches, 'mem-gul-1', SCRIPTED[0].code);
-    seedMeasurements(db, today);
     seedAttendance(db, today, nowMinutes);
     seedEveryCase(db, today);
+    seedFacilities(db);
     seedClasses(db, today);
-    seedRoutines(db);
+    seedSchedulingCases(db, today);
+    seedTraining(db, today);
     return db;
 }

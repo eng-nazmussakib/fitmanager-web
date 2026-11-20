@@ -73,6 +73,31 @@ const SAMPLE = 3000;
                         A new rate applies to quotes and sales from the moment you save. Invoices already issued keep the rate printed on them.
                     </fm-alert>
                 </fm-card>
+                <fm-card subtitle="Every branch's timetable and the member portal follow these (D-081)." title="Class booking">
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <fm-field label="Opens, days ahead" required>
+                            <fm-number-input formControlName="booking_open_days" [max]="60" [min]="1" />
+                        </fm-field>
+                        <fm-field label="Upcoming bookings per member" required>
+                            <fm-number-input formControlName="booking_max_active" [max]="50" [min]="1" />
+                        </fm-field>
+                        <fm-field hint="Later counts as a missed class." label="Free cancel, hours before" required>
+                            <fm-number-input formControlName="booking_cancel_hours" [max]="72" [min]="0" />
+                        </fm-field>
+                        <fm-field label="Missed classes that pause booking" required>
+                            <fm-number-input formControlName="noshow_limit" [max]="20" [min]="1" />
+                        </fm-field>
+                        <fm-field label="Counted over, days" required>
+                            <fm-number-input formControlName="noshow_window_days" [max]="365" [min]="1" />
+                        </fm-field>
+                        <fm-field label="Pause for, days" required>
+                            <fm-number-input formControlName="noshow_block_days" [max]="90" [min]="1" />
+                        </fm-field>
+                    </div>
+                    <p class="mt-3 text-sm text-fg-muted">
+                        A late cancel or a no-show is a missed class. The same window applies to PT sessions a member cancels.
+                    </p>
+                </fm-card>
                 <fm-card subtitle="Which plans may freeze is set on each plan template." title="Freezes">
                     <div class="grid gap-4 sm:grid-cols-3">
                         <fm-field label="Shortest (days)" required>
@@ -122,7 +147,13 @@ export class HqSettingsPageComponent {
         vat_inclusive: [false],
         freeze_min_days: [7, [Validators.required, Validators.min(1), Validators.max(MAX_FREEZE_DAYS)]],
         freeze_max_days: [60, [Validators.required, Validators.min(1), Validators.max(MAX_FREEZE_DAYS)]],
-        freeze_max_count: [2, [Validators.required, Validators.min(0), Validators.max(12)]]
+        freeze_max_count: [2, [Validators.required, Validators.min(0), Validators.max(12)]],
+        booking_open_days: [7, [Validators.required, Validators.min(1), Validators.max(60)]],
+        booking_max_active: [4, [Validators.required, Validators.min(1), Validators.max(50)]],
+        booking_cancel_hours: [2, [Validators.required, Validators.min(0), Validators.max(72)]],
+        noshow_limit: [3, [Validators.required, Validators.min(1), Validators.max(20)]],
+        noshow_window_days: [30, [Validators.required, Validators.min(1), Validators.max(365)]],
+        noshow_block_days: [7, [Validators.required, Validators.min(1), Validators.max(90)]]
     });
     protected readonly maxFreeze = MAX_FREEZE_DAYS;
     private readonly _value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -151,7 +182,13 @@ export class HqSettingsPageComponent {
             vat_inclusive: s.vat_inclusive,
             freeze_min_days: s.freeze_min_days,
             freeze_max_days: s.freeze_max_days,
-            freeze_max_count: s.freeze_max_count
+            freeze_max_count: s.freeze_max_count,
+            booking_open_days: s.booking_open_days,
+            booking_max_active: s.booking_max_active,
+            booking_cancel_hours: s.booking_cancel_hours,
+            noshow_limit: s.noshow_limit,
+            noshow_window_days: s.noshow_window_days,
+            noshow_block_days: s.noshow_block_days
         });
     }
 
@@ -167,7 +204,13 @@ export class HqSettingsPageComponent {
             vat_inclusive: v.vat_inclusive,
             freeze_min_days: Number(v.freeze_min_days),
             freeze_max_days: Number(v.freeze_max_days),
-            freeze_max_count: Number(v.freeze_max_count)
+            freeze_max_count: Number(v.freeze_max_count),
+            booking_open_days: Number(v.booking_open_days),
+            booking_max_active: Number(v.booking_max_active),
+            booking_cancel_hours: Number(v.booking_cancel_hours),
+            noshow_limit: Number(v.noshow_limit),
+            noshow_window_days: Number(v.noshow_window_days),
+            noshow_block_days: Number(v.noshow_block_days)
         };
         this.saving.set(true);
         this._api.patch<OrgSettings>('/v1/hq/settings', body).subscribe({

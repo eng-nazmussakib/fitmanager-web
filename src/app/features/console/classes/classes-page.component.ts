@@ -14,15 +14,19 @@ import { CanDirective } from '@shared/directives/can.directive';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { DialogComponent } from '@shared/ui/dialog/dialog.component';
-import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/display/display';
+import { DialogService } from '@shared/ui/dialog/dialog.service';
+import { BadgeComponent, CardComponent, DividerDirective, SkeletonComponent } from '@shared/ui/display/display';
 import { EmptyStateComponent } from '@shared/ui/feedback/empty-state.component';
 import { todayIso } from '@shared/ui/forms/date-picker.component';
 import { FieldComponent, InputDirective, PrefixDirective } from '@shared/ui/forms/field.component';
+import { SelectComponent, type SelectOption } from '@shared/ui/forms/select.component';
 import { SwitchComponent } from '@shared/ui/forms/switch.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 import { ConsoleService } from '../console.service';
+import { SchedulingService } from '../scheduling.service';
 import { type Lane, lanes } from './class-lanes';
+import { type ClassRulesData, ClassRulesDialogComponent } from './class-rules-dialog.component';
 
 /** Grid hours: 06:00 to 22:00. */
 const FIRST_HOUR = 6;
@@ -64,6 +68,8 @@ const COLORS: Record<ClassType['color'], string> = {
         InputDirective,
         PrefixDirective,
         SwitchComponent,
+        SelectComponent,
+        DividerDirective,
         IconComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,6 +80,14 @@ const COLORS: Record<ClassType['color'], string> = {
                 <button fmButton (click)="goToday()">This week</button>
                 <button aria-label="Next week" fmButton iconOnly (click)="go(7)"><fm-icon name="chevron-right" /></button>
             </div>
+            <button *appCan="'manage'; on: 'Class'" fmButton (click)="openRules(false)">
+                <fm-icon name="repeat" />
+                Weekly classes
+            </button>
+            <button *appCan="'manage'; on: 'Class'" fmButton variant="primary" (click)="openRules(true)">
+                <fm-icon name="plus" />
+                Add a class
+            </button>
         </app-page-header>
 
         <div class="mb-4 flex flex-wrap items-center gap-4">
@@ -136,7 +150,11 @@ const COLORS: Record<ClassType['color'], string> = {
                                     type="button"
                                     [attr.aria-label]="sessionLabel(s)"
                                     [attr.title]="sessionLabel(s)"
-                                    [class]="colors[s.color]"
+                                    [class]="
+                                        colors[s.color] +
+                                        (s.cancelled ? ' line-through opacity-50' : '') +
+                                        (s.blocked && !s.cancelled ? ' ring-2 ring-warning' : '')
+                                    "
                                     [style.height.px]="height(s)"
                                     [style.left]="laneLeft(d.lanes, s)"
                                     [style.top.px]="top(s)"
@@ -177,7 +195,7 @@ const COLORS: Record<ClassType['color'], string> = {
                                         <button
                                             class="fm-focusable flex w-full items-center gap-3 rounded-lg border-l-4 px-3 py-2.5 text-left"
                                             type="button"
-                                            [class]="colors[s.color]"
+                                            [class]="colors[s.color] + (s.cancelled ? ' line-through opacity-50' : '')"
                                             (click)="open(s)"
                                         >
                                             <span class="w-16 shrink-0 text-sm font-semibold tabular-nums">{{ s.starts_at | appDate: 'h:mm a' }}</span>
@@ -213,9 +231,62 @@ const COLORS: Record<ClassType['color'], string> = {
                         @if (s.ladies_only) {
                             <fm-badge tone="primary">Ladies only</fm-badge>
                         }
+                        @if (s.cancelled) {
+                            <fm-badge tone="danger">Cancelled: {{ s.cancel_reason }}</fm-badge>
+                        }
+                        @if (s.blocked && !s.cancelled) {
+                            <fm-badge tone="warning">Room under maintenance: move or cancel</fm-badge>
+                        }
+                        @if (s.detached && s.schedule_oid) {
+                            <fm-badge>Changed on its own</fm-badge>
+                        }
                     </div>
+                    @if (!past(s) && !s.cancelled && auth.can('manage', 'Class')) {
+                        <details class="rounded-lg border border-border p-3">
+                            <summary class="cursor-pointer text-sm font-medium">Change or cancel this class</summary>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <fm-field label="Trainer">
+                                    <fm-select
+                                        ariaLabel="Trainer"
+                                        [ngModel]="editTrainer()"
+                                        [options]="trainerOptions()"
+                                        (ngModelChange)="editTrainer.set($event)"
+                                    />
+                                </fm-field>
+                                <fm-field label="Room">
+                                    <fm-select ariaLabel="Room" [ngModel]="editRoom()" [options]="roomOptions()" (ngModelChange)="editRoom.set($event)" />
+                                </fm-field>
+                                <fm-field hint="HH:mm" label="Starts at">
+                                    <input fmInput maxlength="5" [ngModel]="editTime()" (ngModelChange)="editTime.set($event)" />
+                                </fm-field>
+                                <fm-field label="Places">
+                                    <input fmInput inputmode="numeric" [ngModel]="editCapacity()" (ngModelChange)="editCapacity.set(+$event || 0)" />
+                                </fm-field>
+                            </div>
+                            <div class="mt-2 flex justify-end">
+                                <button fmButton size="sm" [loading]="busy() === 'edit'" (click)="saveSession(s)">Save change</button>
+                            </div>
+                            <hr fmDivider />
+                            <fm-field label="Reason to cancel">
+                                <input fmInput maxlength="300" [ngModel]="cancelReason()" (ngModelChange)="cancelReason.set($event)" />
+                            </fm-field>
+                            <p class="mt-1 text-xs text-fg-subtle">Everyone booked gets a message in their portal.</p>
+                            <div class="mt-2 flex justify-end">
+                                <button
+                                    fmButton
+                                    size="sm"
+                                    variant="danger"
+                                    [disabled]="cancelReason().trim().length < 3"
+                                    [loading]="busy() === 'cancel'"
+                                    (click)="cancelSession(s)"
+                                >
+                                    Cancel class
+                                </button>
+                            </div>
+                        </details>
+                    }
 
-                    @if (!past(s)) {
+                    @if (!past(s) && !s.cancelled) {
                         <div *appCan="'create'; on: 'Booking'" class="relative">
                             <fm-field label="Book a member">
                                 <fm-icon class="text-fg-subtle" name="search" fmPrefix />
@@ -320,6 +391,8 @@ const COLORS: Record<ClassType['color'], string> = {
 })
 export class ClassesPageComponent {
     private readonly _service = inject(ConsoleService);
+    private readonly _scheduling = inject(SchedulingService);
+    private readonly _dialog = inject(DialogService);
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
     protected readonly auth = inject(AuthService);
@@ -338,6 +411,15 @@ export class ClassesPageComponent {
     protected readonly drawerOpen = signal(false);
     protected readonly bookQuery = signal('');
     protected readonly busy = signal<string | null>(null);
+    protected readonly editTrainer = signal('');
+    protected readonly editRoom = signal('');
+    protected readonly editTime = signal('');
+    protected readonly editCapacity = signal(0);
+    protected readonly cancelReason = signal('');
+    protected readonly trainerOptions = computed<SelectOption<string>[]>(() => (this.data.value()?.trainers ?? []).map(t => ({ value: t.oid, label: t.name })));
+    protected readonly roomOptions = computed<SelectOption<string>[]>(() =>
+        (this.data.value()?.rooms ?? []).filter(r => r.active).map(r => ({ value: r.oid, label: r.name, description: `Holds ${r.capacity}` }))
+    );
     private readonly _matches = signal<MemberListItem[]>([]);
     protected readonly matches = this._matches.asReadonly();
 
@@ -431,7 +513,42 @@ export class ClassesPageComponent {
     protected open(s: ClassSession): void {
         this.selected.set(s);
         this.bookQuery.set('');
+        this.editTrainer.set(s.trainer_oid);
+        this.editRoom.set(s.room_oid ?? '');
+        this.editTime.set(s.starts_at.slice(11, 16));
+        this.editCapacity.set(s.capacity);
+        this.cancelReason.set('');
         this.drawerOpen.set(true);
+    }
+
+    protected openRules(oneOff: boolean): void {
+        const d = this.data.value();
+        if (!d) return;
+        this._dialog
+            .open<ClassRulesDialogComponent, ClassRulesData, boolean>(ClassRulesDialogComponent, {
+                data: { types: d.types, trainers: d.trainers, rooms: d.rooms, oneOff },
+                size: 'lg'
+            })
+            .afterClosed.subscribe(changed => {
+                if (changed) this.data.reload();
+            });
+    }
+
+    protected saveSession(s: ClassSession): void {
+        this.busy.set('edit');
+        this._scheduling
+            .updateSession(s.oid, {
+                trainer_oid: this.editTrainer(),
+                room_oid: this.editRoom(),
+                start_time: this.editTime(),
+                capacity: this.editCapacity()
+            })
+            .subscribe({ next: () => this._after(), error: () => this.busy.set(null) });
+    }
+
+    protected cancelSession(s: ClassSession): void {
+        this.busy.set('cancel');
+        this._scheduling.cancelSession(s.oid, this.cancelReason().trim()).subscribe({ next: () => this._after(), error: () => this.busy.set(null) });
     }
 
     protected book(m: MemberListItem): void {

@@ -35,6 +35,8 @@ export function seedPlans(branches: Branch[]): { templates: PlanTemplate[]; plan
                 features: tier.features ?? [],
                 featured: !!tier.featured,
                 freezable: true,
+                kind: 'membership',
+                sessions: null,
                 sort_order: templates.length * 10,
                 active: true,
                 branches_using: sellers.length
@@ -57,12 +59,72 @@ export function seedPlans(branches: Branch[]): { templates: PlanTemplate[]; plan
                     features: tier.features ?? [],
                     featured: !!tier.featured,
                     freezable: true,
+                    kind: 'membership',
+                    sessions: null,
                     active: true,
                     template_active: true,
                     sellable: true
                 });
             }
         }
+    }
+    // PT packages (D-079), as the API's seed (005_scheduling.sql): sold with a membership, never on the public list.
+    const pt: [string, string, number, number, number, string[]][] = [
+        ['pt-1', '1 session', 1, 1, 1500, ['One hour with your trainer', 'Book a slot in the member portal']],
+        ['pt-8', '8 sessions', 2, 8, 10000, ['Eight hours with your trainer', 'A routine built for you', 'Use within 2 months']],
+        [
+            'pt-16',
+            '16 sessions',
+            3,
+            16,
+            18000,
+            ['Sixteen hours with your trainer', 'A routine built for you', 'Monthly body measurements', 'Use within 3 months']
+        ]
+    ];
+    for (const [period, label, months, sessions, base, features] of pt) {
+        const tplOid = `tpl-pt-${period}`;
+        templates.push({
+            oid: tplOid,
+            tier: 'pt',
+            tier_name: 'Personal training',
+            period,
+            period_label: label,
+            months,
+            base_price: base,
+            persons: 1,
+            features,
+            featured: false,
+            freezable: false,
+            kind: 'pt',
+            sessions,
+            sort_order: 1000 + sessions,
+            active: true,
+            branches_using: sellers.length
+        });
+        for (const b of sellers)
+            plans.push({
+                oid: `pl-${b.code.toLowerCase()}-${period}`,
+                branch_oid: b.oid,
+                template_oid: tplOid,
+                code: `${b.code}-PT-${sessions}`,
+                name: `Personal training · ${label}`,
+                tier: 'pt',
+                tier_name: 'Personal training',
+                period,
+                period_label: label,
+                months,
+                price: Math.round((base * (PRICE_FACTOR[b.code] ?? 1)) / 50) * 50,
+                admission_fee: 0,
+                persons: 1,
+                features,
+                featured: false,
+                freezable: false,
+                kind: 'pt',
+                sessions,
+                active: true,
+                template_active: true,
+                sellable: true
+            });
     }
     return { templates, plans };
 }

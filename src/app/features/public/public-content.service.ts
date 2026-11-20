@@ -9,6 +9,7 @@ import type { ApiResponse } from '@core/models/api-response.model';
 import type { Branch, BranchRef } from '@core/models/branch.model';
 import type { ClassSession, Trainer } from '@core/models/class.model';
 import type { Plan } from '@core/models/plan.model';
+import type { PublicTrainer } from '@core/models/scheduling.model';
 import { type SiteGroup, vatPercent } from '@core/models/settings.model';
 import { environment } from '@env/environment';
 
@@ -93,6 +94,26 @@ export class PublicContentService {
         );
     }
 
+    /** The public trainers (D-078), or null when there is no API to ask: the page keeps the brand config's. */
+    trainers(branchSlug = ''): Observable<Trainer[] | null> {
+        if (!this._api) return of(null);
+        return this._http.get<ApiResponse<Trainer[]>>(`${this._base}/trainers`, { params: branchSlug ? { branch: branchSlug } : {}, context: quiet() }).pipe(
+            timeout(5000),
+            map(r => r.data),
+            catchError(() => of(null))
+        );
+    }
+
+    /** One trainer's public page with their classes this week; null when unknown (or no API). */
+    trainer(slugValue: string): Observable<PublicTrainer | null> {
+        if (!this._api) return of(null);
+        return this._http.get<ApiResponse<PublicTrainer>>(`${this._base}/trainers/${slugValue}`, { context: quiet() }).pipe(
+            timeout(5000),
+            map(r => r.data),
+            catchError(() => of(null))
+        );
+    }
+
     enquire(body: { branch: string; name: string; phone: string; message: string }): Observable<string> {
         return this._http.post<ApiResponse<unknown>>(`${this._base}/enquiries`, body, { context: new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'errors') }).pipe(map(r => r.message));
     }
@@ -152,6 +173,8 @@ function configPlans(branchSlug: string): BranchPlans[] {
                         features: tier.features ?? [],
                         featured: !!tier.featured,
                         freezable: true,
+                        kind: 'membership' as const,
+                        sessions: null,
                         active: true,
                         template_active: true,
                         sellable: true

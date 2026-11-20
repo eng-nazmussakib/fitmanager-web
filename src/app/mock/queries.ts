@@ -13,7 +13,10 @@ import type { CheckInRow, MemberRow, MockDb } from './types';
  * their subscriptions, invoices and check-ins, so a sale or a check-in shows up on every screen at once.
  */
 interface Indexes {
+    /** Memberships only: a PT package gives credits, not a status (D-079). */
     subs: Map<string, Subscription[]>;
+    /** Every subscription, PT packages too (the member's plan list). */
+    allSubs: Map<string, Subscription[]>;
     invoices: Map<string, Invoice[]>;
     lastVisit: Map<string, string>;
     openCheckIn: Map<string, CheckInRow>;
@@ -28,8 +31,12 @@ export function idx(): Indexes {
     if (cached?.version === v) return cached.idx;
     const d = db();
     const subs = new Map<string, Subscription[]>();
-    for (const s of d.subscriptions) (subs.get(s.member_oid) ?? subs.set(s.member_oid, []).get(s.member_oid)!).push(s);
-    for (const list of subs.values()) list.sort((a, b) => (a.start_date < b.start_date ? -1 : 1));
+    const allSubs = new Map<string, Subscription[]>();
+    for (const s of d.subscriptions) {
+        (allSubs.get(s.member_oid) ?? allSubs.set(s.member_oid, []).get(s.member_oid)!).push(s);
+        if (s.kind !== 'pt') (subs.get(s.member_oid) ?? subs.set(s.member_oid, []).get(s.member_oid)!).push(s);
+    }
+    for (const list of [...subs.values(), ...allSubs.values()]) list.sort((a, b) => (a.start_date < b.start_date ? -1 : 1));
     const invoices = new Map<string, Invoice[]>();
     for (const i of d.invoices) (invoices.get(i.member_oid) ?? invoices.set(i.member_oid, []).get(i.member_oid)!).push(i);
     const lastVisit = new Map<string, string>();
@@ -40,7 +47,7 @@ export function idx(): Indexes {
     }
     const members = new Map(d.members.map(m => [m.oid, m]));
     const byCode = new Map(d.members.map(m => [m.code.toUpperCase(), m]));
-    cached = { version: v, idx: { subs, invoices, lastVisit, openCheckIn, members, byCode } };
+    cached = { version: v, idx: { subs, allSubs, invoices, lastVisit, openCheckIn, members, byCode } };
     return cached.idx;
 }
 
@@ -115,6 +122,7 @@ export function memberDetail(m: MemberRow, today: string, d: MockDb = db()): Mem
         emergency_contact: m.emergency_contact,
         health_flags: m.health_flags,
         health_declared: m.health_declared,
+        trainer_oid: m.trainer_oid,
         trainer_name: d.trainers.find(t => t.oid === m.trainer_oid)?.name ?? null,
         current_subscription_oid: s.current?.oid ?? null,
         notes: m.suspended ? `Suspended: ${m.suspended.reason}` : m.notes

@@ -26,6 +26,8 @@ export type Action = 'manage' | 'read' | 'create' | 'update' | 'delete' | 'expor
  * - HQ: HqDashboard, Branch, PlanTemplate, Staff, Settings.
  * - Both consoles: AuditLog (read only; HQ reads across its branches, a branch manager their own branch).
  * - Member portal: Portal.
+ * - Phase 3 (D-083): Room, Locker (`manage` = set up; `create`/`update` = rent), PtSession, ClassType (HQ).
+ * - Phase 4 (D-086): Exercise, Routine, Workout, Measurement.
  */
 export type Subject =
     | 'Dashboard'
@@ -48,6 +50,14 @@ export type Subject =
     | 'Settings'
     | 'AuditLog'
     | 'Portal'
+    | 'Room'
+    | 'Locker'
+    | 'PtSession'
+    | 'ClassType'
+    | 'Exercise'
+    | 'Routine'
+    | 'Workout'
+    | 'Measurement'
     | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subject]>;

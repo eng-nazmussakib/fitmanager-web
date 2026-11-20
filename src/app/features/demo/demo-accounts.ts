@@ -75,7 +75,7 @@ export const DEMO_ROLES: DemoRole[] = [
         role: 'Member',
         icon: 'user',
         blurb: 'The member app on a phone: membership card, routine, bookings, progress.',
-        guestBlurb: 'The member portal on a phone: membership status, dues, invoices and receipts, visits and messages.'
+        guestBlurb: 'The member portal on a phone: membership status, classes and PT, routine and progress, invoices and visits.'
     }
 ];
 

@@ -145,6 +145,12 @@ export function seedSettings(): OrgSettings {
         freeze_min_days: 7,
         freeze_max_days: 60,
         freeze_max_count: 2,
+        booking_open_days: 7,
+        booking_max_active: 4,
+        booking_cancel_hours: 2,
+        noshow_limit: 3,
+        noshow_window_days: 30,
+        noshow_block_days: 7,
         updated_at: null,
         updated_by: null
     };

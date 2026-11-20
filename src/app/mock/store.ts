@@ -9,7 +9,7 @@ import { invoiceDue, invoiceStatus, type Promo } from './domain/pricing';
 import { dhakaNow } from './seed/clock';
 import { seed } from './seed/seed';
 import type { MockAccount } from './seed/staff.seed';
-import type { CheckInRow, ClosingRow, EnquiryRow, FileRow, MemberRow, MockDb, NoteRow } from './types';
+import type { CheckInRow, ClosingRow, EnquiryRow, FileRow, MemberRow, MockDb, NoteRow, TableName } from './types';
 
 /**
  * In-memory state for the mock API.
@@ -25,6 +25,7 @@ export type Mutation =
     | { t: 'subscription.create'; sub: Subscription; invoice: Invoice; invoiceSeq: number }
     | { t: 'payment.create'; invoice_oid: string; payment: PaymentRecord }
     | { t: 'subscription.freeze'; oid: string; freeze: Freeze; end_date: string }
+    | { t: 'invoice.create'; invoice: Invoice; invoiceSeq: number }
     | { t: 'checkin.create'; row: CheckInRow }
     | { t: 'checkin.out'; oid: string; at: string }
     | { t: 'booking.create'; booking: Booking }
@@ -39,10 +40,15 @@ export type Mutation =
     | { t: 'subscription.end'; oid: string; end_date: string; reason: string; at: string; upgraded_to: string | null }
     | { t: 'closing.add'; row: ClosingRow }
     | { t: 'file.add'; row: FileRow }
+    | { t: 'file.patch'; oid: string; patch: Partial<FileRow> }
     | { t: 'group.update'; key: string; patch: SiteGroupUpdate; at: string; by: string }
     /** Staff management (phase 1): the whole account, added or replaced by username. */
     | { t: 'account.put'; account: MockAccount }
-    | { t: 'audit.add'; row: AuditEntry };
+    | { t: 'audit.add'; row: AuditEntry }
+    /** Phase 3 on: add or replace a row by oid, change some of its fields, or drop it, in one of the plain tables. */
+    | { t: 'put'; table: TableName; row: object }
+    | { t: 'patch'; table: TableName; oid: string; patch: Record<string, unknown> }
+    | { t: 'drop'; table: TableName; oid: string };
 
 interface Snapshot {
     v: 1;
@@ -157,6 +163,12 @@ function apply(d: MockDb, m: Mutation): void {
             if (row) Object.assign(row, m.patch);
             break;
         }
+        case 'invoice.create': {
+            d.invoices.push(m.invoice);
+            const key = `invoice:${m.invoice.branch.code}`;
+            d.counters[key] = Math.max(d.counters[key] ?? 0, m.invoiceSeq);
+            break;
+        }
         case 'subscription.create': {
             d.subscriptions.push(m.sub);
             d.invoices.push(m.invoice);
@@ -203,6 +215,11 @@ function apply(d: MockDb, m: Mutation): void {
         case 'file.add':
             (d.files ??= []).push(m.row);
             break;
+        case 'file.patch': {
+            const f = d.files?.find(x => x.oid === m.oid);
+            if (f) Object.assign(f, m.patch);
+            break;
+        }
         case 'subscription.freeze': {
             const sub = d.subscriptions.find(s => s.oid === m.oid);
             if (sub) {
@@ -233,7 +250,7 @@ function apply(d: MockDb, m: Mutation): void {
             break;
         }
         case 'workout.log':
-            (d.workoutLog[m.member_oid] ??= []).push(m.date);
+            // Phase 0.5's "logged today", left in older saved demos: the phase 4 workouts replaced it.
             break;
         case 'template.update': {
             const tpl = d.templates.find(x => x.oid === m.oid);
@@ -250,6 +267,8 @@ function apply(d: MockDb, m: Mutation): void {
                     features: tpl.features,
                     featured: tpl.featured,
                     freezable: tpl.freezable,
+                    kind: tpl.kind,
+                    sessions: tpl.sessions,
                     template_active: tpl.active,
                     sellable: p.active && tpl.active
                 });
@@ -301,6 +320,27 @@ function apply(d: MockDb, m: Mutation): void {
         case 'audit.add':
             d.audit.push(m.row);
             break;
+        case 'put': {
+            const list = d[m.table] as object[] as { oid: string }[];
+            const row = m.row as { oid: string };
+            const i = list.findIndex(x => x.oid === row.oid);
+            if (i >= 0) list[i] = row;
+            else list.push(row);
+            if (m.table === 'bookings') recount(d, (m.row as Booking).session_oid);
+            break;
+        }
+        case 'patch': {
+            const row = (d[m.table] as { oid: string }[]).find(x => x.oid === m.oid);
+            if (row) Object.assign(row, m.patch);
+            if (row && m.table === 'bookings') recount(d, (row as Booking).session_oid);
+            break;
+        }
+        case 'drop': {
+            const list = d[m.table] as { oid: string }[];
+            const i = list.findIndex(x => x.oid === m.oid);
+            if (i >= 0) list.splice(i, 1);
+            break;
+        }
     }
 }
 

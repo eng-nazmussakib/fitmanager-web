@@ -15,6 +15,7 @@ Open `/demo` to pick an account (the same list as below), or sign in at `/auth/s
 | Account             | Password      | Sees                                                              |
 | ------------------- | ------------- | ----------------------------------------------------------------- |
 | `owner`             | `Owner@123`   | HQ console and every branch                                       |
+| `admin.hq`          | `Admin@123`   | HQ admin: branch plans, branch staff, settings; every branch read-only |
 | `manager.gulshan`   | `Manager@123` | Gulshan branch console, with overrides and discounts above 20 %    |
 | `desk.gulshan`      | `Desk@123`    | Gulshan front desk: check-in, members, selling plans              |
 | `trainer.gulshan`   | `Trainer@123` | Gulshan classes and bookings                                      |

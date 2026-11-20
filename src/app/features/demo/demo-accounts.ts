@@ -12,7 +12,7 @@ export interface DemoRole {
     /** The mock's demo account for this role. */
     username: string;
     /** The role code the API's guest list names (D-076): matches a guest account to its card. */
-    key: 'OWNER' | 'BRANCH_MANAGER' | 'FRONT_DESK' | 'TRAINER' | 'MEMBER';
+    key: 'OWNER' | 'HQ_ADMIN' | 'BRANCH_MANAGER' | 'FRONT_DESK' | 'TRAINER' | 'MEMBER';
     role: string;
     icon: IconName;
     /** What this role shows in the demo (phase 0.5 brief). */
@@ -40,6 +40,13 @@ export const DEMO_ROLES: DemoRole[] = [
         role: 'Owner (HQ)',
         icon: 'building-2',
         blurb: 'Compare branches on the HQ dashboard: revenue, dues, attendance, retention.'
+    },
+    {
+        username: 'admin.hq',
+        key: 'HQ_ADMIN',
+        role: 'HQ admin',
+        icon: 'clipboard-list',
+        blurb: 'Run HQ for the owner: branch plans and prices, branch staff, VAT settings, every branch read-only.'
     },
     {
         username: 'manager.gulshan',

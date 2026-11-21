@@ -22,14 +22,31 @@ export interface MockAccount {
  * Phase 3 (D-083): `manage Locker` sets lockers up, the desk's `create`/`update Locker` rents them; a trainer's
  * `update Trainer` and `update PtSession` are narrowed to their own profile and sessions (by the API, and here).
  */
-/** The role rules of migrations 018 and 019 (D-083, D-086). */
+/** The role rules of migration 020 (D-083, D-086, D-097): the full set per role, as the API sends them. */
 export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
     OWNER: [{ action: 'manage', subject: 'all' }],
     HQ_ADMIN: [
-        // Only HQ changes the plans a branch sells (D-044): HQ_ADMIN manages Plan; branch roles only read it.
         {
             action: 'manage',
-            subject: ['HqDashboard', 'Branch', 'PlanTemplate', 'Plan', 'Staff', 'Settings', 'Report', 'ClassType', 'Trainer', 'Exercise', 'Routine']
+            subject: [
+                'HqDashboard',
+                'Branch',
+                'PlanTemplate',
+                'Plan',
+                'Staff',
+                'Settings',
+                'Report',
+                'ClassType',
+                'Trainer',
+                'Exercise',
+                'Routine',
+                'Policy',
+                'Incident',
+                'Complaint',
+                'Product',
+                'Supplier',
+                'PurchaseOrder'
+            ]
         },
         {
             action: 'read',
@@ -48,12 +65,16 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
                 'PtSession',
                 'Workout',
                 'Measurement',
-                'AuditLog'
+                'AuditLog',
+                'Feedback',
+                'Equipment',
+                'Stock',
+                'Transfer',
+                'Sale'
             ]
         }
     ],
     BRANCH_MANAGER: [
-        // Staff: front desk and trainers at their own branch only (D-055; the API enforces the narrowing).
         {
             action: 'manage',
             subject: [
@@ -74,20 +95,33 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
                 'Exercise',
                 'Routine',
                 'Workout',
-                'Measurement'
+                'Measurement',
+                'Incident',
+                'Complaint',
+                'Equipment',
+                'Stock',
+                'Transfer',
+                'Sale'
             ]
         },
-        { action: 'read', subject: ['Dashboard', 'Plan', 'Report', 'AuditLog'] }
+        { action: ['read', 'create', 'update'], subject: ['PurchaseOrder'] },
+        // Exports (D-107, migration 022): `export Report`.
+        { action: ['read', 'export'], subject: ['Report'] },
+        { action: 'read', subject: ['Dashboard', 'Plan', 'AuditLog', 'Policy', 'Feedback', 'Product', 'Supplier'] }
     ],
     FRONT_DESK: [
-        { action: ['read', 'create', 'update'], subject: ['Member', 'Attendance', 'Booking', 'Locker', 'PtSession', 'Measurement'] },
-        { action: ['read', 'create'], subject: ['Subscription', 'Payment'] },
-        { action: 'read', subject: ['Invoice', 'CashClosing', 'Plan', 'Class', 'Dashboard', 'Trainer', 'Room', 'Exercise', 'Routine', 'Workout'] }
+        { action: ['read', 'create', 'update'], subject: ['Member', 'Attendance', 'Booking', 'Locker', 'PtSession', 'Measurement', 'Complaint'] },
+        { action: ['read', 'create'], subject: ['Subscription', 'Payment', 'Incident', 'Equipment', 'Sale'] },
+        {
+            action: 'read',
+            subject: ['Invoice', 'CashClosing', 'Plan', 'Class', 'Dashboard', 'Trainer', 'Room', 'Exercise', 'Routine', 'Workout', 'Policy', 'Product', 'Stock']
+        }
     ],
     TRAINER: [
         { action: ['read', 'update'], subject: ['Class', 'Trainer'] },
         { action: ['read', 'create', 'update'], subject: ['Booking', 'PtSession', 'Exercise', 'Routine', 'Workout', 'Measurement'] },
-        { action: 'read', subject: ['Member', 'Room'] }
+        { action: ['read', 'create'], subject: ['Incident', 'Equipment'] },
+        { action: 'read', subject: ['Member', 'Room', 'Policy', 'Feedback'] }
     ]
 };
 

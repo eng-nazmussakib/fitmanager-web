@@ -14,6 +14,8 @@ interface PortalTab {
     icon: IconName;
     link: string;
     exact?: boolean;
+    /** Not on the phone's bottom bar (six fit): reached from the home page and the account menu there. */
+    sidebarOnly?: boolean;
 }
 
 const TABS: PortalTab[] = [
@@ -22,7 +24,10 @@ const TABS: PortalTab[] = [
     { label: 'PT', icon: 'users-round', link: '/me/pt' },
     { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
     { label: 'Progress', icon: 'trending-up', link: '/me/progress' },
-    { label: 'Payments', icon: 'receipt', link: '/me/payments' }
+    { label: 'Payments', icon: 'receipt', link: '/me/payments' },
+    { label: 'Policies', icon: 'book-open', link: '/me/policies', sidebarOnly: true },
+    { label: 'My record', icon: 'badge-check', link: '/me/record', sidebarOnly: true },
+    { label: 'Complaints', icon: 'message-square', link: '/me/complaints', sidebarOnly: true }
 ];
 
 /**
@@ -56,6 +61,19 @@ const TABS: PortalTab[] = [
                 </button>
                 <fm-menu #account label="Account">
                     <p class="fm-menu-label" aria-hidden="true">{{ user()?.name }} · {{ user()?.member?.code }}</p>
+                    <div class="fm-menu-sep" role="separator"></div>
+                    <a fmMenuItem routerLink="/me/policies">
+                        <fm-icon name="book-open" size="1rem" />
+                        Policies
+                    </a>
+                    <a fmMenuItem routerLink="/me/record">
+                        <fm-icon name="badge-check" size="1rem" />
+                        My record
+                    </a>
+                    <a fmMenuItem routerLink="/me/complaints">
+                        <fm-icon name="message-square" size="1rem" />
+                        Complaints
+                    </a>
                     <div class="fm-menu-sep" role="separator"></div>
                     <button danger fmMenuItem (click)="auth.logout()">
                         <fm-icon name="log-out" size="1rem" />
@@ -93,7 +111,7 @@ const TABS: PortalTab[] = [
             aria-label="Portal"
         >
             <ul class="mx-auto grid max-w-lg grid-cols-6">
-                @for (t of tabs; track t.link) {
+                @for (t of barTabs; track t.link) {
                     <li>
                         <a
                             class="fm-focusable flex h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] font-medium text-fg-subtle no-underline"
@@ -115,4 +133,5 @@ export class PortalLayoutComponent {
     protected readonly auth = inject(AuthService);
     protected readonly user = this.auth.user;
     protected readonly tabs = TABS;
+    protected readonly barTabs = TABS.filter(t => !t.sidebarOnly);
 }

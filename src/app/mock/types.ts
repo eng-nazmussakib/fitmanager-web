@@ -1,5 +1,18 @@
 import type { Branch } from '@core/models/branch.model';
+import type {
+    AdjustReason,
+    EquipmentCategory,
+    EquipmentStatus,
+    MovementKind,
+    PoStatus,
+    ProductCategory,
+    ProductUnit,
+    TicketPriority,
+    TicketStatus,
+    TransferStatus
+} from '@core/models/business.model';
 import type { Booking, ClassSession, ClassType, Trainer } from '@core/models/class.model';
+import type { ComplaintCategory, ComplaintStatus, GiverRole, IncidentCategory, PolicyMode, SanctionLevel } from '@core/models/governance.model';
 import type { Gender } from '@core/models/member.model';
 import type { Invoice } from '@core/models/payment.model';
 import type { Plan, PlanTemplate } from '@core/models/plan.model';
@@ -7,6 +20,7 @@ import type { OrgSettings, SiteGroup } from '@core/models/settings.model';
 import type { AuditEntry } from '@core/models/staff.model';
 import type { Subscription } from '@core/models/subscription.model';
 import type { Equipment, ExerciseCategory, Goal, Level, Measure, Muscle, RoutineDay, WorkoutSet } from '@core/models/training.model';
+import type { FileKind } from '@core/services/files.service';
 
 import type { Promo } from './domain/pricing';
 import type { MockAccount } from './seed/staff.seed';
@@ -30,8 +44,6 @@ export interface MemberRow {
     health_declared: boolean;
     photo_url: string | null;
     joined_on: string;
-    /** Set by the branch; overrides the subscription-derived status. */
-    suspended: { since: string; reason: string } | null;
     /** A join request without a first payment (D-022). */
     pending: boolean;
     trainer_oid: string | null;
@@ -75,7 +87,7 @@ export interface FileRow {
     oid: string;
     branch_oid: string;
     member_oid: string | null;
-    kind: 'member_photo' | 'member_document' | 'trainer_photo' | 'exercise_photo' | 'exercise_video' | 'measurement_photo';
+    kind: FileKind;
     name: string;
     content_type: string;
     size_bytes: number;
@@ -290,7 +302,342 @@ export interface MeasurementRow {
     created_at: string;
 }
 
+/* ---------- phase 5: governance (D-090 to D-097) ---------- */
+
+/** HQ master data, read by every branch (no RLS in the API). */
+export interface PolicyRow {
+    oid: string;
+    slug: string;
+    title: string;
+    summary: string | null;
+    required: boolean;
+    public: boolean;
+    sort_order: number;
+    active: boolean;
+    updated_at: string;
+}
+
+export interface PolicyVersionRow {
+    oid: string;
+    policy_oid: string;
+    version: number;
+    mode: PolicyMode;
+    change_note: string | null;
+    published_on: string;
+    published_by_name: string | null;
+    clauses: { oid: string; number: string; heading: string; body: string }[];
+}
+
+export interface AcceptanceRow {
+    oid: string;
+    branch_oid: string;
+    member_oid: string;
+    policy_oid: string;
+    version_oid: string;
+    version: number;
+    method: 'portal' | 'paper';
+    recorded_by_name: string | null;
+    accepted_at: string;
+}
+
+export interface IncidentRow {
+    oid: string;
+    branch_oid: string;
+    subject_kind: 'member' | 'staff';
+    member_oid: string | null;
+    member_branch_oid: string | null;
+    /** The staff member's username (the mock's account key). */
+    staff_username: string | null;
+    subject_name: string;
+    subject_code: string;
+    subject_role: string | null;
+    occurred_at: string;
+    category: IncidentCategory;
+    summary: string;
+    description: string;
+    clause_oid: string | null;
+    clause_label: string | null;
+    witnesses: string | null;
+    internal_notes: string | null;
+    evidence_file_oids: string[];
+    hq_only: boolean;
+    reported_by: string | null;
+    reported_by_name: string | null;
+    reported_role: GiverRole;
+    closed_at: string | null;
+    created_at: string;
+}
+
+export interface SanctionRow {
+    oid: string;
+    branch_oid: string;
+    incident_oid: string;
+    member_oid: string | null;
+    member_branch_oid: string | null;
+    staff_username: string | null;
+    level: SanctionLevel;
+    starts_on: string;
+    ends_on: string | null;
+    scope: 'branch' | 'all' | null;
+    reason: string;
+    suggested_level: SanctionLevel;
+    choice_reason: string | null;
+    given_by: string | null;
+    given_by_name: string;
+    given_role: GiverRole;
+    given_on: string;
+    membership_cancelled: boolean;
+    lifted: { at: string; by: string; reason: string } | null;
+    overturned_at: string | null;
+    appeal: {
+        oid: string;
+        body: string;
+        status: 'open' | 'upheld' | 'rejected';
+        filed_at: string;
+        filed_by_name: string;
+        decided_by_name: string | null;
+        decision_note: string | null;
+        decided_at: string | null;
+    } | null;
+}
+
+export interface ComplaintRow {
+    oid: string;
+    branch_oid: string;
+    code: string;
+    member_oid: string | null;
+    member_code: string | null;
+    member_name: string;
+    category: ComplaintCategory;
+    subject: string;
+    body: string;
+    photo_file_oid: string | null;
+    named_staff: string | null;
+    named_staff_name: string | null;
+    hq_only: boolean;
+    filed_via: 'portal' | 'desk';
+    status: ComplaintStatus;
+    first_response_at: string | null;
+    resolution: string | null;
+    resolved_at: string | null;
+    escalated: { at: string; by: 'manager' | 'member'; reason: string } | null;
+    member_accepted_at: string | null;
+    created_at: string;
+    updates: { oid: string; author: 'staff' | 'member'; author_name: string; body: string; status: ComplaintStatus | null; at: string }[];
+}
+
+export interface NpsRow {
+    oid: string;
+    branch_oid: string;
+    member_oid: string;
+    score: number | null;
+    comment: string | null;
+    created_at: string;
+}
+
+export interface RatingRow {
+    oid: string;
+    branch_oid: string;
+    member_oid: string;
+    member_name: string;
+    kind: 'class' | 'pt';
+    booking_oid: string | null;
+    pt_session_oid: string | null;
+    trainer_oid: string | null;
+    trainer_name: string | null;
+    label: string;
+    session_at: string;
+    score: number;
+    comment: string | null;
+    created_at: string;
+}
+
+/* ---------- phase 6: business (D-098 to D-102) ---------- */
+
+export interface EquipmentRow {
+    oid: string;
+    branch_oid: string;
+    name: string;
+    category: EquipmentCategory;
+    brand: string | null;
+    model: string | null;
+    serial: string | null;
+    purchased_on: string | null;
+    cost: number | null;
+    warranty_until: string | null;
+    room_oid: string | null;
+    photo_file_oid: string | null;
+    status: EquipmentStatus;
+    service_every_days: number | null;
+    last_serviced_on: string | null;
+    notes: string | null;
+    retired_on: string | null;
+    retired_reason: string | null;
+    created_on: string;
+}
+
+export interface TicketRow {
+    oid: string;
+    branch_oid: string;
+    equipment_oid: string;
+    code: string;
+    kind: 'repair' | 'service';
+    description: string;
+    photo_file_oid: string | null;
+    priority: TicketPriority;
+    out_of_order: boolean;
+    status: TicketStatus;
+    technician: string | null;
+    cost: number | null;
+    resolution: string | null;
+    raised_by_name: string;
+    raised_at: string;
+    updated_at: string;
+    closed_at: string | null;
+    closed_by_name: string | null;
+}
+
+export interface ProductRow {
+    oid: string;
+    code: string;
+    name: string;
+    category: ProductCategory;
+    unit: ProductUnit;
+    description: string | null;
+    price: number;
+    vat_rate: number | null;
+    photo_file_oids: string[];
+    supplier_oid: string | null;
+    reorder_level: number;
+    active: boolean;
+    updated_at: string;
+}
+
+export interface SupplierRow {
+    oid: string;
+    name: string;
+    contact_name: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    notes: string | null;
+    active: boolean;
+    updated_at: string;
+}
+
+/** One branch's stock of one product; `oid` = `<branch oid>:<product oid>`. */
+export interface StockRow {
+    oid: string;
+    branch_oid: string;
+    product_oid: string;
+    on_hand: number;
+    avg_cost: number;
+    reorder_level: number;
+}
+
+/** The ledger, append-only; `seq` orders moves made at the same time. */
+export interface MovementRow {
+    oid: string;
+    seq: number;
+    branch_oid: string;
+    product_oid: string;
+    kind: MovementKind;
+    qty: number;
+    unit_cost: number;
+    on_hand_after: number;
+    avg_cost_after: number;
+    reason: AdjustReason | null;
+    note: string | null;
+    ref_oid: string | null;
+    ref_label: string | null;
+    by_name: string;
+    at: string;
+}
+
+export interface PoRow {
+    oid: string;
+    branch_oid: string;
+    code: string;
+    supplier_oid: string;
+    supplier_name: string;
+    status: PoStatus;
+    note: string | null;
+    raised_by_name: string;
+    raised_at: string;
+    decided_by_name: string | null;
+    decided_at: string | null;
+    decision_note: string | null;
+    sent_at: string | null;
+    closed_at: string | null;
+    cancel_reason: string | null;
+    lines: { oid: string; product_oid: string; code: string; name: string; qty: number; unit_cost: number; received: number }[];
+    deliveries: {
+        oid: string;
+        received_on: string;
+        note: string | null;
+        by_name: string;
+        at: string;
+        lines: { line_oid: string; product_oid: string; qty: number; unit_cost: number }[];
+    }[];
+}
+
+export interface TransferRow {
+    oid: string;
+    code: string;
+    from_branch_oid: string;
+    to_branch_oid: string;
+    status: TransferStatus;
+    note: string | null;
+    requested_by_name: string;
+    requested_at: string;
+    sent_by_name: string | null;
+    sent_at: string | null;
+    received_by_name: string | null;
+    received_at: string | null;
+    closing_note: string | null;
+    closed_at: string | null;
+    lines: {
+        oid: string;
+        product_oid: string;
+        code: string;
+        name: string;
+        qty_requested: number;
+        qty_sent: number | null;
+        qty_received: number | null;
+        unit_cost: number | null;
+    }[];
+}
+
+export interface PosReturnRow {
+    oid: string;
+    branch_oid: string;
+    invoice_oid: string;
+    payment_oid: string;
+    lines: { index: number; product_oid: string; qty: number; damaged: boolean; amount: number }[];
+    amount: number;
+    reason: string;
+    by_name: string;
+    at: string;
+}
+
 export interface Tables {
+    equipment: EquipmentRow[];
+    tickets: TicketRow[];
+    products: ProductRow[];
+    suppliers: SupplierRow[];
+    stock: StockRow[];
+    movements: MovementRow[];
+    purchaseOrders: PoRow[];
+    transfers: TransferRow[];
+    posReturns: PosReturnRow[];
+    policies: PolicyRow[];
+    policyVersions: PolicyVersionRow[];
+    acceptances: AcceptanceRow[];
+    incidents: IncidentRow[];
+    sanctions: SanctionRow[];
+    complaints: ComplaintRow[];
+    nps: NpsRow[];
+    ratings: RatingRow[];
     exercises: ExerciseRow[];
     routines: RoutineRow[];
     workouts: WorkoutRow[];

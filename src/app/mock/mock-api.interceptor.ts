@@ -6,12 +6,15 @@ import { environment } from '@env/environment';
 
 import { ATTENDANCE_ROUTES } from './handlers/attendance.handlers';
 import { accountFromToken, AUTH_ROUTES } from './handlers/auth.handlers';
+import { BUSINESS_ROUTES } from './handlers/business.handlers';
 import { CLASS_ROUTES } from './handlers/classes.handlers';
 import { DASHBOARD_ROUTES } from './handlers/dashboard.handlers';
+import { GOVERNANCE_ROUTES } from './handlers/governance.handlers';
 import { MEMBER_ROUTES } from './handlers/members.handlers';
 import { PHASE2_ROUTES } from './handlers/phase2.handlers';
 import { PLAN_ROUTES } from './handlers/plans.handlers';
 import { PORTAL_ROUTES } from './handlers/portal.handlers';
+import { REPORT_ROUTES } from './handlers/reports.handlers';
 import { SALES_ROUTES } from './handlers/sales.handlers';
 import { SCHEDULING_ROUTES } from './handlers/scheduling.handlers';
 import { SETTINGS_ROUTES } from './handlers/settings.handlers';
@@ -23,6 +26,9 @@ import { db, fastMode } from './store';
 
 const ROUTES: Route[] = [
     ...AUTH_ROUTES,
+    ...GOVERNANCE_ROUTES,
+    ...BUSINESS_ROUTES,
+    ...REPORT_ROUTES,
     ...SCHEDULING_ROUTES,
     ...TRAINING_ROUTES,
     ...MEMBER_ROUTES,

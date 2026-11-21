@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal } from '@angular/core';
 
 import { TENANT } from '@config/tenant';
 import type { Invoice } from '@core/models/payment.model';
@@ -39,17 +39,19 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
             </header>
             <div class="grid gap-1 py-4 text-sm sm:grid-cols-2">
                 <p>
-                    <span class="text-zinc-500">Member:</span>
+                    <span class="text-zinc-500">{{ inv.member_oid ? 'Member:' : 'Customer:' }}</span>
                     {{ inv.member_name }}
                 </p>
-                <p class="sm:text-right">
-                    <span class="text-zinc-500">Code:</span>
-                    {{ inv.member_code }}
-                </p>
-                <p>
-                    <span class="text-zinc-500">Mobile:</span>
-                    {{ inv.member_phone }}
-                </p>
+                @if (inv.member_oid) {
+                    <p class="sm:text-right">
+                        <span class="text-zinc-500">Code:</span>
+                        {{ inv.member_code }}
+                    </p>
+                    <p>
+                        <span class="text-zinc-500">Mobile:</span>
+                        {{ inv.member_phone }}
+                    </p>
+                }
             </div>
             <table class="w-full text-sm">
                 <thead>
@@ -61,7 +63,14 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
                 <tbody>
                     @for (l of inv.lines; track $index) {
                         <tr class="border-b border-zinc-100">
-                            <td class="py-2">{{ l.label }}</td>
+                            <td class="py-2">
+                                {{ l.label }}
+                                @if (l.vat_rate !== undefined && pos()) {
+                                    <span class="block text-xs text-zinc-500">
+                                        {{ l.unit_price | taka }} each · VAT {{ l.vat_rate | vatPercent }}: {{ l.vat | taka }}
+                                    </span>
+                                }
+                            </td>
                             <td class="py-2 text-right tabular-nums">{{ l.amount | taka }}</td>
                         </tr>
                     }
@@ -73,7 +82,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
                     </tr>
                     @if (inv.vat_rate > 0) {
                         <tr>
-                            <td class="text-zinc-500">VAT ({{ inv.vat_rate | vatPercent }})</td>
+                            <td class="text-zinc-500">{{ pos() ? 'VAT (per line)' : 'VAT (' + (inv.vat_rate | vatPercent) + ')' }}</td>
                             <td class="text-right">{{ inv.vat | taka }}</td>
                         </tr>
                     }
@@ -137,6 +146,8 @@ export class InvoiceViewComponent {
 
     readonly invoice = input.required<Invoice>();
     readonly actions = input(true);
+    /** A POS sale (D-102): each line has its own VAT rate (bottled water 5 %), shown on the line. */
+    protected readonly pos = computed(() => this.invoice().kind === 'pos');
 
     protected readonly brand = TENANT.brand.name;
     protected readonly methods = PAYMENT_METHOD_LABELS;

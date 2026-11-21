@@ -32,5 +32,24 @@ export const PORTAL_ROUTES: Routes = [
         title: 'Payments',
         data: { breadcrumb: 'Payments' },
         loadComponent: () => import('./portal-pages.component').then(m => m.PortalPaymentsComponent)
+    },
+    // Phase 5 (D-090 to D-096).
+    {
+        path: 'policies',
+        title: 'Policies',
+        data: { breadcrumb: 'Policies' },
+        loadComponent: () => import('./portal-governance.component').then(m => m.PortalPoliciesComponent)
+    },
+    {
+        path: 'record',
+        title: 'My record',
+        data: { breadcrumb: 'My record' },
+        loadComponent: () => import('./portal-governance.component').then(m => m.PortalRecordComponent)
+    },
+    {
+        path: 'complaints',
+        title: 'Complaints',
+        data: { breadcrumb: 'Complaints' },
+        loadComponent: () => import('./portal-governance.component').then(m => m.PortalComplaintsComponent)
     }
 ];

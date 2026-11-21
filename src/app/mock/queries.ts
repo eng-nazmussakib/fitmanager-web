@@ -4,6 +4,7 @@ import type { Invoice } from '@core/models/payment.model';
 import type { Subscription } from '@core/models/subscription.model';
 
 import { daysBetween } from './domain/access-rules';
+import { memberSanction } from './governance';
 import { toRef } from './seed/organisation.seed';
 import { db, dbVersion } from './store';
 import type { CheckInRow, MemberRow, MockDb } from './types';
@@ -38,7 +39,7 @@ export function idx(): Indexes {
     }
     for (const list of [...subs.values(), ...allSubs.values()]) list.sort((a, b) => (a.start_date < b.start_date ? -1 : 1));
     const invoices = new Map<string, Invoice[]>();
-    for (const i of d.invoices) (invoices.get(i.member_oid) ?? invoices.set(i.member_oid, []).get(i.member_oid)!).push(i);
+    for (const i of d.invoices) if (i.member_oid) (invoices.get(i.member_oid) ?? invoices.set(i.member_oid, []).get(i.member_oid)!).push(i);
     const lastVisit = new Map<string, string>();
     const openCheckIn = new Map<string, CheckInRow>();
     for (const c of d.checkIns) {
@@ -72,8 +73,10 @@ export function memberState(m: MemberRow, today: string): MemberState {
     const freeze = current?.freezes.find(f => f.from <= today && today <= f.to) ?? null;
     const dues = (i.invoices.get(m.oid) ?? []).reduce((sum, inv) => sum + inv.due, 0);
     let status: MemberStatus;
-    // A suspension outranks everything, a join request included (the API's order).
-    if (m.suspended) status = 'Suspended';
+    // A ban covering the home branch, then a suspension in force, outrank everything (the API's order, D-093).
+    const sanction = memberSanction(m, today);
+    if (sanction?.level === 'ban') status = 'Banned';
+    else if (sanction) status = 'Suspended';
     else if (m.pending) status = 'Pending';
     else if (current) status = freeze ? 'Frozen' : 'Active';
     else if (upcoming) status = 'Active';
@@ -125,7 +128,8 @@ export function memberDetail(m: MemberRow, today: string, d: MockDb = db()): Mem
         trainer_oid: m.trainer_oid,
         trainer_name: d.trainers.find(t => t.oid === m.trainer_oid)?.name ?? null,
         current_subscription_oid: s.current?.oid ?? null,
-        notes: m.suspended ? `Suspended: ${m.suspended.reason}` : m.notes
+        notes: m.notes,
+        sanction: memberSanction(m, today, d)
     };
 }
 

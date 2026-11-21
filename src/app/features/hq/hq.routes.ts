@@ -1,9 +1,6 @@
-import type { Type } from '@angular/core';
 import { Routes } from '@angular/router';
 
 import { canMatchAbility } from '@core/auth/auth.guards';
-
-const placeholder = (): Promise<Type<unknown>> => import('@features/shared/placeholder-page.component').then(m => m.PlaceholderPageComponent);
 
 /** The HQ console, under `/hq` (branch context = the HQ row, set by `hqMatch`). */
 export const HQ_ROUTES: Routes = [
@@ -50,12 +47,70 @@ export const HQ_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Routine')],
         loadComponent: () => import('@features/training/routines-page.component').then(m => m.RoutinesPageComponent)
     },
+    // Phase 5: governance (D-090 to D-097).
+    {
+        path: 'incidents',
+        data: { breadcrumb: 'Incidents', hq: true },
+        canMatch: [canMatchAbility('read', 'Incident')],
+        children: [
+            { path: '', title: 'Incidents', loadComponent: () => import('@features/governance/incidents-page.component').then(m => m.IncidentsPageComponent) },
+            {
+                path: ':id',
+                title: 'Case',
+                data: { breadcrumb: 'Case' },
+                loadComponent: () => import('@features/governance/incident-page.component').then(m => m.IncidentPageComponent)
+            }
+        ]
+    },
+    {
+        path: 'complaints',
+        title: 'Complaints',
+        data: { breadcrumb: 'Complaints', hq: true },
+        canMatch: [canMatchAbility('read', 'Complaint')],
+        loadComponent: () => import('@features/governance/complaints-page.component').then(m => m.ComplaintsPageComponent)
+    },
+    // Phase 6 (D-099 to D-101): the catalogue, every branch's purchase orders and stock.
+    {
+        path: 'catalogue',
+        title: 'Catalogue',
+        data: { breadcrumb: 'Catalogue' },
+        canMatch: [canMatchAbility('read', 'Product')],
+        loadComponent: () => import('@features/business/catalogue-page.component').then(m => m.CataloguePageComponent)
+    },
+    {
+        path: 'purchase-orders',
+        title: 'Purchase orders',
+        data: { breadcrumb: 'Purchase orders', hq: true },
+        canMatch: [canMatchAbility('read', 'PurchaseOrder')],
+        loadComponent: () => import('@features/business/stock-page.component').then(m => m.StockPageComponent)
+    },
+    {
+        path: 'stock',
+        title: 'Stock',
+        data: { breadcrumb: 'Stock' },
+        canMatch: [canMatchAbility('read', 'Stock')],
+        loadComponent: () => import('@features/business/hq-stock-page.component').then(m => m.HqStockPageComponent)
+    },
+    {
+        path: 'feedback',
+        title: 'Feedback',
+        data: { breadcrumb: 'Feedback', hq: true },
+        canMatch: [canMatchAbility('read', 'Feedback')],
+        loadComponent: () => import('@features/governance/feedback-page.component').then(m => m.FeedbackPageComponent)
+    },
+    {
+        path: 'policies',
+        title: 'Policies',
+        data: { breadcrumb: 'Policies', hq: true },
+        canMatch: [canMatchAbility('read', 'Policy')],
+        loadComponent: () => import('@features/governance/policies-page.component').then(m => m.PoliciesPageComponent)
+    },
     {
         path: 'reports',
         title: 'Reports',
-        data: { breadcrumb: 'Reports', title: 'Reports', phase: '7', icon: 'chart-column' },
+        data: { breadcrumb: 'Reports', hq: true },
         canMatch: [canMatchAbility('read', 'Report')],
-        loadComponent: placeholder
+        loadComponent: () => import('@features/reports/reports-page.component').then(m => m.ReportsPageComponent)
     },
     {
         path: 'staff',

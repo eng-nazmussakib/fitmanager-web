@@ -24,6 +24,9 @@ export interface OrgSettings {
     noshow_limit: number;
     noshow_window_days: number;
     noshow_block_days: number;
+    /** Governance (D-091, D-095): days before an unaccepted "accept again" policy blocks check-in; hours to a first complaint reply. */
+    policy_grace_days: number;
+    complaint_response_hours: number;
     updated_at: string | null;
     updated_by: string | null;
 }

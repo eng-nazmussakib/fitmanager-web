@@ -151,6 +151,8 @@ export function seedSettings(): OrgSettings {
         noshow_limit: 3,
         noshow_window_days: 30,
         noshow_block_days: 7,
+        policy_grace_days: 14,
+        complaint_response_hours: 48,
         updated_at: null,
         updated_by: null
     };

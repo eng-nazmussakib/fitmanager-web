@@ -3,6 +3,7 @@ import { HttpResponse } from '@angular/common/http';
 import type { AccessDecision, CheckIn, Occupancy } from '@core/models/attendance.model';
 
 import { evaluateAccess } from '../domain/access-rules';
+import { accessSanctions, policiesOutstanding } from '../governance';
 import { type Ctx, fail, ok, type Route, str } from '../http';
 import { idx, memberState } from '../queries';
 import { dateOf, timeOf } from '../seed/clock';
@@ -28,13 +29,16 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
     const home = d.branches.find(b => b.oid === m.branch_oid)!;
     const open = idx().openCheckIn.get(m.oid);
     const openBranch = open ? d.branches.find(b => b.oid === open.branch_oid) : undefined;
+    const policies = policiesOutstanding(m, ctx.now.date);
     // Any branch's member may train here (D-059); their HOME branch's dues limit applies.
     const failures = evaluateAccess(
         {
             member: { status: s.status, dues: s.dues, home_branch_name: home.name, dues_limit: home.dues_limit },
             subscription: s.relevant ? { start_date: s.relevant.start_date, end_date: s.relevant.end_date, freezes: s.relevant.freezes } : null,
             branch: { name: branch.name, hours: openingHours(branch.name) },
-            open_check_in: open ? { branch_name: openBranch?.name ?? 'another branch', time: timeOf(open.in_at) } : null
+            open_check_in: open ? { branch_name: openBranch?.name ?? 'another branch', time: timeOf(open.in_at) } : null,
+            sanctions: accessSanctions(m.oid, branch.oid),
+            policies
         },
         { date: ctx.now.date, time: ctx.now.time, weekday: ctx.now.weekday }
     );
@@ -42,6 +46,7 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
     return {
         allowed: failures.length === 0,
         failures,
+        policies_due: policies.filter(p => p.blocks_on > ctx.now.date),
         member: {
             oid: m.oid,
             code: m.code,

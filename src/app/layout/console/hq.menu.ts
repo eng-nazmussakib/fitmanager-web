@@ -11,6 +11,23 @@ export const HQ_MENU: MenuGroup[] = [
         ]
     },
     {
+        group: 'Governance',
+        items: [
+            { label: 'Incidents', icon: 'shield-alert', route: 'incidents', can: ['read', 'Incident'] },
+            { label: 'Complaints', icon: 'message-square', route: 'complaints', can: ['read', 'Complaint'] },
+            { label: 'Feedback', icon: 'star', route: 'feedback', can: ['read', 'Feedback'] },
+            { label: 'Policies', icon: 'book-open', route: 'policies', can: ['manage', 'Policy'] }
+        ]
+    },
+    {
+        group: 'Business',
+        items: [
+            { label: 'Purchase orders', icon: 'clipboard-list', route: 'purchase-orders', can: ['read', 'PurchaseOrder'] },
+            { label: 'Stock', icon: 'package', route: 'stock', can: ['read', 'Stock'] },
+            { label: 'Catalogue', icon: 'store', route: 'catalogue', can: ['manage', 'Product'] }
+        ]
+    },
+    {
         group: 'Master data',
         items: [
             { label: 'Plan templates', icon: 'clipboard-list', route: 'plans', can: ['read', 'PlanTemplate'] },

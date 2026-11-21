@@ -115,9 +115,9 @@ const STEPS = ['Member', 'Plan', 'Start and discount', 'Payment', 'Receipt'] as 
                                     </div>
                                     <a fmButton routerLink="../.." variant="ghost">Pick another member</a>
                                 </div>
-                                @if (m.status === 'Suspended') {
-                                    <fm-alert class="mt-4" title="Suspended" tone="danger">
-                                        A manager must lift the suspension before a plan can be sold.
+                                @if (m.status === 'Suspended' || m.status === 'Banned') {
+                                    <fm-alert class="mt-4" tone="danger" [title]="m.status">
+                                        {{ m.status === 'Banned' ? 'A banned member cannot be sold a plan here.' : 'Sell after the suspension ends.' }}
                                     </fm-alert>
                                 }
                             } @else {
@@ -396,7 +396,7 @@ export class SubscribePageComponent {
     });
     protected readonly canNext = computed(() => {
         const s = this.step();
-        if (s === 0) return !!this.member.value() && this.member.value()!.status !== 'Suspended';
+        if (s === 0) return !!this.member.value() && !['Suspended', 'Banned'].includes(this.member.value()!.status);
         if (s === 1) return !!this.planOid();
         if (s === 2) return !!this._quote() && !this._quote()!.promo_error;
         return true;

@@ -4,6 +4,7 @@ import type { Branch } from '@core/models/branch.model';
 import type { AttentionItem, BranchComparison, Dashboard, Kpi } from '@core/models/dashboard.model';
 
 import { daysBetween } from '../domain/access-rules';
+import { memberSanction } from '../governance';
 import { type Ctx, fail, ok, qStr, type Route } from '../http';
 import { idx, memberState } from '../queries';
 import { addDaysIso, dateOf, weekdayOf } from '../seed/clock';
@@ -152,7 +153,7 @@ function build(branches: Branch[], from: string, to: string, today: string): Das
         const branch = toRef(branches.find(b => b.oid === m.branch_oid)!);
         const limit = branches.find(b => b.oid === m.branch_oid)!.dues_limit;
         const base = { member_oid: m.oid, member_name: m.name, member_code: m.code, branch };
-        if (s.status === 'Suspended') attention.push({ ...base, kind: 'suspended', detail: m.suspended?.reason ?? 'Suspended' });
+        if (s.status === 'Suspended') attention.push({ ...base, kind: 'suspended', detail: memberSanction(m, today)?.reason ?? 'Suspended' });
         if (s.dues > limit)
             attention.push({ ...base, kind: 'dues', detail: `Owes ৳${s.dues.toLocaleString('en-IN')} (limit ৳${limit.toLocaleString('en-IN')})` });
         if (s.status === 'Active' && s.days_left !== null && s.days_left >= 0 && s.days_left <= 3)

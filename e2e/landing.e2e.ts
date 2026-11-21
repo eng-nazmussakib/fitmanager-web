@@ -247,9 +247,10 @@ test.describe('Public landing page', () => {
         await expect(page.getByRole('heading', { name: 'Student discount' })).toBeVisible();
         await expect(page).toHaveTitle(new RegExp(`Offers & promotions \\| ${TENANT.brand.name}$`));
 
-        await page.goto('/privacy-policy');
-        await expect(page.getByRole('heading', { level: 1 })).toContainText('Privacy Policy');
-        await expect(page.getByText('Last updated')).toBeVisible();
+        // The policies are HQ's, from the API (D-090).
+        await page.goto('/policies/privacy-policy');
+        await expect(page.getByRole('heading', { level: 1 })).toContainText('Privacy policy');
+        await expect(page.getByText(/Last updated/)).toBeVisible();
     });
 });
 

@@ -90,7 +90,9 @@ function quoteHandler(ctx: Ctx): HttpResponse<unknown> {
 function createSale(ctx: Ctx): HttpResponse<unknown> {
     const sale = readSale(ctx);
     const member = branchMember(ctx, sale.member_oid);
-    if (member.suspended) fail(409, 'This member is suspended. A manager must lift the suspension first.');
+    const status = memberState(member, ctx.now.date).status;
+    if (status === 'Suspended') fail(409, 'This member is suspended. Sell after the suspension ends.');
+    if (status === 'Banned') fail(409, 'This member is banned from their home branch.');
     const plan = branchPlan(ctx, sale.plan_oid);
     const q = priceOf(ctx, sale, plan);
     if (q.promo_error) fail(400, q.promo_error);
@@ -228,11 +230,14 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
     let invoicesToday = 0;
     let newMembers = 0;
     let renewals = 0;
+    let posSales = 0;
     for (const inv of db().invoices) {
         if (inv.branch.oid !== ctx.branch!.oid) continue;
         if (dateOf(inv.issued_at) === today) {
             invoicesToday++;
-            if (inv.lines.some(l => l.label === 'Admission fee')) newMembers++;
+            // POS sales (D-102) are counted on their own, not as renewals.
+            if (inv.kind === 'pos') posSales++;
+            else if (inv.lines.some(l => l.label === 'Admission fee')) newMembers++;
             else renewals++;
         }
         for (const p of inv.payments) {
@@ -250,6 +255,7 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
         invoices: invoicesToday,
         new_members: newMembers,
         renewals,
+        pos_sales: posSales,
         by_staff: staffTakings(ctx)
     };
     return ok(result);
@@ -257,7 +263,7 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
 
 /** Recent payments at the branch (payments page). */
 function recentPayments(ctx: Ctx): HttpResponse<unknown> {
-    const rows: (PaymentRecord & { invoice_number: string; member_name: string; member_oid: string; member_code: string; branch: BranchRef })[] = [];
+    const rows: (PaymentRecord & { invoice_number: string; member_name: string; member_oid: string | null; member_code: string; branch: BranchRef })[] = [];
     for (const inv of db().invoices) {
         if (inv.branch.oid !== ctx.branch!.oid) continue;
         for (const p of inv.payments)

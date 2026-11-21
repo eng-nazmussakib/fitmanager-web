@@ -85,14 +85,6 @@ export class ConsoleService {
         return this._api.get<OrgRules>('/v1/rules');
     }
 
-    suspend(oid: string, reason: string): Observable<Member> {
-        return this._api.post<Member>(`/v1/members/${oid}/suspend`, { reason });
-    }
-
-    unsuspend(oid: string): Observable<Member> {
-        return this._api.post<Member>(`/v1/members/${oid}/unsuspend`, {});
-    }
-
     transfer(oid: string, body: { to_branch_oid: string; reason: string }): Observable<{ oid: string; code: string; branch_oid: string; branch_name: string }> {
         return this._api.post(`/v1/members/${oid}/transfer`, body);
     }

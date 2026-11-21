@@ -4,18 +4,31 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/auth/auth.service';
+import { BranchContextService } from '@core/branch/branch-context.service';
+import type { ExportFormat } from '@core/models/report.model';
 import { PAYMENT_METHOD_LABELS } from '@core/models/subscription.model';
+import { ReportsService } from '@features/reports/reports.service';
+import { ExportMenuComponent } from '@shared/components/export-menu/export-menu.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { CanDirective } from '@shared/directives/can.directive';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { TakaPipe } from '@shared/pipes/taka.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { CardComponent, SkeletonComponent } from '@shared/ui/display/display';
 import { EmptyStateComponent } from '@shared/ui/feedback/empty-state.component';
+import { todayIso } from '@shared/ui/forms/date-picker.component';
 import { FieldComponent, InputDirective } from '@shared/ui/forms/field.component';
 import { NumberInputComponent } from '@shared/ui/forms/number-input.component';
+import { SelectComponent, type SelectOption } from '@shared/ui/forms/select.component';
 import { ToastService } from '@shared/ui/toast/toast.service';
 
 import { ConsoleService } from '../console.service';
+
+const addDaysIso = (date: string, n: number): string => {
+    const d = new Date(`${date}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+};
 
 /**
  * Payments at the branch: today's cash closing by method (what the desk counts at the end of the day), the
@@ -24,6 +37,9 @@ import { ConsoleService } from '../console.service';
 @Component({
     selector: 'app-payments-page',
     imports: [
+        ExportMenuComponent,
+        CanDirective,
+        SelectComponent,
         FormsModule,
         RouterLink,
         PageHeaderComponent,
@@ -39,13 +55,26 @@ import { ConsoleService } from '../console.service';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <app-page-header subtitle="Cash, card, bKash, Nagad and bank payments, recorded at the desk" title="Payments" />
+        <app-page-header subtitle="Cash, card, bKash, Nagad and bank payments, recorded at the desk" title="Payments">
+            <div *appCan="'export'; on: 'Report'" class="flex items-center gap-2">
+                <fm-select
+                    class="w-40"
+                    ariaLabel="Payments to export"
+                    [ngModel]="exportDays()"
+                    [options]="exportPeriods"
+                    (ngModelChange)="exportDays.set($event)"
+                />
+                <app-export-menu label="Export payments" [busy]="exporting()" (export)="exportPayments($event)" />
+            </div>
+        </app-page-header>
         <section class="grid gap-3 sm:grid-cols-3 xl:grid-cols-6" aria-label="Cash closing">
             @if (closing.value(); as c) {
                 <fm-card class="sm:col-span-3 xl:col-span-1">
                     <p class="text-sm text-fg-muted">Today's takings</p>
                     <p class="mt-1 text-2xl font-semibold tabular-nums">{{ c.total | taka: 0 }}</p>
-                    <p class="mt-1 text-xs text-fg-subtle">{{ c.invoices }} sales · {{ c.new_members }} new · {{ c.renewals }} renewals</p>
+                    <p class="mt-1 text-xs text-fg-subtle">
+                        {{ c.invoices }} sales · {{ c.new_members }} new · {{ c.renewals }} renewals{{ c.pos_sales ? ' · ' + c.pos_sales + ' shop' : '' }}
+                    </p>
                 </fm-card>
                 @for (m of c.by_method; track m.method) {
                     <fm-card>
@@ -128,7 +157,11 @@ import { ConsoleService } from '../console.service';
                                     <tr>
                                         <td class="whitespace-nowrap">{{ p.received_at | appDate: 'dd MMM, h:mm a' }}</td>
                                         <td>
-                                            <a class="text-fg hover:underline" [routerLink]="['../members', p.member_oid]">{{ p.member_name }}</a>
+                                            @if (p.member_oid) {
+                                                <a class="text-fg hover:underline" [routerLink]="['../members', p.member_oid]">{{ p.member_name }}</a>
+                                            } @else {
+                                                {{ p.member_name }}
+                                            }
                                         </td>
                                         <td class="font-mono text-xs">{{ p.invoice_number }}</td>
                                         <td>
@@ -190,6 +223,15 @@ export class PaymentsPageComponent {
     protected readonly data = rxResource({ stream: () => this._service.payments() });
     protected readonly canClose = this._auth.can('create', 'Payment');
     protected readonly saving = signal(false);
+    private readonly _reports = inject(ReportsService);
+    private readonly _active = inject(BranchContextService).active;
+    protected readonly exporting = signal(false);
+    protected readonly exportDays = signal(30);
+    protected readonly exportPeriods: SelectOption<number>[] = [
+        { value: 30, label: 'Last 30 days' },
+        { value: 90, label: 'Last 90 days' },
+        { value: 365, label: 'Last 365 days' }
+    ];
     protected counted: number | null = null;
     protected note = '';
     protected readonly closedByMe = computed(() => {
@@ -208,5 +250,20 @@ export class PaymentsPageComponent {
             },
             error: () => this.saving.set(false)
         });
+    }
+
+    /** Payments and refunds of the period, oldest first, as Excel or PDF (D-107; the API records the export). */
+    protected async exportPayments(format: ExportFormat): Promise<void> {
+        const to = todayIso();
+        const from = addDaysIso(to, -(this.exportDays() - 1));
+        this.exporting.set(true);
+        try {
+            await this._reports.exportList('payments', { filters: { from, to } }, format, {
+                title: 'Payments',
+                subtitle: `${this._active()?.name ?? ''} · ${from} to ${to}`
+            });
+        } finally {
+            this.exporting.set(false);
+        }
     }
 }

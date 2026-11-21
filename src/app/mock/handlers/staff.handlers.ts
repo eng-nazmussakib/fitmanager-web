@@ -319,7 +319,8 @@ function routesFor(level: 'hq' | 'branch'): Route[] {
 }
 
 /** `GET …/audit`: newest first, filters as in the API; the cursor is the index of the next row. */
-function readAudit(ctx: Ctx, level: 'hq' | 'branch'): HttpResponse<unknown> {
+/** The audit rows the log's filters match, newest first (the screens page through them; the export too). */
+export function auditMatches(ctx: Ctx, level: 'hq' | 'branch'): AuditEntry[] {
     const reach = level === 'hq' ? (ctx.user?.assignments.map(a => a.branch.oid) ?? []) : [ctx.branch!.oid];
     const branch = qStr(ctx, 'branch_oid');
     if (branch && !reach.includes(branch)) fail(403, 'You do not work at this branch');
@@ -333,11 +334,15 @@ function readAudit(ctx: Ctx, level: 'hq' | 'branch'): HttpResponse<unknown> {
         ['entity', r => r.entity === qStr(ctx, 'entity')],
         ['entity_key', r => r.entity_key === qStr(ctx, 'entity_key')]
     ];
-    const rows = [...db().audit]
+    return [...db().audit]
         .reverse()
         .filter(r => (branch ? r.branch_oid === branch : reach.includes(r.branch_oid)))
         .filter(r => filters.every(([key, test]) => !qStr(ctx, key) || test(r)))
         .filter(r => (!from || day(r.created_at) >= from) && (!to || day(r.created_at) <= to));
+}
+
+function readAudit(ctx: Ctx, level: 'hq' | 'branch'): HttpResponse<unknown> {
+    const rows = auditMatches(ctx, level);
     const limit = Math.min(Math.max(Number(qStr(ctx, 'limit')) || 50, 1), 100);
     const start = Number(qStr(ctx, 'before')) || 0;
     const pageRows = rows.slice(start, start + limit);

@@ -1,6 +1,9 @@
 import { HttpResponse } from '@angular/common/http';
 
+import { shortDate } from '../domain/access-rules';
+import { staffSuspendedUntil } from '../governance';
 import { type Ctx, fail, ok, type Route, str } from '../http';
+import { dhakaNow } from '../seed/clock';
 import { db, fastMode, resetDemo, setFastMode } from '../store';
 
 /**
@@ -19,7 +22,9 @@ export function accountFromToken(header: string | null): ReturnType<typeof db>['
     const [prefix, username, issuedAt] = token.split(':');
     if (prefix !== 'mock' || Date.now() - Number(issuedAt) > ACCESS_TTL_MS) return null;
     // A deactivated account's token stops working at once, as the API's profile check does.
-    return db().accounts.find(a => a.username === username && a.status !== 'Inactive') ?? null;
+    // So does a suspended staff member's (D-093).
+    const account = db().accounts.find(a => a.username === username && a.status !== 'Inactive') ?? null;
+    return account && staffSuspendedUntil(account.username, dhakaNow().date) ? null : account;
 }
 
 function login(ctx: Ctx): HttpResponse<unknown> {
@@ -27,12 +32,19 @@ function login(ctx: Ctx): HttpResponse<unknown> {
     const account = db().accounts.find(a => a.username === username);
     if (!account || account.password !== ctx.body['password']) fail(400, 'Invalid username or password');
     if (account.status === 'Inactive') fail(403, 'This account is not active');
+    const until = staffSuspendedUntil(account.username, dhakaNow().date);
+    if (until) fail(403, `This account is suspended until ${shortDate(until)}`);
     return ok(issueTokens(account.username), 'Signed in');
 }
 
 function refresh(ctx: Ctx): HttpResponse<unknown> {
     const [prefix, username] = str(ctx.body['refresh_token']).split(':');
-    if (prefix !== 'mock-refresh' || !db().accounts.some(a => a.username === username && a.status !== 'Inactive')) fail(401, 'Refresh token invalid');
+    if (
+        prefix !== 'mock-refresh' ||
+        !db().accounts.some(a => a.username === username && a.status !== 'Inactive') ||
+        staffSuspendedUntil(username, dhakaNow().date)
+    )
+        fail(401, 'Refresh token invalid');
     return ok(issueTokens(username), 'Token refreshed');
 }
 

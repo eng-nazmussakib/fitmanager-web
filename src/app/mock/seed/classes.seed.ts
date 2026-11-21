@@ -2,6 +2,7 @@ import type { Booking, ClassSession, ClassType } from '@core/models/class.model'
 
 import type { MockDb, RuleRow } from '../types';
 import { addDaysIso, at, weekdayOf, weekStart } from './clock';
+import { seededSuspended } from './governance.seed';
 import { Rng } from './prng';
 
 /** HQ class types (D-080): the same as the API's seed (fitmanager-infra/db/seeds/demo/005_scheduling.sql). */
@@ -209,7 +210,7 @@ export function seedClasses(db: MockDb, today: string): void {
     let bookingId = 0;
     for (const branch of db.branches.filter(b => b.kind === 'BRANCH')) {
         materialise(db, branch.oid, first, last);
-        const members = db.members.filter(m => m.branch_oid === branch.oid && !m.pending && !m.suspended);
+        const members = db.members.filter(m => m.branch_oid === branch.oid && !m.pending && !seededSuspended(db, m));
         for (const session of db.sessions.filter(s => s.branch_oid === branch.oid)) {
             const date = session.starts_at.slice(0, 10);
             const eligible = session.ladies_only ? members.filter(x => x.gender === 'Female') : members;

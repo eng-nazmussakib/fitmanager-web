@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
+import { BranchContextService } from '@core/branch/branch-context.service';
 import type { MemberListItem, MemberStatus } from '@core/models/member.model';
+import type { ExportFormat } from '@core/models/report.model';
+import { ReportsService } from '@features/reports/reports.service';
+import { ExportMenuComponent } from '@shared/components/export-menu/export-menu.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CanDirective } from '@shared/directives/can.directive';
 import { ButtonComponent } from '@shared/ui/button/button.component';
@@ -18,7 +22,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { ConsoleService } from '../console.service';
 
 const CODE = /^MEM-[A-Z]{3}-\d{6}$/i;
-const STATUSES: (MemberStatus | '')[] = ['', 'Active', 'Expired', 'Frozen', 'Suspended', 'Pending'];
+const STATUSES: (MemberStatus | '')[] = ['', 'Active', 'Expired', 'Frozen', 'Suspended', 'Banned', 'Pending'];
 
 /**
  * H2: members of the active branch. Server-side search (name, phone, member code), filters, paging and sort, all in
@@ -27,6 +31,7 @@ const STATUSES: (MemberStatus | '')[] = ['', 'Active', 'Expired', 'Frozen', 'Sus
 @Component({
     selector: 'app-member-list-page',
     imports: [
+        ExportMenuComponent,
         FormsModule,
         RouterLink,
         PageHeaderComponent,
@@ -44,6 +49,7 @@ const STATUSES: (MemberStatus | '')[] = ['', 'Active', 'Expired', 'Frozen', 'Sus
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         <app-page-header title="Members" [subtitle]="(data.value()?.count ?? 0) + ' shown'">
+            <app-export-menu *appCan="'export'; on: 'Report'" label="Export the member list" [busy]="exporting()" (export)="exportList($event)" />
             <a *appCan="'create'; on: 'Member'" fmButton routerLink="new" variant="primary">
                 <fm-icon name="user-plus" />
                 Add member
@@ -145,6 +151,10 @@ export class MemberListPageComponent {
     private readonly _route = inject(ActivatedRoute);
     private readonly _search = viewChild.required<ElementRef<HTMLInputElement>>('search');
 
+    private readonly _reports = inject(ReportsService);
+    private readonly _active = inject(BranchContextService).active;
+    protected readonly exporting = signal(false);
+
     readonly q = input<string>();
     readonly status = input<MemberStatus | ''>();
     readonly plan = input<string>();
@@ -179,7 +189,13 @@ export class MemberListPageComponent {
     ];
     protected readonly actions: TableAction<MemberListItem>[] = [
         { name: 'open', icon: 'user', label: 'Open profile' },
-        { name: 'renew', icon: 'refresh-cw', label: 'Renew or sell a plan', can: ['create', 'Subscription'], visible: r => r.status !== 'Suspended' },
+        {
+            name: 'renew',
+            icon: 'refresh-cw',
+            label: 'Renew or sell a plan',
+            can: ['create', 'Subscription'],
+            visible: r => r.status !== 'Suspended' && r.status !== 'Banned'
+        },
         { name: 'checkin', icon: 'scan-line', label: 'Check in', can: ['create', 'Attendance'] }
     ];
 
@@ -244,5 +260,21 @@ export class MemberListPageComponent {
 
     protected patch(params: Record<string, string | number | null>): void {
         void this._router.navigate([], { relativeTo: this._route, queryParams: params, queryParamsHandling: 'merge' });
+    }
+
+    /** Every member the filters match, as Excel or PDF (D-107; the API records the export). */
+    protected async exportList(format: ExportFormat): Promise<void> {
+        this.exporting.set(true);
+        // Only the filters in use (an empty one means "any").
+        const filters = Object.fromEntries(Object.entries({ q: this.q(), status: this.status(), plan: this.plan(), flag: this.flag() }).filter(([, v]) => !!v));
+        const shown = Object.values(filters).join(', ');
+        try {
+            await this._reports.exportList('members', { filters }, format, {
+                title: 'Members',
+                subtitle: `${this._active()?.name ?? ''}${shown ? ' · ' + shown : ''}`
+            });
+        } finally {
+            this.exporting.set(false);
+        }
     }
 }

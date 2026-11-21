@@ -9,6 +9,7 @@ import { AuthService } from '@core/auth/auth.service';
 import type { Invoice } from '@core/models/payment.model';
 import { METHODS_NEEDING_REFERENCE, PAYMENT_METHOD_LABELS, type PaymentMethod, type Subscription } from '@core/models/subscription.model';
 import { FilesService } from '@core/services/files.service';
+import { MemberGovernanceComponent } from '@features/governance/member-governance.component';
 import { InvoiceViewComponent } from '@features/shared/invoice-view.component';
 import { MemberTrainingComponent } from '@features/training/member-training.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
@@ -37,6 +38,7 @@ const STATUS_TONE: Record<string, Tone> = {
     Active: 'success',
     Expired: 'danger',
     Suspended: 'danger',
+    Banned: 'danger',
     Frozen: 'info',
     Pending: 'warning',
     Upcoming: 'info',
@@ -50,7 +52,9 @@ const TIMELINE_ICON: Record<string, IconName> = {
     check_in: 'log-in',
     override: 'shield-alert',
     note: 'pencil',
-    status: 'ban'
+    status: 'ban',
+    discipline: 'shield-alert',
+    policy: 'file-text'
 };
 
 /**
@@ -61,6 +65,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
 @Component({
     selector: 'app-member-profile-page',
     imports: [
+        MemberGovernanceComponent,
         MemberTrainingComponent,
         FormsModule,
         RouterLink,
@@ -162,8 +167,12 @@ const TIMELINE_ICON: Record<string, IconName> = {
                         }
                     </div>
                 </div>
-                @if (m.status === 'Suspended') {
-                    <fm-alert class="mt-4" title="Suspended" tone="danger">{{ m.notes }}</fm-alert>
+                @if (m.sanction; as x) {
+                    <fm-alert class="mt-4" tone="danger" [title]="x.level === 'ban' ? 'Banned' : 'Suspended until ' + (x.until | appDate: 'd MMM yyyy')">
+                        {{ x.reason }} ({{ x.branch_name }}).
+                        {{ x.level === 'ban' ? 'No entry; the membership was cancelled.' : 'No entry at any branch; the membership keeps running.' }}
+                        See the Discipline tab.
+                    </fm-alert>
                 }
                 @if (m.health_flags.length) {
                     <fm-alert class="mt-4" title="Health flags" tone="warning">
@@ -421,6 +430,9 @@ const TIMELINE_ICON: Record<string, IconName> = {
                     }
                 </ng-template>
 
+                <ng-template fmTab="discipline" label="Discipline">
+                    <app-member-governance [member]="m" (changed)="reloadAll()" />
+                </ng-template>
                 <ng-template fmTab="documents" label="Documents" [count]="documents.value()?.length ?? null">
                     <fm-card subtitle="ID, medical notes, signed forms: PDF, JPEG or PNG up to 5 MB, at most 10." title="Documents">
                         <ul class="grid gap-2">

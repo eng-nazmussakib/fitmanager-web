@@ -118,6 +118,77 @@ export const CONSOLE_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Locker')],
         loadComponent: () => import('./facilities/facilities-page.component').then(m => m.FacilitiesPageComponent)
     },
+    // Phase 5: governance (D-090 to D-097).
+    {
+        path: 'incidents',
+        data: { breadcrumb: 'Incidents' },
+        canMatch: [canMatchAbility('read', 'Incident')],
+        children: [
+            { path: '', title: 'Incidents', loadComponent: () => import('@features/governance/incidents-page.component').then(m => m.IncidentsPageComponent) },
+            {
+                path: ':id',
+                title: 'Case',
+                data: { breadcrumb: 'Case' },
+                loadComponent: () => import('@features/governance/incident-page.component').then(m => m.IncidentPageComponent)
+            }
+        ]
+    },
+    {
+        path: 'complaints',
+        title: 'Complaints',
+        data: { breadcrumb: 'Complaints' },
+        canMatch: [canMatchAbility('read', 'Complaint')],
+        loadComponent: () => import('@features/governance/complaints-page.component').then(m => m.ComplaintsPageComponent)
+    },
+    // Phase 6: business (D-098 to D-102).
+    {
+        path: 'equipment',
+        title: 'Equipment',
+        data: { breadcrumb: 'Equipment' },
+        canMatch: [canMatchAbility('read', 'Equipment')],
+        loadComponent: () => import('@features/business/equipment-page.component').then(m => m.EquipmentPageComponent)
+    },
+    {
+        path: 'stock',
+        title: 'Stock',
+        data: { breadcrumb: 'Stock' },
+        canMatch: [canMatchAbility('read', 'Stock')],
+        loadComponent: () => import('@features/business/stock-page.component').then(m => m.StockPageComponent)
+    },
+    {
+        path: 'pos',
+        title: 'Shop',
+        data: { breadcrumb: 'Shop' },
+        canMatch: [canMatchAbility('create', 'Sale')],
+        loadComponent: () => import('@features/business/pos-page.component').then(m => m.PosPageComponent)
+    },
+    {
+        path: 'pos-sales',
+        title: 'Shop sales',
+        data: { breadcrumb: 'Shop sales' },
+        canMatch: [canMatchAbility('read', 'Sale')],
+        loadComponent: () => import('@features/business/pos-sales-page.component').then(m => m.PosSalesPageComponent)
+    },
+    {
+        path: 'feedback',
+        title: 'Feedback',
+        data: { breadcrumb: 'Feedback' },
+        canMatch: [canMatchAbility('read', 'Feedback')],
+        loadComponent: () => import('@features/governance/feedback-page.component').then(m => m.FeedbackPageComponent)
+    },
+    {
+        path: 'policies',
+        title: 'Policies',
+        data: { breadcrumb: 'Policies' },
+        canMatch: [canMatchAbility('read', 'Policy')],
+        loadComponent: () => import('@features/governance/policies-page.component').then(m => m.PoliciesPageComponent)
+    },
+    {
+        path: 'my-record',
+        title: 'My record',
+        data: { breadcrumb: 'My record' },
+        loadComponent: () => import('@features/governance/own-record.component').then(m => m.OwnRecordComponent)
+    },
     {
         path: 'staff',
         title: 'Staff',
@@ -135,8 +206,8 @@ export const CONSOLE_ROUTES: Routes = [
     {
         path: 'reports',
         title: 'Reports',
-        data: { breadcrumb: 'Reports', title: 'Reports', phase: '7', icon: 'chart-column' },
+        data: { breadcrumb: 'Reports' },
         canMatch: [canMatchAbility('read', 'Report')],
-        loadComponent: () => import('@features/shared/placeholder-page.component').then(m => m.PlaceholderPageComponent)
+        loadComponent: () => import('@features/reports/reports-page.component').then(m => m.ReportsPageComponent)
     }
 ];

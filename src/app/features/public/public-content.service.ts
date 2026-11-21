@@ -8,6 +8,7 @@ import { NOTIFY, SKIP_AUTH } from '@core/http/http-context.tokens';
 import type { ApiResponse } from '@core/models/api-response.model';
 import type { Branch, BranchRef } from '@core/models/branch.model';
 import type { ClassSession, Trainer } from '@core/models/class.model';
+import type { PublicPolicy, PublicPolicySummary } from '@core/models/governance.model';
 import type { Plan } from '@core/models/plan.model';
 import type { PublicTrainer } from '@core/models/scheduling.model';
 import { type SiteGroup, vatPercent } from '@core/models/settings.model';
@@ -108,6 +109,26 @@ export class PublicContentService {
     trainer(slugValue: string): Observable<PublicTrainer | null> {
         if (!this._api) return of(null);
         return this._http.get<ApiResponse<PublicTrainer>>(`${this._base}/trainers/${slugValue}`, { context: quiet() }).pipe(
+            timeout(5000),
+            map(r => r.data),
+            catchError(() => of(null))
+        );
+    }
+
+    /** HQ's public policies (D-090), for `/policies`; empty without an API. */
+    policies(): Observable<PublicPolicySummary[]> {
+        if (!this._api) return of([]);
+        return this._http.get<ApiResponse<PublicPolicySummary[]>>(`${this._base}/policies`, { context: quiet() }).pipe(
+            timeout(5000),
+            map(r => r.data),
+            catchError(() => of([]))
+        );
+    }
+
+    /** One public policy's current wording and its history; null when unknown (or no API). */
+    policy(slugValue: string): Observable<PublicPolicy | null> {
+        if (!this._api) return of(null);
+        return this._http.get<ApiResponse<PublicPolicy>>(`${this._base}/policies/${slugValue}`, { context: quiet() }).pipe(
             timeout(5000),
             map(r => r.data),
             catchError(() => of(null))

@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
 import type { Trainer } from '@core/models/class.model';
 import type { AvailabilitySlot, TrainerDetail } from '@core/models/scheduling.model';
+import { TrainerNumbersComponent } from '@features/reports/trainer-numbers.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
@@ -50,7 +51,8 @@ const TIMES: SelectOption<string>[] = Array.from({ length: 37 }, (_, i) => {
         FieldComponent,
         InputDirective,
         SelectComponent,
-        IconComponent
+        IconComponent,
+        TrainerNumbersComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
@@ -203,6 +205,10 @@ const TIMES: SelectOption<string>[] = Array.from({ length: 37 }, (_, i) => {
                         }
                     </ul>
                 </fm-card>
+
+                @if (seesNumbers()) {
+                    <app-trainer-numbers class="lg:col-span-3" [trainerOid]="t.oid" />
+                }
             </div>
         } @else {
             <fm-skeleton height="24rem" />
@@ -230,6 +236,11 @@ export class TrainerDetailPageComponent {
         const t = this.data.value();
         if (!t || !this._auth.can('update', 'Trainer')) return false;
         return !this.self() || t.user_oid === this._auth.user()?.user_id;
+    });
+    /** Their numbers (D-106): a trainer on their own profile; managers and HQ on any. */
+    protected readonly seesNumbers = computed(() => {
+        const t = this.data.value();
+        return !!t && (this._auth.can('read', 'Report') || t.user_oid === this._auth.user()?.user_id);
     });
     protected readonly dirty = computed(() => JSON.stringify(this.slots()) !== JSON.stringify(this.data.value()?.availability ?? []));
 

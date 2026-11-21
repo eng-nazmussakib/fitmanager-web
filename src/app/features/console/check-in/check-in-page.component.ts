@@ -202,6 +202,15 @@ const AUTO_KEY = 'app.checkin-auto';
                                         }
                                     </ul>
                                 }
+                                @if (d.policies_due?.length && !checkedIn()) {
+                                    <p class="mt-3 flex gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-fg">
+                                        <fm-icon class="mt-0.5" name="file-text" size="1rem" />
+                                        <span>
+                                            To sign: {{ policyList(d) }}. Check-in is blocked from
+                                            {{ d.policies_due![0]!.blocks_on | appDate: 'd MMM' }} without it.
+                                        </span>
+                                    </p>
+                                }
                                 <div class="mt-5 flex flex-wrap gap-2">
                                     @if (!checkedIn()) {
                                         @if (d.allowed) {
@@ -218,6 +227,11 @@ const AUTO_KEY = 'app.checkin-auto';
                                     }
                                     <!-- A visitor's plan and money belong to their home branch (D-059, D-066): send them there. -->
                                     @if (!d.member.visitor) {
+                                        @if (hasRule(d, 'policy') || d.policies_due?.length) {
+                                            <a fmButton size="lg" [queryParams]="{ tab: 'discipline' }" [routerLink]="['../members', d.member.oid]">
+                                                Policies to sign
+                                            </a>
+                                        }
                                         @if (hasRule(d, 'expired') || hasRule(d, 'membership') || hasRule(d, 'pending')) {
                                             <a fmButton size="lg" [routerLink]="['../members', d.member.oid, 'subscribe']">Renew membership</a>
                                         }
@@ -386,9 +400,13 @@ export class CheckInPageComponent {
               ? 'info'
               : status === 'Pending'
                 ? 'warning'
-                : status === 'Expired' || status === 'Suspended'
+                : status === 'Expired' || status === 'Suspended' || status === 'Banned'
                   ? 'danger'
                   : 'neutral';
+    }
+
+    protected policyList(d: AccessDecision): string {
+        return (d.policies_due ?? []).map(p => p.title).join(', ');
     }
 
     protected hasRule(d: AccessDecision, rule: string): boolean {

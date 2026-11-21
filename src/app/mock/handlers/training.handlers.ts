@@ -662,7 +662,8 @@ function dropMeasurement(ctx: Ctx, memberOid: string | null): HttpResponse<unkno
 
 function portalStartFile(ctx: Ctx): HttpResponse<unknown> {
     const { m, c } = home(ctx);
-    if (str(ctx.body['kind']) !== 'measurement_photo') fail(400, 'Only progress photos');
+    const kind = str(ctx.body['kind']);
+    if (kind !== 'measurement_photo' && kind !== 'complaint_photo') fail(400, 'Only progress or complaint photos');
     const type = str(ctx.body['content_type']).toLowerCase();
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) fail(415, 'A progress photo is a JPEG, PNG or WebP of at most 300 KB');
     if (num(ctx.body['size']) > 300 * 1024) fail(413, 'A progress photo is a JPEG, PNG or WebP of at most 300 KB');
@@ -673,7 +674,7 @@ function portalStartFile(ctx: Ctx): HttpResponse<unknown> {
             oid,
             branch_oid: m.branch_oid,
             member_oid: m.oid,
-            kind: 'measurement_photo',
+            kind,
             name: str(ctx.body['name']),
             content_type: type,
             size_bytes: num(ctx.body['size']),
@@ -701,7 +702,7 @@ function portalCompleteFile(ctx: Ctx): HttpResponse<unknown> {
     const { m, c } = home(ctx);
     const row = db().files?.find(f => f.oid === ctx.params[0] && f.branch_oid === m.branch_oid);
     if (!row) fail(404, 'File not found');
-    if (row.kind !== 'measurement_photo' || row.member_oid !== m.oid) fail(403, 'You do not have permission to do this');
+    if ((row.kind !== 'measurement_photo' && row.kind !== 'complaint_photo') || row.member_oid !== m.oid) fail(403, 'You do not have permission to do this');
     const blob = takeUpload(row.oid);
     if (!blob && !row.url) fail(409, 'The file has not arrived yet. Upload it, then try again.');
     if (blob) {

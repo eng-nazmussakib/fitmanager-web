@@ -23,10 +23,30 @@ export const CONSOLE_MENU: MenuGroup[] = [
         ]
     },
     {
+        group: 'Business',
+        items: [
+            { label: 'Shop', icon: 'store', route: 'pos', can: ['create', 'Sale'] },
+            { label: 'Shop sales', icon: 'receipt', route: 'pos-sales', can: ['read', 'Sale'] },
+            { label: 'Stock', icon: 'package', route: 'stock', can: ['read', 'Stock'] },
+            { label: 'Equipment', icon: 'wrench', route: 'equipment', can: ['read', 'Equipment'] }
+        ]
+    },
+    {
         group: 'Training',
         items: [
             { label: 'Exercises', icon: 'dumbbell', route: 'exercises', can: ['read', 'Exercise'] },
             { label: 'Routines', icon: 'list-ordered', route: 'routines', can: ['read', 'Routine'] }
+        ]
+    },
+    {
+        group: 'Governance',
+        items: [
+            { label: 'Incidents', icon: 'shield-alert', route: 'incidents', can: ['read', 'Incident'] },
+            { label: 'Complaints', icon: 'message-square', route: 'complaints', can: ['read', 'Complaint'] },
+            { label: 'Feedback', icon: 'star', route: 'feedback', can: ['read', 'Feedback'] },
+            { label: 'Policies', icon: 'book-open', route: 'policies', can: ['read', 'Policy'] },
+            // Every staff role reads the policies: the same gate shows each person their own record (D-094).
+            { label: 'My record', icon: 'badge-check', route: 'my-record', can: ['read', 'Policy'] }
         ]
     },
     {

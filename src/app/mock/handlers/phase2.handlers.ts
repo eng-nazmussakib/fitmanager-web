@@ -10,7 +10,7 @@ import { recordAudit } from '../audit';
 import { daysBetween, shortDate } from '../domain/access-rules';
 import { endDate, quote } from '../domain/pricing';
 import { type Ctx, fail, num, ok, type Route, str } from '../http';
-import { idx, memberDetail, memberState } from '../queries';
+import { idx, memberState } from '../queries';
 import { addDaysIso, dateOf } from '../seed/clock';
 import { toRef } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
@@ -20,7 +20,7 @@ import { memberTraining } from './training.handlers';
 
 /**
  * Phase 2's new actions, as the API answers them (fitmanager-api: members, sales, files, portal, join):
- * suspend, transfer, anonymise, portal access, cancel, upgrade, refund, closing the day, uploads, documents and
+ * transfer, anonymise, portal access, cancel, upgrade, refund, closing the day, uploads, documents and
  * messages. The rules match the API's (D-063, D-064, D-067, D-068, D-069); the demo keeps everything in memory.
  */
 
@@ -78,7 +78,31 @@ const RULES: Record<FileRow['kind'], { types: readonly string[]; max: number; la
         label: 'A progress photo is a JPEG, PNG or WebP of at most 300 KB',
         can: ['create', 'Measurement'],
         hq: false
-    }
+    },
+    incident_evidence: {
+        types: [...IMAGES, 'application/pdf'],
+        max: 2 * MB,
+        label: 'Evidence is a photo (JPEG, PNG or WebP) or a PDF of at most 2 MB',
+        can: ['create', 'Incident'],
+        hq: false
+    },
+    complaint_photo: {
+        types: IMAGES,
+        max: 300 * 1024,
+        label: 'A complaint photo is a JPEG, PNG or WebP of at most 300 KB',
+        can: ['create', 'Complaint'],
+        hq: false
+    },
+    // Phase 6 (D-098, D-099): HQ's product photos; a machine's photo (the register's keepers); a ticket's photo (anyone who raises one).
+    product_photo: { types: IMAGES, max: 300 * 1024, label: 'A product photo is a JPEG, PNG or WebP of at most 300 KB', can: ['update', 'Product'], hq: true },
+    equipment_photo: {
+        types: IMAGES,
+        max: 300 * 1024,
+        label: 'An equipment photo is a JPEG, PNG or WebP of at most 300 KB',
+        can: ['update', 'Equipment'],
+        hq: false
+    },
+    ticket_photo: { types: IMAGES, max: 300 * 1024, label: 'A ticket photo is a JPEG, PNG or WebP of at most 300 KB', can: ['create', 'Equipment'], hq: false }
 };
 /** The API's `FILE_STORAGE_LIMIT_MB` default (D-074): every branch's files together, inside R2's free 10 GB. */
 const FILE_STORAGE_LIMIT_BYTES = 6144 * 1024 * 1024;
@@ -184,17 +208,6 @@ function documents(ctx: Ctx): HttpResponse<unknown> {
 }
 
 /* ---------- members (D-064, D-068) ---------- */
-
-function suspend(ctx: Ctx, on: boolean): HttpResponse<unknown> {
-    manager(ctx, 'Member');
-    const m = branchMember(ctx, ctx.params[0] ?? '');
-    if (on && m.suspended) fail(409, 'This member is already suspended');
-    if (!on && !m.suspended) fail(409, 'This member is not suspended');
-    const before = memberState(m, ctx.now.date).status;
-    commit({ t: 'member.update', oid: m.oid, patch: { suspended: on ? { since: ctx.now.date, reason: reasonOf(ctx) } : null } });
-    recordAudit(ctx, on ? 'suspend' : 'unsuspend', 'member', m.code, { status: before }, { status: memberState(m, ctx.now.date).status });
-    return ok(memberDetail(m, ctx.now.date), on ? 'Member suspended' : 'Suspension lifted');
-}
 
 function transfer(ctx: Ctx): HttpResponse<unknown> {
     manager(ctx, 'Member');
@@ -511,8 +524,6 @@ export const PHASE2_ROUTES: Route[] = [
     { method: 'POST', path: /^\/v1\/files\/([\w-]+)\/complete$/, scope: 'staff', handler: complete },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/documents$/, scope: 'branch', can: ['read', 'Member'], handler: documents },
     { method: 'GET', path: /^\/v1\/members\/([\w-]+)\/notifications$/, scope: 'branch', can: ['read', 'Member'], handler: messages },
-    { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/suspend$/, scope: 'branch', can: ['read', 'Member'], handler: ctx => suspend(ctx, true) },
-    { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/unsuspend$/, scope: 'branch', can: ['read', 'Member'], handler: ctx => suspend(ctx, false) },
     { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/transfer$/, scope: 'branch', can: ['read', 'Member'], handler: transfer },
     { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/anonymise$/, scope: 'branch', can: ['read', 'Member'], handler: anonymise },
     { method: 'POST', path: /^\/v1\/members\/([\w-]+)\/portal-access$/, scope: 'branch', can: ['read', 'Member'], handler: portalAccess },

@@ -2,9 +2,10 @@ import type { BranchRef } from './branch.model';
 
 /**
  * - Active: a running subscription. Expired: the last one ended. Frozen: paused for a period.
- * - Suspended: blocked by the branch (behaviour, unpaid dues). Pending: a join request without a first payment (D-022).
+ * - Suspended: a suspension in force (D-093): no entry at any branch, the plan keeps running. Banned: a ban covering the
+ *   home branch (the plan was cancelled). Pending: a join request without a first payment (D-022).
  */
-export type MemberStatus = 'Active' | 'Expired' | 'Frozen' | 'Suspended' | 'Pending';
+export type MemberStatus = 'Active' | 'Expired' | 'Frozen' | 'Suspended' | 'Banned' | 'Pending';
 
 export type Gender = 'Male' | 'Female';
 
@@ -47,7 +48,8 @@ export interface Member extends MemberListItem {
     notes: string | null;
     /** The uploaded photo's file (send it back to keep or replace the photo). */
     photo_file_oid?: string | null;
-    suspended_reason?: string | null;
+    /** What makes the member Suspended or Banned (D-093); the cases are on the Discipline tab. */
+    sanction?: { level: 'suspension' | 'ban'; reason: string; until: string | null; branch_name: string } | null;
     /** "Delete my data" was done (D-068 c): the record keeps only its code. */
     anonymised?: boolean;
     frozen_until?: string | null;
@@ -100,11 +102,13 @@ export interface MemberPayload {
     emergency_contact?: { name: string; phone: string; relation: string } | null;
     health_flags: string[];
     health_declared: boolean;
+    /** Signed the current policies on paper at the desk (D-090): recorded as accepted. */
+    policies_signed?: boolean;
     /** From `POST /v1/files` (kind `member_photo`) once completed. */
     photo_file_oid?: string | null;
 }
 
-export type TimelineKind = 'joined' | 'subscription' | 'payment' | 'freeze' | 'check_in' | 'override' | 'note' | 'status';
+export type TimelineKind = 'joined' | 'subscription' | 'payment' | 'freeze' | 'check_in' | 'override' | 'note' | 'status' | 'discipline' | 'policy';
 
 /** `GET /v1/members/:id/timeline`: the audit-style history of a member. */
 export interface TimelineEvent {

@@ -142,7 +142,7 @@ describe('mock API', () => {
         expect(pub.data.filter(r => r.required).map(r => r.key)).toEqual(['hero', 'services', 'plans', 'facilities']);
     });
 
-    it('phase 2 (D-059, D-067, D-068): a visitor trains anywhere; refunds and suspensions follow the API’s rules', async () => {
+    it('phase 2 (D-059, D-067, D-068): a visitor trains anywhere; refunds and suspensions (D-093) follow the API’s rules', async () => {
         const send = <T>(method: 'POST', path: string, body: unknown, token: string, branch: string): Promise<Res<T>> =>
             firstValueFrom(http.request<Res<T>>(method, `${base}${path}`, { body, headers: { Authorization: `Bearer ${token}`, 'X-Branch-Id': branch } }));
         const deskDha = await login('desk.dhanmondi', 'Desk@123');
@@ -158,11 +158,29 @@ describe('mock API', () => {
 
         const desk = await login('desk.gulshan', 'Desk@123');
         const manager = await login('manager.gulshan', 'Manager@123');
-        const page = await get<{ rows: { oid: string; status: string }[] }>('/v1/members?size=100&status=Active', desk, 'br-gul');
+        const page = await get<{ rows: { oid: string; code: string; status: string }[] }>('/v1/members?size=100&status=Active', desk, 'br-gul');
         const member = page.data.rows[0]?.oid ?? '';
-        expect(await status(send('POST', `/v1/members/${member}/suspend`, { reason: 'Behaviour' }, desk, 'br-gul'))).toBe(403);
-        expect(await status(send('POST', `/v1/members/${member}/suspend`, { reason: 'Behaviour' }, manager, 'br-gul'))).toBe(200);
-        expect(await status(send('POST', `/v1/members/${member}/unsuspend`, {}, manager, 'br-gul'))).toBe(200);
+        // A suspension is a step on a discipline case (D-093): the desk warns, a manager suspends.
+        const at = new Date(Date.now() - 60_000).toISOString();
+        const body = {
+            subject_kind: 'member',
+            member_code: page.data.rows[0]?.code,
+            occurred_at: at,
+            category: 'conduct',
+            summary: 'Shouting',
+            description: 'Shouted at the desk.'
+        };
+        const c = await send<{ oid: string; suggestion: string }>('POST', '/v1/incidents', body, desk, 'br-gul');
+        const suspend = {
+            level: 'suspension',
+            reason: 'Behaviour',
+            choice_reason: 'Serious',
+            ends_on: new Date(Date.now() + 5 * 86_400_000).toISOString().slice(0, 10)
+        };
+        expect(await status(send('POST', `/v1/incidents/${c.data.oid}/sanctions`, suspend, desk, 'br-gul'))).toBe(403);
+        expect(await status(send('POST', `/v1/incidents/${c.data.oid}/sanctions`, suspend, manager, 'br-gul'))).toBe(200);
+        const after = await get<{ status: string; sanction: { level: string } | null }>(`/v1/members/${member}`, desk, 'br-gul');
+        expect(after.data).toMatchObject({ status: 'Suspended', sanction: { level: 'suspension' } });
 
         const invoices = await get<{ oid: string; paid: number; issued_at: string }[]>(`/v1/members/${member}/invoices`, desk, 'br-gul');
         const old = invoices.data.find(i => i.paid > 0);

@@ -150,7 +150,8 @@ export function newOid(prefix: string): string {
     return `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function apply(d: MockDb, m: Mutation): void {
+/** Applies one change to a state: the seed uses it to build rows the way the handlers' commits do. */
+export function apply(d: MockDb, m: Mutation): void {
     switch (m.t) {
         case 'member.create': {
             d.members.push(m.row);

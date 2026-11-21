@@ -98,6 +98,24 @@ const SAMPLE = 3000;
                         A late cancel or a no-show is a missed class. The same window applies to PT sessions a member cancels.
                     </p>
                 </fm-card>
+                <fm-card subtitle="Policies and complaints at every branch follow these (D-091, D-095)." title="Governance">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <fm-field
+                            hint="After a new “accept again” version (or joining), check-in is blocked once this has passed without acceptance."
+                            label="Policy grace period, days"
+                            required
+                        >
+                            <fm-number-input formControlName="policy_grace_days" [max]="90" [min]="0" />
+                        </fm-field>
+                        <fm-field
+                            hint="A complaint with no reply by then shows as overdue, at the branch and at HQ."
+                            label="Complaint reply within, hours"
+                            required
+                        >
+                            <fm-number-input formControlName="complaint_response_hours" [max]="336" [min]="1" />
+                        </fm-field>
+                    </div>
+                </fm-card>
                 <fm-card subtitle="Which plans may freeze is set on each plan template." title="Freezes">
                     <div class="grid gap-4 sm:grid-cols-3">
                         <fm-field label="Shortest (days)" required>
@@ -153,7 +171,9 @@ export class HqSettingsPageComponent {
         booking_cancel_hours: [2, [Validators.required, Validators.min(0), Validators.max(72)]],
         noshow_limit: [3, [Validators.required, Validators.min(1), Validators.max(20)]],
         noshow_window_days: [30, [Validators.required, Validators.min(1), Validators.max(365)]],
-        noshow_block_days: [7, [Validators.required, Validators.min(1), Validators.max(90)]]
+        noshow_block_days: [7, [Validators.required, Validators.min(1), Validators.max(90)]],
+        policy_grace_days: [14, [Validators.required, Validators.min(0), Validators.max(90)]],
+        complaint_response_hours: [48, [Validators.required, Validators.min(1), Validators.max(336)]]
     });
     protected readonly maxFreeze = MAX_FREEZE_DAYS;
     private readonly _value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -188,7 +208,9 @@ export class HqSettingsPageComponent {
             booking_cancel_hours: s.booking_cancel_hours,
             noshow_limit: s.noshow_limit,
             noshow_window_days: s.noshow_window_days,
-            noshow_block_days: s.noshow_block_days
+            noshow_block_days: s.noshow_block_days,
+            policy_grace_days: s.policy_grace_days,
+            complaint_response_hours: s.complaint_response_hours
         });
     }
 
@@ -210,7 +232,9 @@ export class HqSettingsPageComponent {
             booking_cancel_hours: Number(v.booking_cancel_hours),
             noshow_limit: Number(v.noshow_limit),
             noshow_window_days: Number(v.noshow_window_days),
-            noshow_block_days: Number(v.noshow_block_days)
+            noshow_block_days: Number(v.noshow_block_days),
+            policy_grace_days: Number(v.policy_grace_days),
+            complaint_response_hours: Number(v.complaint_response_hours)
         };
         this.saving.set(true);
         this._api.patch<OrgSettings>('/v1/hq/settings', body).subscribe({

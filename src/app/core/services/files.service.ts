@@ -6,7 +6,18 @@ import { ApiService } from '@core/http/api.service';
 import { NOTIFY, SKIP_AUTH } from '@core/http/http-context.tokens';
 import { environment } from '@env/environment';
 
-export type FileKind = 'member_photo' | 'member_document' | 'trainer_photo' | 'exercise_photo' | 'exercise_video' | 'measurement_photo';
+export type FileKind =
+    | 'member_photo'
+    | 'member_document'
+    | 'trainer_photo'
+    | 'exercise_photo'
+    | 'exercise_video'
+    | 'measurement_photo'
+    | 'incident_evidence'
+    | 'complaint_photo'
+    | 'product_photo'
+    | 'equipment_photo'
+    | 'ticket_photo';
 
 /** `POST /v1/files`: a pending file and where to PUT its bytes (D-058). */
 interface UploadStart {

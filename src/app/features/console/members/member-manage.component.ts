@@ -17,11 +17,11 @@ import { ToastService } from '@shared/ui/toast/toast.service';
 
 import { ConsoleService } from '../console.service';
 
-type Action = 'suspend' | 'transfer' | 'anonymise' | 'portal' | null;
+type Action = 'transfer' | 'anonymise' | 'portal' | null;
 
 /**
  * The member actions that are not about money (D-064, D-068): portal access with a temporary password (the desk),
- * suspend or lift it, move the home branch, and "delete my data" (a manager: `manage Member`). Each opens a
+ * move the home branch, and "delete my data" (a manager: `manage Member`). Each opens a
  * dialog; the API decides and audits.
  */
 @Component({
@@ -41,7 +41,7 @@ type Action = 'suspend' | 'transfer' | 'anonymise' | 'portal' | null;
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         @if (!member().anonymised) {
-            <fm-card subtitle="Portal access, suspension, transfer and personal data." title="Manage">
+            <fm-card subtitle="Portal access, transfer and personal data. Suspensions and bans are steps on a case (Discipline)." title="Manage">
                 <div class="flex flex-wrap gap-2">
                     @if (canEdit && member().status !== 'Pending') {
                         <button fmButton size="sm" (click)="open('portal')">
@@ -50,10 +50,6 @@ type Action = 'suspend' | 'transfer' | 'anonymise' | 'portal' | null;
                         </button>
                     }
                     @if (canManage) {
-                        <button fmButton size="sm" (click)="member().status === 'Suspended' ? lift() : open('suspend')">
-                            <fm-icon size="1rem" [name]="member().status === 'Suspended' ? 'circle-check' : 'ban'" />
-                            {{ member().status === 'Suspended' ? 'Lift suspension' : 'Suspend' }}
-                        </button>
                         <button fmButton size="sm" (click)="open('transfer')">
                             <fm-icon name="arrow-right-left" size="1rem" />
                             Move to another branch
@@ -66,22 +62,6 @@ type Action = 'suspend' | 'transfer' | 'anonymise' | 'portal' | null;
                 </div>
             </fm-card>
         }
-
-        <fm-dialog
-            description="The member cannot check in or buy a plan until a manager lifts it."
-            size="sm"
-            title="Suspend member"
-            [open]="action() === 'suspend'"
-            (openChange)="!$event && close()"
-        >
-            <fm-field label="Reason" required>
-                <input fmInput placeholder="e.g. Behaviour at the gym" [(ngModel)]="reason" />
-            </fm-field>
-            <ng-container fmDialogFooter>
-                <button fmButton (click)="close()">Cancel</button>
-                <button fmButton variant="danger" [disabled]="reason.trim().length < 3" [loading]="busy()" (click)="suspend()">Suspend</button>
-            </ng-container>
-        </fm-dialog>
 
         <fm-dialog
             description="The home branch moves; a running plan carries on and its money stays where it was sold. Dues must be cleared first."
@@ -176,14 +156,6 @@ export class MemberManageComponent {
 
     protected close(): void {
         this.action.set(null);
-    }
-
-    protected suspend(): void {
-        this._run(this._service.suspend(this.member().oid, this.reason.trim()), 'Member suspended');
-    }
-
-    protected lift(): void {
-        this._run(this._service.unsuspend(this.member().oid), 'Suspension lifted');
     }
 
     protected transfer(): void {

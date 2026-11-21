@@ -555,7 +555,8 @@ export const TENANT: TenantConfig = {
             ]
         },
 
-        // Extra public pages, each at `/<slug>`. Placeholder text: replace with the client's own offers and policies.
+        // Extra public pages, each at `/<slug>`. Placeholder text: replace with the client's own. The gym's policies are HQ's,
+        // in the database, at /policies/<slug> (D-090).
         pages: [
             {
                 slug: 'offers',
@@ -592,117 +593,6 @@ export const TENANT: TenantConfig = {
                         text: ['Join any branch this month and pay no admission fee.'],
                         list: ['New members only'],
                         note: 'Until 31 Dec 2026'
-                    }
-                ]
-            },
-            {
-                slug: 'membership-terms',
-                crumb: 'Membership Terms',
-                title: 'Membership',
-                accent: 'Terms',
-                updated: '2026-11-15',
-                seo: {
-                    title: 'Membership terms',
-                    description: 'The terms of a {brand} membership: plans, payment, renewal, branch transfer and cancellation.'
-                },
-                blocks: [
-                    {
-                        heading: 'Your membership',
-                        text: [
-                            'A membership belongs to one member and one branch. It cannot be shared or passed on.',
-                            'Bring your member card on every visit; the front desk checks you in with it.'
-                        ]
-                    },
-                    {
-                        heading: 'Payment and renewal',
-                        text: ['Plans are paid in advance at the front desk, by cash, card or mobile banking. A plan does not renew by itself.'],
-                        list: [
-                            'Monthly plans run for one calendar month from the start date',
-                            'Annual plans run for twelve months',
-                            'Renew before the end date to keep your price'
-                        ]
-                    },
-                    {
-                        heading: 'Changing branch',
-                        text: ['You can move your membership to another branch. Ask the front desk; the move starts on an agreed date.']
-                    }
-                ]
-            },
-            {
-                slug: 'gym-rules',
-                crumb: 'Gym Rules',
-                title: 'Gym',
-                accent: 'Rules',
-                updated: '2026-11-15',
-                seo: { title: 'Gym rules', description: 'House rules at every {brand} branch: dress code, equipment, ladies hour and conduct.' },
-                blocks: [
-                    {
-                        heading: 'On the floor',
-                        list: [
-                            'Wear clean indoor shoes and gym clothes',
-                            'Bring a towel and wipe equipment after use',
-                            'Put weights back on the rack',
-                            'Share equipment between sets at busy times'
-                        ]
-                    },
-                    {
-                        heading: 'Ladies hour',
-                        text: ['During ladies hour the gym floor is for women only, with women trainers on duty.']
-                    },
-                    {
-                        heading: 'Conduct',
-                        text: ['Treat members and staff with respect. The branch may suspend a membership for unsafe or abusive behaviour.']
-                    }
-                ]
-            },
-            {
-                slug: 'refund-policy',
-                crumb: 'Refund & Freeze',
-                title: 'Refund &',
-                accent: 'Freeze Policy',
-                updated: '2026-11-15',
-                seo: { title: 'Refund & freeze policy', description: 'How refunds and membership freezes work at {brand}.' },
-                blocks: [
-                    {
-                        heading: 'Freezing a membership',
-                        // The plans that may freeze and the shortest and longest freeze are HQ settings (D-063): no numbers here
-                        // until this page reads them from the API (phase 2 step 8).
-                        text: [
-                            'Members on plans that allow it can freeze their membership for travel, illness or injury. The end date moves by the frozen days.'
-                        ],
-                        list: ['The front desk tells you which plans can freeze, and for how long', 'Ask the front desk before the freeze starts']
-                    },
-                    {
-                        heading: 'Refunds',
-                        text: [
-                            'A plan can be refunded in full within 3 days of payment if you have not used it.',
-                            'After that, plans are not refundable, but a freeze or a branch transfer may help.'
-                        ]
-                    }
-                ]
-            },
-            {
-                slug: 'privacy-policy',
-                crumb: 'Privacy Policy',
-                title: 'Privacy',
-                accent: 'Policy',
-                updated: '2026-11-15',
-                seo: { title: 'Privacy policy', description: 'What personal data {brand} keeps about members and visitors, and how it is used.' },
-                blocks: [
-                    {
-                        heading: 'What we keep',
-                        list: ['Your name, phone number and email', 'Your plan, payments and visits', 'A photo for your member card']
-                    },
-                    {
-                        heading: 'How we use it',
-                        text: [
-                            'To run your membership: check-ins, renewals, receipts and reminders. We do not sell your data.',
-                            'Only the staff of your branch, and head office, can see your record.'
-                        ]
-                    },
-                    {
-                        heading: 'Your choices',
-                        text: ['Ask the front desk to see, correct or delete your data, or to stop reminders.']
                     }
                 ]
             },
@@ -771,10 +661,11 @@ export const TENANT: TenantConfig = {
                     title: 'Info',
                     links: [
                         { label: 'Offers', route: '/offers' },
-                        { label: 'Membership Terms', route: '/membership-terms' },
-                        { label: 'Gym Rules', route: '/gym-rules' },
-                        { label: 'Refund & Freeze', route: '/refund-policy' },
-                        { label: 'Privacy Policy', route: '/privacy-policy' },
+                        { label: 'Policies', route: '/policies' },
+                        { label: 'Membership Terms', route: '/policies/membership-terms' },
+                        { label: 'Gym Rules', route: '/policies/gym-rules' },
+                        { label: 'Refund Policy', route: '/policies/refund-policy' },
+                        { label: 'Privacy Policy', route: '/policies/privacy-policy' },
                         { label: 'Terms of Use', route: '/terms' },
                         { label: 'Careers', route: '/careers' }
                     ]

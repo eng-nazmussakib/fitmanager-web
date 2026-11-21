@@ -28,6 +28,9 @@ export type Action = 'manage' | 'read' | 'create' | 'update' | 'delete' | 'expor
  * - Member portal: Portal.
  * - Phase 3 (D-083): Room, Locker (`manage` = set up; `create`/`update` = rent), PtSession, ClassType (HQ).
  * - Phase 4 (D-086): Exercise, Routine, Workout, Measurement.
+ * - Phase 5 (D-097): Policy, Incident, Complaint, Feedback.
+ * - Phase 6 (D-102): Equipment (`create` = raise a ticket), Product, Supplier (HQ), Stock, PurchaseOrder, Transfer, Sale
+ *   (`manage` = line discounts and late returns).
  */
 export type Subject =
     | 'Dashboard'
@@ -58,6 +61,17 @@ export type Subject =
     | 'Routine'
     | 'Workout'
     | 'Measurement'
+    | 'Policy'
+    | 'Incident'
+    | 'Complaint'
+    | 'Feedback'
+    | 'Equipment'
+    | 'Product'
+    | 'Supplier'
+    | 'Stock'
+    | 'PurchaseOrder'
+    | 'Transfer'
+    | 'Sale'
     | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subject]>;

@@ -5,6 +5,7 @@ import type { Subscription } from '@core/models/subscription.model';
 import { invoiceDue, invoiceStatus, quote } from '../domain/pricing';
 import type { ClosingRow, FileRow, MemberRow, MockDb } from '../types';
 import { addDaysIso, at } from './clock';
+import { seededSuspended } from './governance.seed';
 import { toRef } from './organisation.seed';
 
 /**
@@ -31,7 +32,7 @@ export function seedEveryCase(db: MockDb, today: string): void {
     // A generated member (not one of the scripted first twenty) whose plan runs today, fully paid, at `branch`.
     const pick = (branch: Branch, test: (s: Subscription, i: Invoice) => boolean = () => true): { m: MemberRow; sub: Subscription; inv: Invoice } | null => {
         for (const m of db.members) {
-            if (m.branch_oid !== branch.oid || m.pending || m.suspended || used.has(m.oid) || Number(m.code.slice(-6)) <= 20) continue;
+            if (m.branch_oid !== branch.oid || m.pending || seededSuspended(db, m) || used.has(m.oid) || Number(m.code.slice(-6)) <= 20) continue;
             const subs = subsOf(m.oid);
             const cur = subs.find(s => s.start_date <= today && today <= s.end_date && !s.cancelled_at && !s.freezes.length);
             const inv = cur ? invoiceOf(cur) : undefined;
@@ -186,7 +187,7 @@ export function seedEveryCase(db: MockDb, today: string): void {
         m =>
             m.branch_oid === gul.oid &&
             !m.pending &&
-            !m.suspended &&
+            !seededSuspended(db, m) &&
             !used.has(m.oid) &&
             Number(m.code.slice(-6)) > 20 &&
             subsOf(m.oid).length > 0 &&
@@ -232,7 +233,6 @@ export function seedEveryCase(db: MockDb, today: string): void {
         health_declared: false,
         photo_url: null,
         joined_on: addDaysIso(today, -1),
-        suspended: null,
         pending: true,
         trainer_oid: null,
         notes: 'Web join request: Single · Monthly',

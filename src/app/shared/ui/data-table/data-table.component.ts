@@ -32,6 +32,7 @@ const DEFAULT_TONES: Record<string, Tone> = {
     Approved: 'success',
     Expired: 'danger',
     Suspended: 'danger',
+    Banned: 'danger',
     Inactive: 'neutral',
     Frozen: 'info',
     Pending: 'warning',

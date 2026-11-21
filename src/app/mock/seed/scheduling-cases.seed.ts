@@ -4,6 +4,7 @@ import type { Subscription } from '@core/models/subscription.model';
 
 import type { MemberRow, MockDb, PtRow } from '../types';
 import { addDaysIso, at, dateOf } from './clock';
+import { seededSuspended } from './governance.seed';
 import { toRef } from './organisation.seed';
 
 /**
@@ -15,7 +16,7 @@ export function seedSchedulingCases(db: MockDb, today: string): void {
     const gul = db.branches.find(b => b.code === 'GUL')!;
     const running = (m: MemberRow): boolean =>
         !m.pending &&
-        !m.suspended &&
+        !seededSuspended(db, m) &&
         db.subscriptions.some(s => s.member_oid === m.oid && s.kind !== 'pt' && s.start_date <= today && today <= s.end_date && !s.freezes.length);
     const active = db.members.filter(m => m.branch_oid === gul.oid && running(m));
     const rahim = db.members.find(m => m.oid === 'mem-gul-1')!;

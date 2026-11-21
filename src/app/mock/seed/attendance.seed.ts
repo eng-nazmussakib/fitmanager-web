@@ -1,5 +1,6 @@
 import type { MockDb } from '../types';
 import { addDaysIso, at, weekdayOf } from './clock';
+import { seededSuspended } from './governance.seed';
 import { openingHours } from './organisation.seed';
 import { Rng } from './prng';
 
@@ -7,7 +8,7 @@ import { Rng } from './prng';
 const WEEKDAY_FACTOR = [1, 1, 1, 0.95, 0.9, 0.55, 1.05];
 
 /**
- * 60 days of check-ins following each member's habit (morning, midday or evening regulars) and the branch's
+ * 92 days of check-ins (three months of history for the reports, D-111) following each member's habit (morning, midday or evening regulars) and the branch's
  * opening hours. Today's visits stop at the current time; people who came in within the last ~80 minutes are
  * still inside (no check-out), which feeds the live occupancy.
  */
@@ -18,11 +19,11 @@ export function seedAttendance(db: MockDb, today: string, nowMinutes: number): v
     const desk: Record<string, string> = { 'br-gul': 'Lamia Haque', 'br-dha': 'Mim Sarker', 'br-utt': 'Tanjila Biswas' };
     const hoursOf = new Map(db.branches.map(b => [b.oid, openingHours(b.name)]));
     let n = 0;
-    for (let d = 59; d >= 0; d--) {
+    for (let d = 91; d >= 0; d--) {
         const date = addDaysIso(today, -d);
         const wd = weekdayOf(date);
         for (const m of db.members) {
-            if (m.pending || m.suspended) continue;
+            if (m.pending || seededSuspended(db, m)) continue;
             const hours = hoursOf.get(m.branch_oid)?.find(h => h.days.includes(wd));
             if (!hours) continue;
             const open = toMin(hours.open);

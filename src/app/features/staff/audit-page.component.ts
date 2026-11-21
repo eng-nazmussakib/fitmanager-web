@@ -5,8 +5,12 @@ import { finalize } from 'rxjs';
 
 import { AuthService } from '@core/auth/auth.service';
 import { ignoreHandledApiError } from '@core/http/api-error';
+import type { ExportFormat } from '@core/models/report.model';
 import type { AuditEntry } from '@core/models/staff.model';
+import { ReportsService } from '@features/reports/reports.service';
+import { ExportMenuComponent } from '@shared/components/export-menu/export-menu.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { CanDirective } from '@shared/directives/can.directive';
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/display/display';
@@ -36,6 +40,8 @@ const ENTITIES: Record<string, string> = { staff: 'Staff', site_group: 'Public s
 @Component({
     selector: 'app-audit-page',
     imports: [
+        ExportMenuComponent,
+        CanDirective,
         FormsModule,
         JsonPipe,
         PageHeaderComponent,
@@ -51,7 +57,9 @@ const ENTITIES: Record<string, string> = { staff: 'Staff', site_group: 'Public s
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <app-page-header subtitle="Every change, who made it and when. Entries cannot be edited or deleted." title="Audit log" />
+        <app-page-header subtitle="Every change, who made it and when. Entries cannot be edited or deleted." title="Audit log">
+            <app-export-menu *appCan="'export'; on: 'Report'" label="Export the audit log" [busy]="exporting()" (export)="exportLog($event)" />
+        </app-page-header>
 
         <div class="mb-4 grid gap-3" [class]="level() === 'hq' ? 'sm:grid-cols-4' : 'sm:grid-cols-3'">
             @if (level() === 'hq') {
@@ -136,6 +144,8 @@ export class AuditPageComponent {
     protected readonly next = signal<string | null>(null);
     protected readonly loading = signal(false);
     protected readonly open = signal<string | null>(null);
+    protected readonly exporting = signal(false);
+    private readonly _reports = inject(ReportsService);
 
     protected readonly entityOptions: SelectOption<string>[] = [
         { value: '', label: 'Everything' },
@@ -181,6 +191,21 @@ export class AuditPageComponent {
         const named = (r.after ?? r.before) as { name?: unknown } | null;
         const name = typeof named?.name === 'string' ? named.name : r.entity_key;
         return `${ENTITIES[r.entity] ?? r.entity}: ${name}`;
+    }
+
+    /** Every entry the filters match, as Excel or PDF (D-107). The export itself is logged too. */
+    protected async exportLog(format: ExportFormat): Promise<void> {
+        this.exporting.set(true);
+        const q = this._query();
+        const filters = Object.fromEntries(Object.entries(q).filter(([k, v]) => v !== undefined && v !== '' && k !== 'before' && k !== 'limit'));
+        try {
+            await this._reports.exportList('audit', { filters }, format, {
+                title: 'Audit log',
+                subtitle: [q.from && q.to ? `${q.from} to ${q.to}` : '', this.entity()].filter(Boolean).join(' · ') || 'Everything'
+            });
+        } finally {
+            this.exporting.set(false);
+        }
     }
 
     private _load(query: Record<string, string | undefined>, before: string | undefined): void {

@@ -2,12 +2,14 @@ import { HttpResponse } from '@angular/common/http';
 
 import type { MemberListItem, MemberStatus, TimelineEvent } from '@core/models/member.model';
 
+import { recordAudit } from '../audit';
 import { clock12, shortDate } from '../domain/access-rules';
 import { type Ctx, fail, num, ok, page, qStr, type Route, sortBy, str } from '../http';
 import { idx, listItem, memberDetail, memberState } from '../queries';
 import { addDaysIso, dateOf, timeOf } from '../seed/clock';
 import { commit, db, newOid } from '../store';
 import type { MemberRow } from '../types';
+import { acceptAllOnPaper } from './governance.handlers';
 import { photoUrl } from './phase2.handlers';
 
 /** A member of the request's branch, or 404 (never another branch's: tenancy). */
@@ -19,7 +21,8 @@ export function branchMember(ctx: Ctx, oid: string): MemberRow {
 
 const PHONE = /^01[3-9]\d{8}$/;
 
-function list(ctx: Ctx): HttpResponse<unknown> {
+/** `GET /v1/members` (also paged through by the member export). */
+export function list(ctx: Ctx): HttpResponse<unknown> {
     const today = ctx.now.date;
     const q = qStr(ctx, 'q').toLowerCase();
     const digits = q.replace(/\D/g, '');
@@ -114,7 +117,6 @@ function create(ctx: Ctx): HttpResponse<unknown> {
         health_declared: true,
         photo_url: fields.photo_url ?? null,
         joined_on: ctx.now.date,
-        suspended: null,
         // No subscription yet: the membership starts with the first payment (D-022).
         pending: true,
         trainer_oid: null,
@@ -123,6 +125,9 @@ function create(ctx: Ctx): HttpResponse<unknown> {
         habit_minutes: 18 * 60
     };
     commit({ t: 'member.create', row, seq });
+    recordAudit(ctx, 'create', 'member', row.code, null, { name: row.name });
+    // Signed the policies on paper at the desk (D-090): recorded as accepted.
+    if (ctx.body['policies_signed'] === true) acceptAllOnPaper(ctx, row);
     return ok(memberDetail(row, ctx.now.date), `Member ${row.code} created`);
 }
 
@@ -185,15 +190,39 @@ function timeline(ctx: Ctx): HttpResponse<unknown> {
             detail: c.out_at ? `${clock12(timeOf(c.in_at))} to ${clock12(timeOf(c.out_at))}` : `${clock12(timeOf(c.in_at))}, still inside`,
             by: c.by
         });
-    if (m.suspended)
+    // Sanctions (D-093) and policy acceptances (D-090), as the API's timeline lists them.
+    const LEVEL = { verbal: 'Verbal warning', written: 'Written warning', suspension: 'Suspended', ban: 'Banned' } as const;
+    for (const x of (d.sanctions ?? []).filter(s => s.member_oid === m.oid)) {
+        const where = d.branches.find(b => b.oid === x.branch_oid)?.name ?? '';
+        const reach =
+            x.level === 'suspension'
+                ? ` (${shortDate(x.starts_on)} to ${shortDate(x.ends_on ?? x.starts_on)})`
+                : x.level === 'ban' && x.scope === 'all'
+                  ? ' at every branch'
+                  : ` at ${where}`;
         events.push({
-            oid: `${m.oid}-susp`,
-            kind: 'status',
-            at: `${m.suspended.since}T12:00:00+06:00`,
-            title: 'Suspended',
-            detail: m.suspended.reason,
-            by: 'Branch manager'
+            oid: x.oid,
+            kind: 'discipline',
+            at: `${x.given_on}T18:30:00+06:00`,
+            title: `${LEVEL[x.level]}${reach}`,
+            detail: x.reason,
+            by: x.given_by_name
         });
+        if (x.overturned_at)
+            events.push({ oid: `${x.oid}-ot`, kind: 'discipline', at: x.overturned_at, title: 'Overturned on appeal', detail: LEVEL[x.level], by: null });
+        if (x.lifted) events.push({ oid: `${x.oid}-lift`, kind: 'discipline', at: x.lifted.at, title: 'Ban lifted', detail: x.lifted.reason, by: x.lifted.by });
+    }
+    for (const a of (d.acceptances ?? []).filter(x => x.member_oid === m.oid)) {
+        const p = d.policies.find(x => x.oid === a.policy_oid);
+        events.push({
+            oid: a.oid,
+            kind: 'policy',
+            at: a.accepted_at,
+            title: `Accepted ${p?.title ?? 'a policy'} v${a.version}`,
+            detail: a.method === 'paper' ? 'Signed on paper at the desk' : 'Accepted in the member portal',
+            by: a.recorded_by_name
+        });
+    }
     for (const n of d.notes.filter(n => n.member_oid === m.oid))
         events.push({ oid: n.oid, kind: 'note', at: n.at, title: n.title, detail: n.detail, by: n.by });
     events.sort((a, b) => (a.at < b.at ? 1 : -1));

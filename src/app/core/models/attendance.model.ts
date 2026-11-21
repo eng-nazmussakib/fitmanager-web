@@ -1,7 +1,7 @@
 import type { MemberStatus } from './member.model';
 
 /** No 'branch' rule: a member trains at every branch (D-059). */
-export type AccessRuleId = 'membership' | 'expired' | 'frozen' | 'suspended' | 'dues' | 'hours' | 'already_in' | 'pending';
+export type AccessRuleId = 'membership' | 'expired' | 'frozen' | 'suspended' | 'banned' | 'dues' | 'policy' | 'hours' | 'already_in' | 'pending';
 
 /** One failed rule, with the reason shown to the front desk. */
 export interface RuleFailure {
@@ -15,6 +15,8 @@ export interface RuleFailure {
 export interface AccessDecision {
     allowed: boolean;
     failures: RuleFailure[];
+    /** Required policies due but not blocking yet (D-091): ask the member to sign. */
+    policies_due?: { title: string; blocks_on: string }[];
     member: {
         oid: string;
         code: string;

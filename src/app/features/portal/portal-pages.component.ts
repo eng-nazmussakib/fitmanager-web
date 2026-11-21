@@ -15,11 +15,23 @@ import { EmptyStateComponent } from '@shared/ui/feedback/empty-state.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 import { PortalService } from './portal.service';
+import { PortalFeedbackCardComponent } from './portal-governance.component';
 
 /** H6 home: the membership card (with the code as a barcode for the desk scanner), dues, the next workout, next class. */
 @Component({
     selector: 'app-portal-home',
-    imports: [RouterLink, AppDatePipe, TakaPipe, BarcodeComponent, AlertComponent, BadgeComponent, CardComponent, SkeletonComponent, IconComponent],
+    imports: [
+        RouterLink,
+        AppDatePipe,
+        TakaPipe,
+        BarcodeComponent,
+        AlertComponent,
+        BadgeComponent,
+        CardComponent,
+        SkeletonComponent,
+        IconComponent,
+        PortalFeedbackCardComponent
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         @if (summary.value(); as s) {
@@ -103,6 +115,7 @@ import { PortalService } from './portal.service';
                     </p>
                 </a>
             }
+            <app-portal-feedback-card />
         } @else {
             <fm-skeleton height="15rem" />
             <fm-skeleton class="mt-4" height="5rem" />
@@ -244,7 +257,9 @@ export class PortalBookingsComponent {
                     @for (inv of list; track inv.oid) {
                         <li class="flex items-center gap-3 rounded-[var(--radius-panel)] border border-border bg-surface p-4">
                             <span class="min-w-0 flex-1">
-                                <span class="block font-medium">{{ inv.lines[0].label }}</span>
+                                <span class="block font-medium">
+                                    {{ inv.kind === 'pos' ? 'Shop: ' + inv.lines[0].label + (inv.lines.length > 1 ? ' and more' : '') : inv.lines[0].label }}
+                                </span>
                                 <span class="block text-sm text-fg-muted">{{ inv.issued_at | appDate }} · {{ inv.number }}</span>
                             </span>
                             <span class="text-right">

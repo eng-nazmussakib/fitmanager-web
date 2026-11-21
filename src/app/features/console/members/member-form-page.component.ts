@@ -95,7 +95,14 @@ const HEALTH = ['Asthma', 'Diabetes', 'High blood pressure', 'Heart condition', 
                 </fieldset>
                 <label class="fm-check-label mt-5 items-start">
                     <input class="mt-0.5" type="checkbox" fmCheck formControlName="health_declared" [attr.aria-invalid]="declarationMissing()" />
-                    <span>The member declares they are fit to exercise, has told us about any condition above, and accepts the gym rules.</span>
+                    <span>The member declares they are fit to exercise and has told us about any condition above.</span>
+                </label>
+                <label class="fm-check-label mt-3 items-start">
+                    <input class="mt-0.5" type="checkbox" fmCheck formControlName="policies_signed" />
+                    <span>
+                        The member signed the gym's policies on paper (gym rules, membership terms, refund and privacy policies, liability waiver). Otherwise
+                        they accept them in the member portal within 14 days.
+                    </span>
                 </label>
                 @if (declarationMissing()) {
                     <p class="fm-error mt-2">The member must sign the health declaration.</p>
@@ -143,7 +150,8 @@ export class MemberFormPageComponent {
         email: ['', Validators.email],
         address: [''],
         emergency: this._fb.group({ name: [''], phone: [''], relation: [''] }),
-        health_declared: [false, Validators.requiredTrue]
+        health_declared: [false, Validators.requiredTrue],
+        policies_signed: [true]
     });
 
     protected declarationMissing(): boolean {
@@ -182,6 +190,7 @@ export class MemberFormPageComponent {
                         emergency_contact: v.emergency.name ? v.emergency : null,
                         health_flags: this.flags(),
                         health_declared: v.health_declared,
+                        policies_signed: v.policies_signed,
                         photo_file_oid: photoFileOid
                     })
                 )

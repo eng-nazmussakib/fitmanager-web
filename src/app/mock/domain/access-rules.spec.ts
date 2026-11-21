@@ -15,7 +15,9 @@ function facts(over: Omit<Partial<AccessFacts>, 'member'> & { member?: Partial<A
         member: { status: 'Active', dues: 0, home_branch_name: 'Gulshan', dues_limit: 1000, ...over.member },
         subscription: over.subscription === undefined ? { start_date: '2026-11-01', end_date: '2026-11-30', freezes: [] } : over.subscription,
         branch: over.branch ?? BRANCH,
-        open_check_in: over.open_check_in ?? null
+        open_check_in: over.open_check_in ?? null,
+        sanctions: over.sanctions ?? [],
+        policies: over.policies ?? []
     };
 }
 
@@ -39,7 +41,48 @@ describe('access rules (D-059, D-061)', () => {
             ['frozen'],
             [true]
         ],
-        ['suspended', facts({ member: { status: 'Suspended' } }), NOW, ['suspended'], [true]],
+        [
+            'suspended (every branch, not overridable)',
+            facts({
+                member: { status: 'Suspended' },
+                sanctions: [
+                    { level: 'suspension' as const, starts_on: '2026-11-10', ends_on: '2026-11-20', scope: null, branch_name: 'Gulshan', reason: 'Abuse' }
+                ]
+            }),
+            NOW,
+            ['suspended'],
+            [false]
+        ],
+        [
+            'a suspension that ended',
+            facts({
+                sanctions: [
+                    {
+                        ...{
+                            level: 'suspension' as const,
+                            starts_on: '2026-11-10',
+                            ends_on: '2026-11-20',
+                            scope: null,
+                            branch_name: 'Gulshan',
+                            reason: 'Abuse'
+                        },
+                        ends_on: '2026-11-14'
+                    }
+                ]
+            }),
+            NOW,
+            [],
+            []
+        ],
+        [
+            'banned here (not overridable)',
+            facts({ sanctions: [{ level: 'ban', starts_on: '2026-11-01', ends_on: null, scope: 'branch', branch_name: 'Gulshan', reason: 'Threats' }] }),
+            NOW,
+            ['banned'],
+            [false]
+        ],
+        ['a policy due, not blocking yet', facts({ policies: [{ title: 'Gym rules', blocks_on: '2026-11-16' }] }), NOW, [], []],
+        ['a policy past its grace period (overridable)', facts({ policies: [{ title: 'Gym rules', blocks_on: '2026-11-15' }] }), NOW, ['policy'], [true]],
         ['dues over the home branch’s limit', facts({ member: { dues: 2500 } }), NOW, ['dues'], [true]],
         ['dues at the limit are fine', facts({ member: { dues: 1000 } }), NOW, [], []],
         [
@@ -58,10 +101,16 @@ describe('access rules (D-059, D-061)', () => {
         ['starts in the future', facts({ subscription: { start_date: '2026-11-20', end_date: '2026-12-19', freezes: [] } }), NOW, ['membership'], [true]],
         [
             'several failures at once',
-            facts({ member: { status: 'Suspended', dues: 5000 }, subscription: { start_date: '2026-09-01', end_date: '2026-10-31', freezes: [] } }),
+            facts({
+                member: { status: 'Suspended', dues: 5000 },
+                subscription: { start_date: '2026-09-01', end_date: '2026-10-31', freezes: [] },
+                sanctions: [
+                    { level: 'suspension' as const, starts_on: '2026-11-10', ends_on: '2026-11-20', scope: null, branch_name: 'Gulshan', reason: 'Abuse' }
+                ]
+            }),
             NOW,
             ['suspended', 'expired', 'dues'],
-            [true, true, true]
+            [false, true, true]
         ]
     ];
 

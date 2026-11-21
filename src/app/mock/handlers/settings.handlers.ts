@@ -51,7 +51,9 @@ function update(ctx: Ctx): HttpResponse<unknown> {
         | 'booking_cancel_hours'
         | 'noshow_limit'
         | 'noshow_window_days'
-        | 'noshow_block_days';
+        | 'noshow_block_days'
+        | 'policy_grace_days'
+        | 'complaint_response_hours';
     const whole = (key: WholeKey, min: number, max: number, message: string): void => {
         if (!(key in ctx.body)) return;
         const n = ctx.body[key];
@@ -68,6 +70,9 @@ function update(ctx: Ctx): HttpResponse<unknown> {
     whole('noshow_limit', 1, 20, 'Pause booking after 1 to 20 missed classes.');
     whole('noshow_window_days', 1, 365, 'Count missed classes over 1 to 365 days.');
     whole('noshow_block_days', 1, 90, 'Pause booking for 1 to 90 days.');
+    // Governance (D-091, D-095).
+    whole('policy_grace_days', 0, 90, 'The policy grace period is 0 to 90 days.');
+    whole('complaint_response_hours', 1, 336, 'Complaints are answered within 1 to 336 hours.');
     const min = patch.freeze_min_days ?? db().settings.freeze_min_days;
     const max = patch.freeze_max_days ?? db().settings.freeze_max_days;
     if (min > max) fail(400, `The shortest freeze (${min} days) is longer than the longest (${max} days)`);

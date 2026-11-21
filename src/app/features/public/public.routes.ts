@@ -23,7 +23,10 @@ export const PUBLIC_ROUTES: Routes = [
     { path: 'trainers/:slug', canActivate: [sitePageGuard('trainers')], title: 'Trainer', loadComponent: () => import('./trainers/trainer-page.component').then(m => m.TrainerPageComponent) },
     { path: 'blog', canActivate: [sitePageGuard('blog')], title: landing.blog.page.seo.title, loadComponent: () => import('./blog/blog-page.component').then(m => m.BlogPageComponent) },
     { path: 'gallery', canActivate: [sitePageGuard('gallery')], title: landing.gallery.page.seo.title, loadComponent: () => import('./gallery/gallery-page.component').then(m => m.GalleryPageComponent) },
-    // Extra pages from the config (offers, policies…), each at `/<slug>`.
+    // HQ's policies (D-090), from the database: rendered in the browser, as each new version changes them.
+    { path: 'policies', title: 'Policies', loadComponent: () => import('./policies/policy-pages.component').then(m => m.PoliciesIndexComponent) },
+    { path: 'policies/:slug', title: 'Policy', loadComponent: () => import('./policies/policy-pages.component').then(m => m.PolicyPageComponent) },
+    // Extra pages from the config (offers, careers…), each at `/<slug>`.
     ...landing.pages.map(page => ({
         path: page.slug,
         title: page.seo.title,

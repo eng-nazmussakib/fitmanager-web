@@ -7,6 +7,7 @@ import type { PaymentMethod, Subscription } from '@core/models/subscription.mode
 import { endDate } from '../domain/pricing';
 import type { MemberRow, MockDb } from '../types';
 import { addDaysIso, at } from './clock';
+import { seededSuspended, seedSuspension } from './governance.seed';
 import { AREAS, FEMALE_NAMES, FEMALE_ONLY_LAST, HEALTH_FLAGS, LAST_NAMES, MALE_NAMES, MOBILE_PREFIXES, RELATIONS } from './names';
 import { toRef } from './organisation.seed';
 import { Rng } from './prng';
@@ -198,7 +199,6 @@ export function seedMembers(db: MockDb, today: string): void {
                 health_declared: true,
                 photo_url: null,
                 joined_on: addDaysIso(today, -joinedDaysAgo),
-                suspended: null,
                 pending: scripted?.story === 'pending',
                 trainer_oid: rng.chance(0.35) && trainers.length ? rng.pick(trainers).oid : null,
                 notes: null,
@@ -260,8 +260,17 @@ export function seedMembers(db: MockDb, today: string): void {
             s.end_date = addDaysIso(s.end_date, 1 + Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000));
         }
         // One suspended member per branch besides the scripted one.
-        const candidate = db.members.find(m => m.branch_oid === branch.oid && !m.pending && !m.suspended && Number(m.oid.split('-')[2]) > 20);
-        if (candidate && branch.code !== 'GUL') candidate.suspended = { since: addDaysIso(today, -6), reason: 'Unpaid dues and repeated warnings' };
+        const candidate = db.members.find(m => m.branch_oid === branch.oid && !m.pending && !seededSuspended(db, m) && Number(m.oid.split('-')[2]) > 20);
+        if (candidate && branch.code !== 'GUL')
+            seedSuspension(
+                db,
+                candidate,
+                branch.code as 'DHA' | 'UTT',
+                addDaysIso(today, -6),
+                10,
+                'Repeated warnings about dropping weights near others.',
+                'Dropped weights again after warnings'
+            );
     }
 }
 
@@ -298,7 +307,16 @@ function seedScripted(c: Ctx, m: MemberRow, branch: Branch, plan: (tier: string,
         sub.end_date = addDaysIso(sub.end_date, 15);
     } else if (story === 'suspended') {
         addSubscription(c, m, branch, plan('single', 'monthly'), addDaysIso(today, -12), true, 1);
-        m.suspended = { since: addDaysIso(today, -4), reason: 'Behaviour on the training floor (second warning)' };
+        // The third case in three weeks (the governance seed adds the first two, the evidence and an appeal).
+        seedSuspension(
+            c.db,
+            m,
+            'GUL',
+            addDaysIso(today, -4),
+            14,
+            'Abusive language to another member (gym rules §3). Suspended for two weeks; your plan keeps running.',
+            'Shouting at another member over a bench'
+        );
     } else if (story === 'expiring') {
         addSubscription(c, m, branch, plan('duo', 'monthly'), addDaysIso(today, -27), true, 1);
     }

@@ -21,16 +21,30 @@ export interface Invoice {
     oid: string;
     /** "INV-GUL-2026-00123" */
     number: string;
-    /** A sale, an upgrade, or a locker rental (D-082). */
-    kind?: 'sale' | 'upgrade' | 'locker';
+    /** A sale, an upgrade, a locker rental (D-082), or a POS sale (D-102). */
+    kind?: 'sale' | 'upgrade' | 'locker' | 'pos';
     branch: BranchRef;
-    member_oid: string;
+    /** Null on a POS sale to a walk-in (member_code 'WALK-IN', D-102). */
+    member_oid: string | null;
     member_name: string;
     member_code: string;
     /** Null once the member was anonymised (D-068 c). */
     member_phone: string | null;
     issued_at: string;
-    lines: { label: string; amount: number }[];
+    /** A POS invoice's product lines carry their own VAT (rate, vat, total); its discount lines do not. */
+    lines: {
+        label: string;
+        amount: number;
+        product_oid?: string;
+        code?: string;
+        qty?: number;
+        unit_price?: number;
+        vat_rate?: number;
+        discount?: number;
+        discount_reason?: string | null;
+        vat?: number;
+        total?: number;
+    }[];
     subtotal: number;
     discount: number;
     /** The VAT rate in force when the invoice was issued (OrgSettings.vat_rate then). */
@@ -65,6 +79,8 @@ export interface CashClosing {
     invoices: number;
     new_members: number;
     renewals: number;
+    /** POS sales today (D-102), counted apart from plan sales. */
+    pos_sales?: number;
     /** What each staff member took today, and their closing if done (D-061: the daily count per person). */
     by_staff?: {
         staff_oid: string;

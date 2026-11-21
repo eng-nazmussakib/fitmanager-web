@@ -58,7 +58,7 @@
                             }
                         ],
                         "styles": ["src/styles.css"],
-                        "allowedCommonJsDependencies": ["file-saver", "fast-unique-numbers", "html2canvas", "canvg", "core-js", "raf", "rgbcolor"],
+                        "allowedCommonJsDependencies": ["exceljs", "file-saver", "fast-unique-numbers", "html2canvas", "canvg", "core-js", "raf", "rgbcolor"],
                         "server": "src/main.server.ts",
                         "outputMode": "static",
                         "security": {

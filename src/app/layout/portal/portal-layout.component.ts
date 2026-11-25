@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { AuthService } from '@core/auth/auth.service';
+import { BellService } from '@core/notifications/bell.service';
+import { BellComponent } from '@shared/components/bell/bell.component';
 import { LogoComponent } from '@shared/components/logo/logo.component';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { AvatarComponent } from '@shared/ui/display/display';
@@ -25,6 +29,7 @@ const TABS: PortalTab[] = [
     { label: 'Routine', icon: 'dumbbell', link: '/me/routine' },
     { label: 'Progress', icon: 'trending-up', link: '/me/progress' },
     { label: 'Payments', icon: 'receipt', link: '/me/payments' },
+    { label: 'Messages', icon: 'bell', link: '/me/messages', sidebarOnly: true },
     { label: 'Policies', icon: 'book-open', link: '/me/policies', sidebarOnly: true },
     { label: 'My record', icon: 'badge-check', link: '/me/record', sidebarOnly: true },
     { label: 'Complaints', icon: 'message-square', link: '/me/complaints', sidebarOnly: true }
@@ -46,7 +51,8 @@ const TABS: PortalTab[] = [
         IconComponent,
         MenuComponent,
         MenuItemDirective,
-        MenuTriggerDirective
+        MenuTriggerDirective,
+        BellComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: { class: 'block min-h-dvh bg-bg text-fg' },
@@ -56,6 +62,7 @@ const TABS: PortalTab[] = [
             <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
                 <a class="text-fg no-underline" aria-label="My membership, home" routerLink="/me"><app-logo size="sm" /></a>
                 <span class="flex-1"></span>
+                <app-bell link="/me/messages" />
                 <button aria-label="Account" fmButton iconOnly variant="ghost" [fmMenuTrigger]="account">
                     <fm-avatar size="2rem" [name]="user()?.name ?? '?'" [src]="user()?.photo_url" />
                 </button>
@@ -134,4 +141,16 @@ export class PortalLayoutComponent {
     protected readonly user = this.auth.user;
     protected readonly tabs = TABS;
     protected readonly barTabs = TABS.filter(t => !t.sidebarOnly);
+
+    constructor() {
+        // The bell's count: on opening the portal and on every page (D-108).
+        const bell = inject(BellService);
+        bell.refresh(true);
+        inject(Router)
+            .events.pipe(
+                filter(e => e instanceof NavigationEnd),
+                takeUntilDestroyed()
+            )
+            .subscribe(() => bell.refresh());
+    }
 }

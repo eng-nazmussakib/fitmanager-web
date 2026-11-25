@@ -39,6 +39,7 @@ import { TakaPipe } from '@shared/pipes/taka.pipe';
 
 import { LinkTarget, openingHoursSpec, Plan, PlanQuote, planQuote, postalAddress, PublicSiteService, slug } from '../public-site.service';
 import { PromoDialogComponent } from '../shared/promo-dialog.component';
+import { SiteContentService } from '../site-content.service';
 
 /** A plan card: a plan at the selected period, or (single plan) the plan at one period. */
 interface PlanCard {
@@ -129,7 +130,10 @@ export class LandingComponent {
     protected readonly facilities = this.c.facilities.items.map(f => ({ ...f, icon: FACILITY_ICONS[f.icon] }));
     protected readonly branches = this.site.branches;
     protected readonly branchHeading = this.site.branchHeading;
-    protected readonly galleryPreview = this.c.gallery.items.slice(0, this.c.gallery.preview ?? 6);
+    /** The database's posts and photos (phase 7c, D-109), the config's until they load or with no API. */
+    private readonly _content = inject(SiteContentService);
+    protected readonly posts = computed(() => this._content.posts().slice(0, 5));
+    protected readonly galleryPreview = computed(() => this._content.photos().slice(0, this.c.gallery.preview ?? 6));
 
     /** Plans layout: a card per plan (switch: period), or a card per period (switch: plan). */
     protected readonly planMode = this.site.planLayout;

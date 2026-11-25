@@ -9,7 +9,7 @@ import { invoiceDue, invoiceStatus, type Promo } from './domain/pricing';
 import { dhakaNow } from './seed/clock';
 import { seed } from './seed/seed';
 import type { MockAccount } from './seed/staff.seed';
-import type { CheckInRow, ClosingRow, EnquiryRow, FileRow, MemberRow, MockDb, NoteRow, TableName } from './types';
+import type { CheckInRow, ClosingRow, EnquiryRow, FileRow, MemberRow, MockDb, NoteRow, ReadRow, TableName } from './types';
 
 /**
  * In-memory state for the mock API.
@@ -46,6 +46,8 @@ export type Mutation =
     | { t: 'account.put'; account: MockAccount }
     | { t: 'audit.add'; row: AuditEntry }
     /** Phase 3 on: add or replace a row by oid, change some of its fields, or drop it, in one of the plain tables. */
+    | { t: 'reads.add'; rows: ReadRow[] }
+    | { t: 'branch.description'; oid: string; description: string | null }
     | { t: 'put'; table: TableName; row: object }
     | { t: 'patch'; table: TableName; oid: string; patch: Record<string, unknown> }
     | { t: 'drop'; table: TableName; oid: string };
@@ -321,6 +323,16 @@ export function apply(d: MockDb, m: Mutation): void {
         case 'audit.add':
             d.audit.push(m.row);
             break;
+        case 'branch.description': {
+            const b = d.branches.find(x => x.oid === m.oid);
+            if (b) b.description = m.description;
+            break;
+        }
+        case 'reads.add': {
+            const have = new Set(d.reads.map(r => r.oid));
+            d.reads.push(...m.rows.filter(r => !have.has(r.oid)));
+            break;
+        }
         case 'put': {
             const list = d[m.table] as object[] as { oid: string }[];
             const row = m.row as { oid: string };

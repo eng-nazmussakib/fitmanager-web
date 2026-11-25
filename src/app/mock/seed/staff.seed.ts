@@ -72,7 +72,9 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
                 'Transfer',
                 'Sale'
             ]
-        }
+        },
+        // Phase 7c (D-109, migration 024): the public site's content.
+        { action: 'manage', subject: ['Website'] }
     ],
     BRANCH_MANAGER: [
         {
@@ -107,6 +109,8 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
         { action: ['read', 'create', 'update'], subject: ['PurchaseOrder'] },
         // Exports (D-107, migration 022): `export Report`.
         { action: ['read', 'export'], subject: ['Report'] },
+        // Their branch's page and photos (D-109, migration 024).
+        { action: ['read', 'update'], subject: ['Website'] },
         { action: 'read', subject: ['Dashboard', 'Plan', 'AuditLog', 'Policy', 'Feedback', 'Product', 'Supplier'] }
     ],
     FRONT_DESK: [

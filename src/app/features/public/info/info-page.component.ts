@@ -1,10 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideClock } from '@ng-icons/lucide';
+import { of, switchMap } from 'rxjs';
 
-import { SeoService } from '@core/seo/seo.service';
+import { breadcrumbs, SeoService } from '@core/seo/seo.service';
+import { markdownText } from '@core/utils/markdown';
+import { environment } from '@env/environment';
 import { RevealDirective } from '@shared/directives/reveal.directive';
 
+import { PublicContentService } from '../public-content.service';
 import { PublicSiteService } from '../public-site.service';
 import { PageIntroComponent } from '../shared/page-intro.component';
 
@@ -12,6 +17,8 @@ import { PageIntroComponent } from '../shared/page-intro.component';
  * An extra public page from the brand config's `pages` (offers, policies, rules, careers…), at `/<slug>`.
  * The route passes the page's `slug` as route data. `document` pages read like a policy; `cards` pages show a card per block.
  */
+const dayText = (iso: string): string => new Date(`${iso}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
 @Component({
     selector: 'app-info-page',
     imports: [NgIcon, RevealDirective, PageIntroComponent],
@@ -120,10 +127,27 @@ import { PageIntroComponent } from '../shared/page-intro.component';
 export class InfoPageComponent {
     private readonly _site = inject(PublicSiteService);
     private readonly _seo = inject(SeoService);
+    private readonly _content = inject(PublicContentService);
 
     /** The page's slug (route data). */
     readonly slug = input.required<string>();
-    protected readonly page = computed(() => this._site.c.pages.find(p => p.slug === this.slug()) ?? null);
+    private readonly _config = computed(() => this._site.c.pages.find(p => p.slug === this.slug()) ?? null);
+    /** `/offers` (phase 7c, D-109): the offers running today, from the database; the config's blocks without an API. */
+    private readonly _offers = toSignal(toObservable(this.slug).pipe(switchMap(s => (s === 'offers' ? this._content.offers() : of(null)))), { initialValue: null });
+    protected readonly page = computed(() => {
+        const page = this._config();
+        const offers = this._offers();
+        if (!page || !offers) return page;
+        return {
+            ...page,
+            blocks: offers.map(o => ({
+                heading: o.title,
+                text: [o.summary, ...(o.body ? [markdownText(o.body)] : [])],
+                list: [...o.conditions, ...(o.promo_code ? [`At the desk, ask for ${o.promo_code}`] : [])],
+                note: o.ends_on ? `Until ${dayText(o.ends_on)}` : 'Ongoing'
+            }))
+        };
+    });
     /** `2026-11-15` → `15 November 2026`. */
     protected readonly updated = computed(() => {
         const date = this.page()?.updated;
@@ -134,7 +158,40 @@ export class InfoPageComponent {
         effect(() => {
             const p = this.page();
             if (!p) return;
-            this._seo.update({ path: `/${p.slug}`, title: `${p.seo.title} | ${this._site.brand}`, description: p.seo.description });
+            const url = `${environment.siteUrl}/${p.slug}`;
+            const offers = this._offers();
+            this._seo.update({
+                path: `/${p.slug}`,
+                title: `${p.seo.title} | ${this._site.brand}`,
+                description: p.seo.description,
+                jsonLd: {
+                    '@context': 'https://schema.org',
+                    '@graph': [
+                        ...(offers?.length
+                            ? [
+                                  {
+                                      '@type': 'OfferCatalog',
+                                      name: p.seo.title,
+                                      url,
+                                      itemListElement: offers.map(o => ({
+                                          '@type': 'Offer',
+                                          name: o.title,
+                                          description: o.summary,
+                                          url,
+                                          validFrom: o.starts_on,
+                                          ...(o.ends_on ? { validThrough: o.ends_on } : {}),
+                                          offeredBy: { '@type': 'ExerciseGym', name: this._site.brand }
+                                      }))
+                                  }
+                              ]
+                            : []),
+                        breadcrumbs([
+                            ['Home', `${environment.siteUrl}/`],
+                            [p.crumb ?? p.title, url]
+                        ])
+                    ]
+                }
+            });
         });
     }
 }

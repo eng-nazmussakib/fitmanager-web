@@ -17,7 +17,7 @@ test.describe('Sign-in and landing pages per role', () => {
         await page.goto('/auth/sign-in');
         await page.getByRole('button', { name: 'Sign in' }).click();
         await expect(page.getByText('This field is required.')).toHaveCount(2);
-        await signIn(page, 'owner', 'wrong-password');
+        await signIn(page, 'owner', 'wrong-password', { fails: true });
         await expect(page.getByText('Invalid username or password')).toBeVisible();
         await expect(page).toHaveURL(/\/auth\/sign-in/);
     });

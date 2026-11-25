@@ -72,6 +72,8 @@ export type Subject =
     | 'PurchaseOrder'
     | 'Transfer'
     | 'Sale'
+    // Phase 7c (D-109): the public site's content.
+    | 'Website'
     | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subject]>;

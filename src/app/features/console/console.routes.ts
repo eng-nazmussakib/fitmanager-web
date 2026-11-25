@@ -8,6 +8,21 @@ import { canMatchAbility } from '@core/auth/auth.guards';
  */
 export const CONSOLE_ROUTES: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+    // Phase 7c (D-109): the public site's content.
+    {
+        path: 'website',
+        title: 'Website',
+        data: { breadcrumb: 'Website' },
+        canMatch: [canMatchAbility('update', 'Website')],
+        loadComponent: () => import('@features/website/website-page.component').then(m => m.WebsitePageComponent)
+    },
+    // Phase 7b (D-108): the bell's inbox. Everyone may open it; each message shows to whoever may act on it.
+    {
+        path: 'inbox',
+        title: 'Inbox',
+        data: { breadcrumb: 'Inbox' },
+        loadComponent: () => import('@features/inbox/inbox-page.component').then(m => m.InboxPageComponent)
+    },
     {
         path: 'dashboard',
         title: 'Dashboard',

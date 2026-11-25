@@ -1,15 +1,16 @@
 import type { HttpResponse } from '@angular/common/http';
 
 import type { Action, Subject } from '@core/auth/ability';
-import type { MemberDocument, MemberNotification } from '@core/models/member.model';
+import type { MemberDocument } from '@core/models/member.model';
 import type { CashClosing, Invoice, PaymentRecord } from '@core/models/payment.model';
 import type { PaymentMethod, Subscription } from '@core/models/subscription.model';
 import { environment } from '@env/environment';
 
 import { recordAudit } from '../audit';
-import { daysBetween, shortDate } from '../domain/access-rules';
+import { daysBetween } from '../domain/access-rules';
 import { endDate, quote } from '../domain/pricing';
 import { type Ctx, fail, num, ok, type Route, str } from '../http';
+import { memberMessages } from '../inbox';
 import { idx, memberState } from '../queries';
 import { addDaysIso, dateOf } from '../seed/clock';
 import { toRef } from '../seed/organisation.seed';
@@ -102,7 +103,8 @@ const RULES: Record<FileRow['kind'], { types: readonly string[]; max: number; la
         can: ['update', 'Equipment'],
         hq: false
     },
-    ticket_photo: { types: IMAGES, max: 300 * 1024, label: 'A ticket photo is a JPEG, PNG or WebP of at most 300 KB', can: ['create', 'Equipment'], hq: false }
+    ticket_photo: { types: IMAGES, max: 300 * 1024, label: 'A ticket photo is a JPEG, PNG or WebP of at most 300 KB', can: ['create', 'Equipment'], hq: false },
+    site_image: { types: IMAGES, max: 500 * 1024, label: 'A website image is a JPEG, PNG or WebP of at most 500 KB', can: ['update', 'Website'], hq: true }
 };
 /** The API's `FILE_STORAGE_LIMIT_MB` default (D-074): every branch's files together, inside R2's free 10 GB. */
 const FILE_STORAGE_LIMIT_BYTES = 6144 * 1024 * 1024;
@@ -269,44 +271,10 @@ function portalAccess(ctx: Ctx): HttpResponse<unknown> {
     );
 }
 
-/** The member's in-app messages (D-075): receipts, and the expiry reminders that have fallen due. */
+/** The member's in-app messages (D-075, D-108): the same derivation as the portal's (mock/inbox.ts). */
 function messages(ctx: Ctx): HttpResponse<unknown> {
     const m = branchMember(ctx, ctx.params[0] ?? '');
-    const channel = m.email ? 'email' : m.phone ? 'sms' : 'log';
-    const status = m.email || m.phone ? 'logged' : 'skipped';
-    const rows: MemberNotification[] = [];
-    for (const inv of idx().invoices.get(m.oid) ?? [])
-        for (const p of inv.payments.filter(x => x.kind !== 'refund'))
-            rows.push({
-                oid: `n-${p.oid}`,
-                kind: 'receipt',
-                channel,
-                subject: `Receipt for ${inv.number}`,
-                body: `Dear ${m.name}, we received ৳${p.amount.toLocaleString('en-IN')} towards ${inv.number}. Thank you.`,
-                status,
-                created_at: p.received_at
-            });
-    for (const s of idx().subs.get(m.oid) ?? []) {
-        for (const [days, kind] of [
-            [7, 'expiry_7d'],
-            [1, 'expiry_1d']
-        ] as const) {
-            const day = addDaysIso(s.end_date, -days);
-            if (day > ctx.now.date || s.cancelled_at) continue;
-            rows.push({
-                oid: `n-${s.oid}-${kind}`,
-                kind,
-                channel,
-                subject: days === 1 ? 'Your membership ends tomorrow' : 'Your membership ends in 7 days',
-                body: `Dear ${m.name}, your ${s.plan_name} plan ends on ${shortDate(s.end_date)}. Renew at the front desk to keep training.`,
-                status,
-                created_at: `${day}T00:05:00+06:00`
-            });
-        }
-    }
-    for (const r of db().messages.filter(x => x.member_oid === m.oid))
-        rows.push({ oid: r.oid, kind: r.kind, channel, subject: r.subject, body: r.body, status, created_at: r.created_at });
-    return ok(rows.sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 50));
+    return ok(memberMessages(db(), m, ctx.now.date, ctx.now.iso).slice(0, 50));
 }
 
 /* ---------- plans and money (D-067) ---------- */

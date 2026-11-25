@@ -5,8 +5,9 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideChevronRight, lucideCircleCheck } from '@ng-icons/lucide';
 import { finalize } from 'rxjs';
 
-import { SeoService } from '@core/seo/seo.service';
+import { breadcrumbs, SeoService } from '@core/seo/seo.service';
 import { revealErrors } from '@core/utils/form.utils';
+import { environment } from '@env/environment';
 import { ErrorMessagePipe } from '@shared/pipes/error-message.pipe';
 import { AppValidators } from '@shared/validators/app.validators';
 
@@ -112,7 +113,18 @@ export class JoinPageComponent implements OnInit {
     });
 
     constructor() {
-        inject(SeoService).update({ path: '/join', title: `Join ${this.brand}`, description: `Ask a ${this.brand} branch to call you back about membership, a visit or a first session.` });
+        inject(SeoService).update({
+            path: '/join',
+            title: `Join ${this.brand}`,
+            description: `Ask a ${this.brand} branch to call you back about membership, a visit or a first session.`,
+            jsonLd: {
+                '@context': 'https://schema.org',
+                ...breadcrumbs([
+                    ['Home', `${environment.siteUrl}/`],
+                    ['Join', `${environment.siteUrl}/join`]
+                ])
+            }
+        });
     }
 
     /** `?branch=&plan=` from a branch or plans page (query params arrive as inputs). */

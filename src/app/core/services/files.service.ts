@@ -17,7 +17,9 @@ export type FileKind =
     | 'complaint_photo'
     | 'product_photo'
     | 'equipment_photo'
-    | 'ticket_photo';
+    | 'ticket_photo'
+    // Phase 7c (D-109): website images (post covers, gallery and branch photos), public once used.
+    | 'site_image';
 
 /** `POST /v1/files`: a pending file and where to PUT its bytes (D-058). */
 interface UploadStart {

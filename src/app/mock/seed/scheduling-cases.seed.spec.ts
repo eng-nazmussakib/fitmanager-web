@@ -19,7 +19,9 @@ describe('every scheduling case in the demo data', () => {
         expect(db.ptSessions.some(p => p.status === 'Cancelled' && !p.charged && p.cancelled_by === 'trainer')).toBe(true);
         expect(db.ptSessions.some(p => p.status === 'Cancelled' && p.charged && p.cancelled_by === 'member')).toBe(true);
         expect(db.subscriptions.filter(s => s.kind === 'pt').map(s => s.sessions)).toEqual(expect.arrayContaining([8, 1]));
-        expect(new Set(db.messages.map(m => m.kind))).toEqual(new Set(['class_cancelled', 'waitlist_promoted', 'pt_booked', 'pt_cancelled']));
+        expect(new Set(db.messages.filter(m => m.kind !== 'welcome').map(m => m.kind))).toEqual(
+            new Set(['class_cancelled', 'waitlist_promoted', 'pt_booked', 'pt_cancelled'])
+        );
     });
 
     it('trainers, lockers and maintenance', () => {

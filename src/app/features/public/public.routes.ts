@@ -22,6 +22,8 @@ export const PUBLIC_ROUTES: Routes = [
     // One page per trainer (D-078), from the database: rendered in the browser, as the trainers change at the branches.
     { path: 'trainers/:slug', canActivate: [sitePageGuard('trainers')], title: 'Trainer', loadComponent: () => import('./trainers/trainer-page.component').then(m => m.TrainerPageComponent) },
     { path: 'blog', canActivate: [sitePageGuard('blog')], title: landing.blog.page.seo.title, loadComponent: () => import('./blog/blog-page.component').then(m => m.BlogPageComponent) },
+    // One page per post (D-109): prerendered from the database at build time (app.routes.server.ts), read again live.
+    { path: 'blog/:slug', canActivate: [sitePageGuard('blog')], title: 'Blog', loadComponent: () => import('./blog/post-page.component').then(m => m.PostPageComponent) },
     { path: 'gallery', canActivate: [sitePageGuard('gallery')], title: landing.gallery.page.seo.title, loadComponent: () => import('./gallery/gallery-page.component').then(m => m.GalleryPageComponent) },
     // HQ's policies (D-090), from the database: rendered in the browser, as each new version changes them.
     { path: 'policies', title: 'Policies', loadComponent: () => import('./policies/policy-pages.component').then(m => m.PoliciesIndexComponent) },

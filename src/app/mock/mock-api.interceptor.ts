@@ -10,6 +10,7 @@ import { BUSINESS_ROUTES } from './handlers/business.handlers';
 import { CLASS_ROUTES } from './handlers/classes.handlers';
 import { DASHBOARD_ROUTES } from './handlers/dashboard.handlers';
 import { GOVERNANCE_ROUTES } from './handlers/governance.handlers';
+import { INBOX_ROUTES } from './handlers/inbox.handlers';
 import { MEMBER_ROUTES } from './handlers/members.handlers';
 import { PHASE2_ROUTES } from './handlers/phase2.handlers';
 import { PLAN_ROUTES } from './handlers/plans.handlers';
@@ -20,12 +21,15 @@ import { SCHEDULING_ROUTES } from './handlers/scheduling.handlers';
 import { SETTINGS_ROUTES } from './handlers/settings.handlers';
 import { STAFF_ROUTES } from './handlers/staff.handlers';
 import { TRAINING_ROUTES } from './handlers/training.handlers';
+import { WEBSITE_ROUTES } from './handlers/website.handlers';
 import { abilityFor, type Ctx, httpError, MockError, type Route } from './http';
 import { dhakaNow } from './seed/clock';
 import { db, fastMode } from './store';
 
 const ROUTES: Route[] = [
     ...AUTH_ROUTES,
+    ...INBOX_ROUTES,
+    ...WEBSITE_ROUTES,
     ...GOVERNANCE_ROUTES,
     ...BUSINESS_ROUTES,
     ...REPORT_ROUTES,

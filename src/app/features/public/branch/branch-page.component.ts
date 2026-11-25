@@ -6,7 +6,8 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCalendarDays, lucideChevronRight, lucideClock, lucideExternalLink, lucideMapPin, lucidePhone, lucideUsers } from '@ng-icons/lucide';
 import { switchMap } from 'rxjs';
 
-import { SeoService } from '@core/seo/seo.service';
+import { absolute, breadcrumbs, SeoService } from '@core/seo/seo.service';
+import { environment } from '@env/environment';
 import { RevealDirective } from '@shared/directives/reveal.directive';
 import { TakaPipe } from '@shared/pipes/taka.pipe';
 
@@ -57,6 +58,10 @@ import { ClassTimetableComponent } from './class-timetable.component';
                         </li>
                     }
                 </ul>
+            }
+
+            @if (b.description) {
+                <p class="wrap mt-8 max-w-3xl text-lg leading-relaxed text-white/80">{{ b.description }}</p>
             }
 
             <section class="wrap mt-12 grid gap-6 lg:grid-cols-3" aria-label="Opening hours and contact">
@@ -155,7 +160,12 @@ export class BranchPageComponent {
 
     protected readonly branch = computed(() => this._branch() ?? null);
     protected readonly loaded = computed(() => this._branch() !== undefined);
-    protected readonly photos = computed(() => this._site.c.gallery.items.filter(g => toSlug(g.category) === this.slug()).slice(0, 3));
+    /** The branch's photos (the database's, D-109; the brand config's gallery without an API). */
+    protected readonly photos = computed(() => {
+        const own = this.branch()?.photos;
+        if (own?.length) return own.slice(0, 3);
+        return this._site.c.gallery.items.filter(g => toSlug(g.category) === this.slug()).slice(0, 3);
+    });
     /** The branch's entry in the brand config: its opening, ladies-only and combined hours. */
     private readonly _siteBranch = computed(() => this._site.branches.find(b => toSlug(b.name) === this.slug()));
     protected readonly timetable = computed(() => this._siteBranch()?.timetable ?? []);
@@ -185,14 +195,25 @@ export class BranchPageComponent {
                 description: `${this.brand} ${b.name} at ${b.address ?? b.name}. Opening hours, facilities, membership plans and this week's classes.`,
                 jsonLd: {
                     '@context': 'https://schema.org',
+                    '@graph': [
+                        {
                     '@type': 'ExerciseGym',
                     name: `${this.brand} ${b.name}`,
+                    url: `${environment.siteUrl}/branches/${b.slug}`,
+                    ...(b.description ? { description: b.description } : {}),
+                    ...(this.photos()[0] ? { image: absolute(this.photos()[0].src) } : {}),
                     address: { '@type': 'PostalAddress', streetAddress: b.address, addressLocality: 'Dhaka', addressCountry: 'BD' },
                     telephone: b.phone ?? undefined,
                     // The hours the page shows, from the brand config: never a second copy.
                     openingHoursSpecification: openingHoursSpec(this._siteBranch()?.hours ?? []),
                     amenityFeature: b.facilities.map(f => ({ '@type': 'LocationFeatureSpecification', name: f, value: true })),
                     makesOffer: plans.map(p => ({ '@type': 'Offer', name: p.name, price: p.price, priceCurrency: 'BDT' }))
+                        },
+                        breadcrumbs([
+                            ['Home', `${environment.siteUrl}/`],
+                            [b.name, `${environment.siteUrl}/branches/${b.slug}`]
+                        ])
+                    ]
                 }
             });
         });

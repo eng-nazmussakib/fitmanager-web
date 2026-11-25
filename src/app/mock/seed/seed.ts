@@ -5,12 +5,14 @@ import { seedClasses, seedFacilities } from './classes.seed';
 import { seedEveryCase } from './every-case.seed';
 import { seedGovernanceCases, seedPolicies } from './governance.seed';
 import { SCRIPTED, seedMembers } from './members.seed';
+import { seedMessages } from './messages.seed';
 import { seedBranches, seedPromos, seedSettings, seedSiteGroups } from './organisation.seed';
 import { seedPlans } from './plans.seed';
 import { seedReportHistory } from './report-history.seed';
 import { seedSchedulingCases } from './scheduling-cases.seed';
 import { seedAccounts, seedTrainers } from './staff.seed';
 import { seedTraining } from './training.seed';
+import { seedWebsite } from './website.seed';
 
 /**
  * Builds the whole demo world for `today` (Dhaka date). Deterministic: the same day and the same code give the
@@ -44,6 +46,11 @@ export function seed(today: string, nowMinutes: number): MockDb {
         notes: [],
         enquiries: [],
         messages: [],
+        reads: [],
+        posts: [],
+        postCategories: [],
+        gallery: [],
+        offers: [],
         rooms: [],
         rules: [],
         availability: [],
@@ -84,5 +91,7 @@ export function seed(today: string, nowMinutes: number): MockDb {
     seedGovernanceCases(db, today);
     seedReportHistory(db, today);
     seedBusiness(db, today);
+    seedMessages(db, today);
+    seedWebsite(db, today);
     return db;
 }

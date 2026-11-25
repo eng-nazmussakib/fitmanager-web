@@ -221,10 +221,71 @@ export interface BlockRow {
 export interface MessageRow {
     oid: string;
     member_oid: string;
-    kind: 'class_cancelled' | 'waitlist_promoted' | 'pt_booked' | 'pt_cancelled';
+    kind: 'class_cancelled' | 'waitlist_promoted' | 'pt_booked' | 'pt_cancelled' | 'welcome';
     subject: string;
     body: string;
     created_at: string;
+}
+
+/** Phase 7b (D-108): a read mark on a derived message; `oid` is `<reader>|<message oid>` (mock/inbox.ts). */
+export interface ReadRow {
+    oid: string;
+    read_at: string;
+}
+
+/* ---------- phase 7c: the website (D-109) ---------- */
+
+export interface PostCategoryRow {
+    oid: string;
+    name: string;
+    slug: string;
+    sort_order: number;
+}
+
+export interface PostRow {
+    oid: string;
+    branch_oid: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    body: string;
+    category_oid: string | null;
+    cover_file_oid: string | null;
+    cover_url: string | null;
+    cover_alt: string;
+    author_name: string;
+    published_at: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+}
+
+export interface GalleryRow {
+    oid: string;
+    branch_oid: string;
+    file_oid: string | null;
+    image_url: string | null;
+    thumb_url: string | null;
+    alt: string;
+    width: number;
+    height: number;
+    sort_order: number;
+    deleted_at: string | null;
+}
+
+export interface OfferRow {
+    oid: string;
+    slug: string;
+    title: string;
+    summary: string;
+    body: string;
+    conditions: string[];
+    promo_code: string | null;
+    starts_on: string;
+    ends_on: string | null;
+    sort_order: number;
+    published: boolean;
+    deleted_at: string | null;
 }
 
 /** The tables the generic `put` / `patch` mutations reach. */
@@ -643,6 +704,11 @@ export interface Tables {
     workouts: WorkoutRow[];
     measurements: MeasurementRow[];
     messages: MessageRow[];
+    reads: ReadRow[];
+    posts: PostRow[];
+    postCategories: PostCategoryRow[];
+    gallery: GalleryRow[];
+    offers: OfferRow[];
     rooms: RoomRow[];
     rules: RuleRow[];
     availability: AvailabilityRow[];

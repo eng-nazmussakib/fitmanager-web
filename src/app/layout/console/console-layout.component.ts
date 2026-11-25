@@ -8,9 +8,11 @@ import { AuthService } from '@core/auth/auth.service';
 import { BranchContextService } from '@core/branch/branch-context.service';
 import { STAFF_ROLE_LABELS } from '@core/models/branch.model';
 import type { MenuGroup } from '@core/models/menu.model';
+import { BellService } from '@core/notifications/bell.service';
 import { BreakpointService } from '@core/platform/breakpoint.service';
 import { StorageService } from '@core/services/storage.service';
 import { TenantService } from '@core/tenant/tenant.service';
+import { BellComponent } from '@shared/components/bell/bell.component';
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { DialogComponent } from '@shared/ui/dialog/dialog.component';
 import { AvatarComponent } from '@shared/ui/display/display';
@@ -48,7 +50,8 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
         MenuTriggerDirective,
         BreadcrumbComponent,
         TooltipDirective,
-        BranchSwitcherComponent
+        BranchSwitcherComponent,
+        BellComponent
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: { class: 'block min-h-dvh bg-bg text-fg' },
@@ -142,6 +145,7 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
                     <app-branch-switcher />
                     <fm-breadcrumb class="ml-2 hidden min-w-0 truncate xl:block" />
                     <span class="flex-1"></span>
+                    <app-bell [link]="base() + '/inbox'" />
                     <button
                         class="gap-2 px-1.5 sm:px-2"
                         fmButton
@@ -187,6 +191,7 @@ export class ConsoleLayoutComponent {
     private readonly _breakpoints = inject(BreakpointService);
     private readonly _route = inject(ActivatedRoute);
     private readonly _router = inject(Router);
+    private readonly _bell = inject(BellService);
 
     protected readonly product = inject(TenantService).config.poweredBy?.name ?? 'FitManager';
     protected readonly user = this._auth.user;
@@ -217,7 +222,15 @@ export class ConsoleLayoutComponent {
                 filter(e => e instanceof NavigationEnd),
                 takeUntilDestroyed()
             )
-            .subscribe(() => this.navOpen.set(false));
+            .subscribe(() => {
+                this.navOpen.set(false);
+                this._bell.refresh();
+            });
+        // The bell's count: on opening, and for the branch (or HQ) switched to.
+        effect(() => {
+            this.branch();
+            this._bell.refresh(true);
+        });
         effect(() => {
             if (this._breakpoints.isDesktop()) this.navOpen.set(false);
         });

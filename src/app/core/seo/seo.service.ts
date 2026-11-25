@@ -10,6 +10,19 @@ import { environment } from '@env/environment';
  */
 const SHARE_IMAGE = { path: '/og-image.png', width: 1200, height: 630, type: 'image/png' };
 
+/** An absolute URL on the site for a path (`assets/…`, `/api/…`), as structured data wants; absolute ones kept. */
+export function absolute(src: string): string {
+    return /^https?:/.test(src) ? src : `${environment.siteUrl}/${src.replace(/^\//, '')}`;
+}
+
+/** A schema.org BreadcrumbList (D-110) from [name, absolute URL] pairs, the last one being the page itself. */
+export function breadcrumbs(items: [string, string][]): Record<string, unknown> {
+    return {
+        '@type': 'BreadcrumbList',
+        itemListElement: items.map(([name, item], i) => ({ '@type': 'ListItem', position: i + 1, name, item }))
+    };
+}
+
 export interface SeoTags {
     /** Path of the page, '' for the home page, '/plans' for /plans. */
     path: string;
@@ -17,6 +30,10 @@ export interface SeoTags {
     description: string;
     /** schema.org object rendered as JSON-LD. */
     jsonLd?: Record<string, unknown>;
+    /** `article` for a blog post (Open Graph); `website` otherwise. */
+    type?: 'website' | 'article';
+    /** A page's own share image (an absolute URL, or a path on the site), instead of the site's. */
+    image?: { src: string; alt: string };
 }
 
 /**
@@ -34,19 +51,25 @@ export class SeoService {
         const url = `${origin}${tags.path || '/'}`;
 
         this._meta.updateTag({ name: 'description', content: tags.description });
-        this._meta.updateTag({ property: 'og:type', content: 'website' });
+        this._meta.updateTag({ property: 'og:type', content: tags.type ?? 'website' });
         this._meta.updateTag({ property: 'og:title', content: tags.title });
         this._meta.updateTag({ property: 'og:description', content: tags.description });
         this._meta.updateTag({ property: 'og:url', content: url });
         this._meta.updateTag({ property: 'og:locale', content: 'en_US' });
         this._meta.updateTag({ property: 'og:site_name', content: TENANT.brand.name });
-        const image = `${origin}${SHARE_IMAGE.path}`;
+        const own = tags.image ? (/^https?:/.test(tags.image.src) ? tags.image.src : `${origin}/${tags.image.src.replace(/^\//, '')}`) : null;
+        const image = own ?? `${origin}${SHARE_IMAGE.path}`;
         // Describes og-image.png, which names the product for now (scripts/brand-images.mjs, SHARE).
-        const alt = 'FitManager: members, plans, payments and check-ins for every branch of your gym';
+        const alt = tags.image?.alt.length ? tags.image.alt : 'FitManager: members, plans, payments and check-ins for every branch of your gym';
         this._meta.updateTag({ property: 'og:image', content: image });
-        this._meta.updateTag({ property: 'og:image:width', content: String(SHARE_IMAGE.width) });
-        this._meta.updateTag({ property: 'og:image:height', content: String(SHARE_IMAGE.height) });
-        this._meta.updateTag({ property: 'og:image:type', content: SHARE_IMAGE.type });
+        if (own) {
+            // Its size and type are not known here: leave them out rather than describe the site's image.
+            for (const p of ['og:image:width', 'og:image:height', 'og:image:type']) this._meta.removeTag(`property="${p}"`);
+        } else {
+            this._meta.updateTag({ property: 'og:image:width', content: String(SHARE_IMAGE.width) });
+            this._meta.updateTag({ property: 'og:image:height', content: String(SHARE_IMAGE.height) });
+            this._meta.updateTag({ property: 'og:image:type', content: SHARE_IMAGE.type });
+        }
         this._meta.updateTag({ property: 'og:image:alt', content: alt });
         // X/Twitter falls back to the og: title, description and image; the card type has no og: equivalent.
         this._meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });

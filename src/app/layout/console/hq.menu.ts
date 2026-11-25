@@ -35,6 +35,7 @@ export const HQ_MENU: MenuGroup[] = [
             { label: 'Exercises', icon: 'dumbbell', route: 'exercises', can: ['manage', 'Exercise'] },
             { label: 'Routines', icon: 'list-ordered', route: 'routines', can: ['manage', 'Routine'] },
             { label: 'Staff and roles', icon: 'shield-check', route: 'staff', can: ['read', 'Staff'] },
+            { label: 'Website', icon: 'megaphone', route: 'website', can: ['read', 'Website'] },
             { label: 'Settings', icon: 'settings', route: 'settings', can: ['read', 'Settings'] },
             { label: 'Audit log', icon: 'list-checks', route: 'audit', can: ['read', 'AuditLog'] }
         ]

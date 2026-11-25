@@ -32,10 +32,15 @@ export const test = base.extend<{ promoSnoozed: boolean }>({
 
 export { expect };
 
-export async function signIn(page: Page, username: string, password: string): Promise<void> {
+/**
+ * Signs in on the sign-in page and waits until the app has left it, so a `page.goto` right after cannot race the
+ * sign-in (and land back on /auth). Pass `{ fails: true }` for a sign-in that is meant to be refused.
+ */
+export async function signIn(page: Page, username: string, password: string, opts: { fails?: boolean } = {}): Promise<void> {
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Sign in' }).click();
+    if (!opts.fails) await page.waitForURL(u => !u.pathname.startsWith('/auth/sign-in'));
 }
 
 export function sidebar(page: Page): ReturnType<Page['getByRole']> {

@@ -56,6 +56,7 @@ export const CONSOLE_MENU: MenuGroup[] = [
             { label: 'Facilities', icon: 'key-round', route: 'facilities', can: ['read', 'Locker'] },
             { label: 'Staff', icon: 'shield-check', route: 'staff', can: ['read', 'Staff'] },
             { label: 'Reports', icon: 'chart-column', route: 'reports', can: ['read', 'Report'] },
+            { label: 'Website', icon: 'megaphone', route: 'website', can: ['update', 'Website'] },
             { label: 'Audit log', icon: 'list-checks', route: 'audit', can: ['read', 'AuditLog'] }
         ]
     }

@@ -3,6 +3,7 @@ import { HttpResponse } from '@angular/common/http';
 import { type Ctx, fail, ok, qStr, type Route, str } from '../http';
 import { toRef } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
+import { photosOf } from './website.handlers';
 
 function branches(ctx: Ctx): HttpResponse<unknown> {
     const allowed = new Set(ctx.user!.assignments.map(a => a.branch.oid));
@@ -28,7 +29,9 @@ function publicBranch(ctx: Ctx): HttpResponse<unknown> {
         ...b,
         trainers: db()
             .trainers.filter(t => t.branch_oid === b.oid)
-            .map(t => ({ ...t, phone: '' }))
+            .map(t => ({ ...t, phone: '' })),
+        // Phase 7c (D-109): its photos.
+        photos: photosOf(b.slug)
     });
 }
 

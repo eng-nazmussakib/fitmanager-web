@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideArrowLeft, lucideArrowRight, lucideMapPin, lucideX } from '@ng-icons/lucide';
 
-import { SeoService } from '@core/seo/seo.service';
+import { absolute, breadcrumbs, SeoService } from '@core/seo/seo.service';
+import { environment } from '@env/environment';
 import { RevealDirective } from '@shared/directives/reveal.directive';
 
 import { categoriesOf, PublicSiteService } from '../public-site.service';
 import { CategoryFilterComponent } from '../shared/category-filter.component';
 import { PageIntroComponent } from '../shared/page-intro.component';
+import { SiteContentService } from '../site-content.service';
 
 /**
  * `/gallery?category=…`: every photo from the brand config, filtered by category (the branch, for now), in an even
@@ -78,7 +80,7 @@ import { PageIntroComponent } from '../shared/page-intro.component';
     `,
     template: `
         <app-page-intro [crumb]="c.gallery.page.accent" [page]="c.gallery.page" />
-        <app-category-filter class="mt-8 lg:mt-10" label="Gallery categories" [active]="active()" [categories]="categories" [total]="c.gallery.items.length" />
+        <app-category-filter class="mt-8 lg:mt-10" label="Gallery categories" [active]="active()" [categories]="categories()" [total]="all().length" />
 
         @for (key of [active()]; track key) {
             <ul class="swap-in wrap mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:grid-cols-3 lg:gap-6" aria-live="polite">
@@ -133,20 +135,22 @@ export class GalleryPageComponent {
     private readonly _dialog = viewChild.required<ElementRef<HTMLDialogElement>>('lightbox');
 
     protected readonly c = this._site.c;
-    protected readonly categories = categoriesOf(this.c.gallery.items, this.c.gallery.categories).map(name => ({
-        name,
-        count: this.c.gallery.items.filter(g => g.category === name).length
-    }));
+    /** Every photo (the database's, D-109; the brand config's without an API). Category = the branch. */
+    protected readonly all = inject(SiteContentService).photos;
+    protected readonly categories = computed(() => {
+        const items = this.all();
+        return categoriesOf(items, this.c.gallery.categories).map(name => ({ name, count: items.filter(g => g.category === name).length }));
+    });
     /** Index (in the filtered photos) of the photo open in the lightbox, or null. */
     protected readonly current = signal<number | null>(null);
 
     /** `?category=…` (route query param, bound by the router). */
     readonly category = input<string>();
     /** The active category, or null for all (an unknown one counts as all). */
-    protected readonly active = computed(() => this.categories.find(c => c.name === this.category())?.name ?? null);
+    protected readonly active = computed(() => this.categories().find(c => c.name === this.category())?.name ?? null);
     protected readonly photos = computed(() => {
         const active = this.active();
-        return active ? this.c.gallery.items.filter(g => g.category === active) : this.c.gallery.items;
+        return active ? this.all().filter(g => g.category === active) : this.all();
     });
     protected readonly photo = computed(() => {
         const i = this.current();
@@ -155,17 +159,29 @@ export class GalleryPageComponent {
 
     constructor() {
         const page = this.c.gallery.page;
-        inject(SeoService).update({
-            path: '/gallery',
-            title: `${page.seo.title} | ${this._site.brand}`,
-            description: page.seo.description,
-            jsonLd: {
-                '@context': 'https://schema.org',
-                '@type': 'ImageGallery',
-                name: `${this._site.brand} ${page.seo.title}`,
+        const seo = inject(SeoService);
+        effect(() => {
+            seo.update({
+                path: '/gallery',
+                title: `${page.seo.title} | ${this._site.brand}`,
                 description: page.seo.description,
-                image: this.c.gallery.items.map(g => ({ '@type': 'ImageObject', contentUrl: g.src, caption: g.alt, contentLocation: g.category }))
-            }
+                jsonLd: {
+                    '@context': 'https://schema.org',
+                    '@graph': [
+                        {
+                            '@type': 'ImageGallery',
+                            name: `${this._site.brand} ${page.seo.title}`,
+                            description: page.seo.description,
+                            url: `${environment.siteUrl}/gallery`,
+                            image: this.all().map(g => ({ '@type': 'ImageObject', contentUrl: absolute(g.src), caption: g.alt, contentLocation: g.category }))
+                        },
+                        breadcrumbs([
+                            ['Home', `${environment.siteUrl}/`],
+                            [page.accent, `${environment.siteUrl}/gallery`]
+                        ])
+                    ]
+                }
+            });
         });
     }
 

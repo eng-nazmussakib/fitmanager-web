@@ -163,7 +163,13 @@
                 <p class="mt-6 text-justify leading-relaxed text-white/55">
                     {{ c.footer.about }}
                     @if (c.footer.aboutLink; as link) {
-                        <a class="text-secondary-400 hover:underline" [fragment]="to(link).fragment" [routerLink]="to(link).route">{{ link.label }}</a>
+                        <a
+                            class="text-secondary-400 underline underline-offset-2 hover:text-secondary-300"
+                            [fragment]="to(link).fragment"
+                            [routerLink]="to(link).route"
+                        >
+                            {{ link.label }}
+                        </a>
                     }
                 </p>
                 <ul class="mt-8 flex justify-around" aria-label="Social media">
@@ -201,7 +207,7 @@
             >
                 @for (col of site.footerColumns(); track col.title) {
                     <div>
-                        <h2 class="text-base font-medium text-primary-400 lg:text-h2">{{ col.title }}</h2>
+                        <h2 class="text-base font-medium text-primary-300 lg:text-h2">{{ col.title }}</h2>
                         <ul class="mt-6 space-y-5 text-[0.8rem] text-white/60 lg:mt-10">
                             @for (link of col.links; track link.label) {
                                 <li>

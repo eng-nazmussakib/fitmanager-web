@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { inject, Injectable, InjectionToken, PLATFORM_ID } from '@angular/core';
 import { catchError, defer, map, Observable, of, shareReplay, timeout } from 'rxjs';
 
 import { TENANT } from '@config/tenant';
@@ -12,11 +12,13 @@ import type { PublicPolicy, PublicPolicySummary } from '@core/models/governance.
 import type { Plan } from '@core/models/plan.model';
 import type { PublicTrainer } from '@core/models/scheduling.model';
 import { type SiteGroup, vatPercent } from '@core/models/settings.model';
+import type { BlogPost, GalleryPhoto, Offer } from '@core/models/website.model';
 import { environment } from '@env/environment';
 
 import { slug } from './public-site.service';
 
-export type PublicBranch = Branch & { trainers: Trainer[] };
+/** A branch's public page: its profile, trainers, and (phase 7c, D-109) its description and photos. */
+export type PublicBranch = Branch & { trainers: Trainer[]; photos?: GalleryPhoto[] };
 export interface BranchPlans {
     branch: BranchRef;
     plans: Plan[];
@@ -35,6 +37,13 @@ export function vatNote(rate: number | undefined, inclusive = false): string {
 const quiet = (): HttpContext => new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'none');
 
 /**
+ * Where the API is while PRERENDERING (phase 7c, D-109, item 22 b): the build reads the website's content from the
+ * live API (`https://<site>/api`), so the prerendered pages carry the database's posts, offers and photos. Provided by
+ * the server config only (`SITE_API_ORIGIN`, default the site's own URL); in the browser the relative `/api` is used.
+ */
+export const PRERENDER_API_ORIGIN = new InjectionToken<string>('PRERENDER_API_ORIGIN');
+
+/**
  * Data for the public gym pages from the public API (`/v1/public/*`), with the brand config as the fallback.
  *
  * Pages are prerendered at build time (Cloudflare, D-026). The demo build answers from the mock; a production build
@@ -44,12 +53,13 @@ const quiet = (): HttpContext => new HttpContext().set(SKIP_AUTH, true).set(NOTI
 @Injectable({ providedIn: 'root' })
 export class PublicContentService {
     private readonly _http = inject(HttpClient);
-    private readonly _base = `${environment.apiBaseUrl}/v1/public`;
+    private readonly _origin = isPlatformBrowser(inject(PLATFORM_ID)) ? '' : (inject(PRERENDER_API_ORIGIN, { optional: true }) ?? '');
+    private readonly _base = `${this._origin}${environment.apiBaseUrl}/v1/public`;
     /**
-     * Is there an API to ask? In the browser, yes. While prerendering only with the mock: the build has no API (a
-     * relative `/api` call would reach the prerender server itself).
+     * Is there an API to ask? In the browser, yes. While prerendering: the mock, or the live API when the build names
+     * it (`PRERENDER_API_ORIGIN`); otherwise not (a relative `/api` call would reach the prerender server itself).
      */
-    private readonly _api = isPlatformBrowser(inject(PLATFORM_ID)) || environment.useMockApi;
+    private readonly _api = isPlatformBrowser(inject(PLATFORM_ID)) || environment.useMockApi || !!this._origin;
 
     /**
      * The site groups' section and page switches HQ sets (D-040), or null when there is no API to ask or it does not
@@ -135,8 +145,35 @@ export class PublicContentService {
         );
     }
 
+    /* ---------- the website's content (phase 7c, D-109); null when there is no API: the pages keep the config's ---------- */
+
+    posts(): Observable<BlogPost[] | null> {
+        return this._get<BlogPost[]>('posts');
+    }
+
+    post(slugValue: string): Observable<BlogPost | null> {
+        return this._get<BlogPost>(`posts/${slugValue}`);
+    }
+
+    offers(): Observable<Offer[] | null> {
+        return this._get<Offer[]>('offers');
+    }
+
+    gallery(): Observable<GalleryPhoto[] | null> {
+        return this._get<GalleryPhoto[]>('gallery');
+    }
+
     enquire(body: { branch: string; name: string; phone: string; message: string }): Observable<string> {
         return this._http.post<ApiResponse<unknown>>(`${this._base}/enquiries`, body, { context: new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'errors') }).pipe(map(r => r.message));
+    }
+
+    private _get<T>(path: string): Observable<T | null> {
+        if (!this._api) return of(null);
+        return this._http.get<ApiResponse<T>>(`${this._base}/${path}`, { context: quiet() }).pipe(
+            timeout(8000),
+            map(r => r.data),
+            catchError(() => of(null))
+        );
     }
 }
 

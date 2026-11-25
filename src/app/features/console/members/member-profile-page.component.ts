@@ -460,7 +460,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
 
                 <ng-template fmTab="messages" label="Messages">
                     <fm-card
-                        subtitle="Receipts, welcomes and expiry reminders. The member sees them in the portal; to reach them outside it, send one from your own phone or email."
+                        subtitle="Receipts, reminders, and news about classes, complaints and their record. The member sees them in the portal; to reach them outside it, send one from your own phone or email."
                         title="Messages"
                     >
                         <ul class="grid gap-3">
@@ -468,7 +468,9 @@ const TIMELINE_ICON: Record<string, IconName> = {
                                 <li class="text-sm">
                                     <p class="font-medium">{{ n.subject }}</p>
                                     <p class="text-fg-muted">{{ n.body }}</p>
-                                    <p class="text-xs text-fg-subtle">{{ n.created_at | appDate: 'dd MMM yyyy, h:mm a' }}</p>
+                                    <p class="text-xs text-fg-subtle">
+                                        {{ n.created_at | appDate: 'dd MMM yyyy, h:mm a' }} · {{ n.read_at ? 'Read in the portal' : 'Not read yet' }}
+                                    </p>
                                     <p class="mt-1 flex flex-wrap gap-1">
                                         @if (m.phone) {
                                             <a fmButton size="sm" variant="ghost" [href]="smsLink(m.phone, n.body)">

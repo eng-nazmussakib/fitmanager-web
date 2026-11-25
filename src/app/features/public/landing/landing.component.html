@@ -82,7 +82,7 @@
                                 <p class="service-lead">{{ s.lead }}</p>
                                 <p class="service-text">{{ s.text }}</p>
                                 <a class="service-link" [fragment]="to(s.link).fragment" [routerLink]="to(s.link).route">
-                                    {{ s.link.label }}
+                                    {{ s.link.label }}<span class="fm-sr-only">: {{ s.title }}</span>
                                     <ng-icon class="text-primary-500 transition-transform group-hover:translate-x-1" aria-hidden="true" name="lucideMoveRight" />
                                 </a>
                             </div>
@@ -296,7 +296,7 @@
                                 <h3 class="truncate text-sm font-semibold sm:text-xl lg:text-h1">{{ t.name }}</h3>
                                 <p class="mt-1 truncate text-[0.65rem] text-white/60 sm:text-base">{{ t.role }}</p>
                                 <a class="service-link mt-3 text-xs sm:text-sm lg:mt-4" [fragment]="t.link.route ? slug(t.name) : to(t.link).fragment" [routerLink]="to(t.link).route">
-                                    {{ t.link.label }}
+                                    {{ t.link.label }}<span class="fm-sr-only">: {{ t.name }}</span>
                                     <ng-icon class="text-primary-500" aria-hidden="true" name="lucideMoveRight" />
                                 </a>
                             </div>
@@ -316,7 +316,7 @@
             <section id="blog" class="wrap pt-20 lg:pt-24" aria-labelledby="blog-title">
                 <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.blog, id: 'blog-title' }" />
                 <ul class="mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:grid-cols-[1.02fr_0.5fr_0.5fr] lg:grid-rows-2 lg:gap-x-5 lg:gap-y-3">
-                    @for (p of c.blog.items; track p.title; let first = $first; let i = $index) {
+                    @for (p of posts(); track p.slug; let first = $first; let i = $index) {
                         <li class="blog-card group" appReveal [class.blog-card-main]="first" [revealDelay]="i * 80">
                             <img class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" [alt]="p.image.alt" [src]="p.image.src" />
                             <div class="relative mt-auto w-full">
@@ -332,8 +332,8 @@
                                         <ng-icon class="shrink-0" aria-hidden="true" name="lucideNewspaper" />
                                         <span class="truncate">{{ p.category }}</span>
                                     </span>
-                                    <a class="service-link ml-auto shrink-0" [attr.aria-label]="'Read: ' + p.title" [fragment]="to(p.link).fragment" [queryParams]="p.link.route ? { category: p.category } : null" [routerLink]="to(p.link).route">
-                                        {{ p.link.label }}
+                                    <a class="service-link ml-auto shrink-0" [fragment]="to(p.link).fragment" [routerLink]="to(p.link).route">
+                                        {{ p.link.label }}<span class="fm-sr-only">: {{ p.title }}</span>
                                         <ng-icon class="text-primary-500" aria-hidden="true" name="lucideMoveRight" />
                                     </a>
                                 </div>
@@ -411,7 +411,7 @@
         <section id="gallery" class="wrap pt-20 lg:pt-24" aria-labelledby="gallery-title">
             <ng-container *ngTemplateOutlet="heading; context: { $implicit: c.gallery, id: 'gallery-title', center: true }" />
             <ul class="mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:grid-cols-3 lg:gap-6">
-                @for (g of galleryPreview; track g.src; let i = $index) {
+                @for (g of galleryPreview(); track g.src; let i = $index) {
                     <li appReveal [revealDelay]="(i % 3) * 90">
                         <a
                             class="gallery-tile aspect-[4/3] !cursor-pointer"
@@ -453,6 +453,7 @@
             </section>
         }
     }
+
 }
 
 <!-- Section heading from the config: title, accent in the theme colour, optional lead. -->

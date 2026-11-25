@@ -69,15 +69,35 @@ export interface MemberDocument {
     url: string;
 }
 
-/** `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (D-075: no email or SMS provider). */
+export type MemberNotificationKind =
+    | 'receipt'
+    | 'expiry_7d'
+    | 'expiry_1d'
+    | 'welcome'
+    | 'class_cancelled'
+    | 'waitlist_promoted'
+    | 'pt_booked'
+    | 'pt_cancelled'
+    // Phase 7b (D-108 a).
+    | 'complaint_reply'
+    | 'sanction'
+    | 'appeal_decided'
+    | 'policy_to_accept'
+    | 'shop_receipt';
+
+/**
+ * `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (D-075: no email or SMS provider),
+ * newest first, with the member's read state (D-108 d; read ones older than 180 days are no longer listed).
+ */
 export interface MemberNotification {
     oid: string;
-    kind: 'receipt' | 'expiry_7d' | 'expiry_1d' | 'welcome' | 'class_cancelled' | 'waitlist_promoted' | 'pt_booked' | 'pt_cancelled';
+    kind: MemberNotificationKind;
     channel: 'email' | 'sms' | 'log';
     subject: string;
     body: string;
     status: 'logged' | 'sent' | 'failed' | 'skipped';
     created_at: string;
+    read_at: string | null;
 }
 
 export interface MemberQuery {

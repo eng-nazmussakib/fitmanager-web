@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { AuthService } from '@core/auth/auth.service';
@@ -280,7 +281,8 @@ export class EquipmentPageComponent {
         { value: 'retired', label: 'Retired' },
         { value: 'all', label: 'All' }
     ];
-    protected readonly tab = signal('register');
+    /** `?tab=tickets` opens the tickets (the inbox's link for an urgent ticket, D-108). */
+    protected readonly tab = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('tab') === 'tickets' ? 'tickets' : 'register');
     protected readonly status = signal('');
     protected readonly q = signal('');
     protected readonly due = signal(false);

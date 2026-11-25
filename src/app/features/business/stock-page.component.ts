@@ -13,6 +13,8 @@ import { TransfersComponent } from './transfers.component';
  * `/console/:branch/stock` (D-100, D-101): the branch's stock and ledger, its purchase orders and its transfers. HQ's
  * purchase orders page (`/hq/purchase-orders`) is the same orders panel with `hq`.
  */
+const TABS = ['stock', 'orders', 'transfers'] as const;
+
 @Component({
     selector: 'app-stock-page',
     imports: [PageHeaderComponent, TabsComponent, TabDirective, StockLevelsComponent, PurchaseOrdersComponent, TransfersComponent],
@@ -43,8 +45,10 @@ import { TransfersComponent } from './transfers.component';
 })
 export class StockPageComponent {
     protected readonly auth = inject(AuthService);
-    protected readonly hq = inject(ActivatedRoute).snapshot.data['hq'] === true;
-    protected readonly tab = signal('stock');
+    private readonly _route = inject(ActivatedRoute).snapshot;
+    protected readonly hq = this._route.data['hq'] === true;
+    /** `?tab=orders` / `?tab=transfers` open those tabs (the inbox's links, D-108). */
+    protected readonly tab = signal<string>(TABS.find(t => t === this._route.queryParamMap.get('tab')) ?? 'stock');
     private readonly _orders = viewChild(PurchaseOrdersComponent);
 
     /** "Order the low ones": the orders tab, with a new order started for them. */

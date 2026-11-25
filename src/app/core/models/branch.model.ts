@@ -48,6 +48,8 @@ export interface Branch extends BranchRef {
     /** Women-only sessions. */
     ladies_hours: HoursBlock[];
     map_url: string | null;
+    /** The public page's text (phase 7c, D-109), written by the branch manager or HQ. */
+    description?: string | null;
 }
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

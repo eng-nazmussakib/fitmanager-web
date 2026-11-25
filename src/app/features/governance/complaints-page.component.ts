@@ -151,6 +151,12 @@ export class ComplaintsPageComponent {
     protected reply = '';
     protected readonly busy = signal(false);
 
+    constructor() {
+        // `?open=<oid>`: the inbox's link to an escalated complaint (D-108).
+        const open = this._route.snapshot.queryParamMap.get('open');
+        if (open) this.show(open);
+    }
+
     protected show(oid: string): void {
         this.reply = '';
         this._service.complaint(oid).subscribe(c => this.open.set(c));

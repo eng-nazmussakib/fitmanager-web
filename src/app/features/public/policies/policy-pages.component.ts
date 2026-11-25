@@ -41,7 +41,7 @@ const DOC_STYLES = `
 `;
 
 /**
- * `/policies` (D-090): HQ's public policies, from the API in the browser (they change with each new version, so these
+ * `/policies`: HQ's public policies, from the API in the browser (they change with each new version, so these
  * pages are not prerendered).
  */
 @Component({
@@ -91,7 +91,7 @@ export class PoliciesIndexComponent {
     }
 }
 
-/** `/policies/:slug` (D-090): one policy's current numbered clauses and its version history. */
+/** `/policies/:slug`: one policy's current numbered clauses and its version history. */
 @Component({
     selector: 'app-policy-page',
     imports: [RouterLink, NgIcon, AppDatePipe],

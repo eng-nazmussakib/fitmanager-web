@@ -24,7 +24,7 @@ import type {
     TrainerLeave
 } from '@core/models/scheduling.model';
 
-/** The branch console's scheduling calls (phase 3): trainers, rules, one-off classes, PT, rooms, lockers, maintenance. */
+/** The branch console's scheduling calls: trainers, rules, one-off classes, PT, rooms, lockers, maintenance. */
 @Injectable({ providedIn: 'root' })
 export class SchedulingService {
     private readonly _api = inject(ApiService);

@@ -23,7 +23,7 @@ const SOURCE: Record<Measurement['source'], string> = { member: 'Member', traine
 const day = (iso: string): string => format(parseISO(iso), 'd MMM');
 
 /**
- * A member's progress (D-088, D-089), in the console and the portal: totals, workouts a week, personal records, a
+ * A member's progress, in the console and the portal: totals, workouts a week, personal records, a
  * chart per exercise, and the body measurements with their chart and photos. Everything comes computed from the API.
  */
 @Component({

@@ -26,7 +26,7 @@ import { type QtyLinesData, QtyLinesDialogComponent, type QtyLinesResult } from 
 const addDays = (date: string, n: number): string => new Date(Date.parse(`${date}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 
 /**
- * Purchase orders (D-100). At a branch: raise one (HQ approves it), mark it sent once it is with the supplier, receive
+ * Purchase orders. At a branch: raise one (HQ approves it), mark it sent once it is with the supplier, receive
  * what comes (in one or more deliveries, at the cost then), or cancel it. At HQ: every branch's, pending first, to
  * approve or reject. The order can be copied as text for WhatsApp or email, or printed.
  */
@@ -294,7 +294,7 @@ export class PurchaseOrdersComponent {
         this.show(o.oid);
     }
 
-    /** The order as plain text: for WhatsApp or email (no integration, D-075). */
+    /** The order as plain text: for WhatsApp or email (no integration). */
     private _text(o: PurchaseOrder): string {
         return [
             `Purchase order ${o.code}`,

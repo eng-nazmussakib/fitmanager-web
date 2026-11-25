@@ -27,8 +27,8 @@ export interface MeasurementDialogData {
 const VIEWS: PhotoView[] = ['front', 'side', 'back'];
 
 /**
- * Records a body measurement (D-089): any of the numbers, the height (kept on the member, for the BMI) and up to 3
- * progress photos (front, side, back), each made small in the browser before upload (D-085). The photos are private
+ * Records a body measurement: any of the numbers, the height (kept on the member, for the BMI) and up to 3
+ * progress photos (front, side, back), each made small in the browser before upload. The photos are private
  * to the member, their home branch and their trainer.
  */
 @Component({

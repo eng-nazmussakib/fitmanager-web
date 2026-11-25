@@ -13,7 +13,7 @@ import { PageIntroComponent } from '../shared/page-intro.component';
 
 /**
  * `/trainers`: every trainer with photo, branch, specialties and a short bio. Prerendered from the brand config; in
- * the browser the list comes from the API (D-078: every public trainer of every branch), each card linking to the
+ * the browser the list comes from the API (every public trainer of every branch), each card linking to the
  * trainer's own page. Each card's id is the trainer's slug, so `/trainers#sam-cole` lands on it.
  */
 @Component({

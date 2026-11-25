@@ -21,7 +21,7 @@ import { BusinessService } from './business.service';
 import { ProductDialogComponent } from './product-dialog.component';
 import { SupplierDialogComponent } from './supplier-dialog.component';
 
-/** `/hq/catalogue` (D-099): HQ's products (prices, VAT, photos) and suppliers, the same for every branch. */
+/** `/hq/catalogue`: HQ's products (prices, VAT, photos) and suppliers, the same for every branch. */
 @Component({
     selector: 'app-catalogue-page',
     imports: [

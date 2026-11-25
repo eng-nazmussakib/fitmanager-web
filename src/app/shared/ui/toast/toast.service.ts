@@ -18,7 +18,7 @@ const MAX_TOASTS = 4;
 
 /**
  * Short notifications, shown by `<fm-toast-host>` (rendered once in AppComponent). Replaces ng-zorro's
- * NzNotificationService / NzMessageService (D-007). State only: safe to call on the server, where nothing renders.
+ * NzNotificationService / NzMessageService. State only: safe to call on the server, where nothing renders.
  *
  *   inject(ToastService).success('Payment recorded');
  */

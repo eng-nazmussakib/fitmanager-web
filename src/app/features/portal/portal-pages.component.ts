@@ -135,7 +135,7 @@ export class PortalHomeComponent {
 }
 
 /**
- * H6 bookings (D-081): my upcoming classes and what is open to book (7 days ahead by default). Cancelling inside the
+ * H6 bookings: my upcoming classes and what is open to book (7 days ahead by default). Cancelling inside the
  * window counts like a missed class, and missing too many pauses booking for a while: both are said up front.
  */
 @Component({

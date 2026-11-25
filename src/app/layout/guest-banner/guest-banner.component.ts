@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 /**
- * Shown while signed in as one of the hosted demo's shared guest accounts (D-076): says the data is shared demo data,
+ * Shown while signed in as one of the hosted demo's shared guest accounts: says the data is shared demo data,
  * and offers Switch role (back to the /demo picker). The demo build has its own banner (DemoBannerComponent).
  */
 @Component({

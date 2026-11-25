@@ -39,7 +39,7 @@ import type { ComplaintRow, IncidentRow, MemberRow, PolicyRow, PolicyVersionRow,
 import { branchMember } from './members.handlers';
 
 /**
- * Phase 5 in demo mode (D-090 to D-097): the API's policies, discipline and feedback routes (fitmanager-api
+ * Governance in demo mode: the API's policies, discipline and feedback routes (fitmanager-api
  * src/features/policies, discipline, feedback) on the mock's tables, with the same rules and messages.
  */
 
@@ -56,7 +56,7 @@ function portalHome(ctx: Ctx): { m: MemberRow; c: Ctx } {
     return { m, c: { ...ctx, branch: db().branches.find(b => b.oid === m.branch_oid) ?? null } };
 }
 
-/* ---------- policies (D-090, D-091) ---------- */
+/* ---------- policies ---------- */
 
 function versionsOf(policyOid: string): PolicyVersionRow[] {
     return db()
@@ -257,7 +257,7 @@ function publicOne(ctx: Ctx): HttpResponse<unknown> {
     });
 }
 
-/* ---------- discipline (D-092 to D-094) ---------- */
+/* ---------- discipline ---------- */
 
 interface Caller {
     username: string;
@@ -577,7 +577,7 @@ function giveSanction(ctx: Ctx): HttpResponse<unknown> {
         appeal: null
     };
     commit({ t: 'put', table: 'sanctions', row });
-    // Staff: a ban deactivates the account at every branch (D-093); a suspension is checked at sign-in.
+    // Staff: a ban deactivates the account at every branch; a suspension is checked at sign-in.
     if (i.staff_username && level === 'ban') setAccountStatus(i.staff_username, 'Inactive');
     recordAudit(ctx, 'sanction', 'sanction', i.subject_code, null, { level, suggested: suggestion, reason, starts_on: startsOn, ends_on: endsOn, scope });
     return ok(detail(ctx, c, i), 'Step recorded');
@@ -639,7 +639,7 @@ function memberDiscipline(ctx: Ctx): HttpResponse<unknown> {
     });
 }
 
-/** What the person sees (D-094): the sanction, the clause and the reason. */
+/** What the person sees: the sanction, the clause and the reason. */
 function ownWire(s: SanctionRow, today: string): OwnSanction {
     const state = sanctionState(s, today);
     const deadline = appealDeadline(s.given_on);
@@ -714,7 +714,7 @@ function fileAppeal(ctx: Ctx, who: { member_oid?: string; username?: string }): 
     );
 }
 
-/* ---------- complaints (D-095) ---------- */
+/* ---------- complaints ---------- */
 
 const DAY_MS = 86_400_000;
 
@@ -937,7 +937,7 @@ function memberAction(ctx: Ctx, kind: 'reply' | 'accept' | 'escalate'): HttpResp
     return ok(complaintWire(c, now, true), 'Sent to HQ');
 }
 
-/* ---------- NPS and ratings (D-096) ---------- */
+/* ---------- NPS and ratings ---------- */
 
 function rateable(m: MemberRow, nowIso: string): Rateable[] {
     const d = db();

@@ -5,7 +5,7 @@ import type { HoursBlock, TenantConfig } from './tenant.model';
  * Brand name and logo, colour themes (the admin consoles, sign-in and the landing page share them), and every
  * text, image, link and section of the landing page. Shape and comments: `tenant.model.ts`.
  *
- * One brand, one build (D-001, D-018). Import it as `@config/tenant`. A second brand would be a
+ * One brand, one build. Import it as `@config/tenant`. A second brand would be a
  * `fileReplacements` entry in angular.json that swaps this file, so its config never reaches this bundle.
  */
 
@@ -81,7 +81,7 @@ export const TENANT: TenantConfig = {
         points: ['Expert coaches at every branch', 'Ladies hour with women trainers', 'Track your visits and renewals']
     },
     landing: {
-        // Fallback only (D-040): the database's site_group switches decide, set by HQ at /hq/settings.
+        // Fallback only: the database's site_group switches decide, set by HQ at /hq/settings.
         sections: ['hero', 'stats', 'services', 'plans', 'facilities', 'reviews', 'trainers', 'blog', 'branches', 'gallery'],
         seo: {
             title: 'Gym & fitness in Dhaka',
@@ -426,7 +426,7 @@ export const TENANT: TenantConfig = {
                 lead: 'Take a look around every branch before your first visit. Pick a branch to see only its photos.',
                 seo: { title: 'Gallery', description: 'Photos of the training floors, cardio zones, strength rooms and classes at every {brand} branch.' }
             },
-            // Category = branch, in branch order. Photos: Pexels (see fitmanager-infra/docs/CHANGELOG.md 0.10.0); stand-ins until the client's own.
+            // Category = branch, in branch order. Photos: Pexels (Pexels licence), stand-ins for a real gym's own.
             categories: ['Gulshan', 'Dhanmondi', 'Uttara'],
             items: [
                 {
@@ -556,7 +556,7 @@ export const TENANT: TenantConfig = {
         },
 
         // Extra public pages, each at `/<slug>`. Placeholder text: replace with the client's own. The gym's policies are HQ's,
-        // in the database, at /policies/<slug> (D-090).
+        // in the database, at /policies/<slug>.
         pages: [
             {
                 slug: 'offers',

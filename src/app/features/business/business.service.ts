@@ -34,14 +34,14 @@ import type {
 } from '@core/models/business.model';
 
 /**
- * The phase 6 calls (D-098 to D-102): the equipment register and tickets, HQ's catalogue and suppliers, each branch's
+ * The business calls: the equipment register and tickets, HQ's catalogue and suppliers, each branch's
  * stock, purchase orders, transfers and the POS. The branch (or HQ) is in `X-Branch-Id`.
  */
 @Injectable({ providedIn: 'root' })
 export class BusinessService {
     private readonly _api = inject(ApiService);
 
-    /* ---------- equipment (D-098) ---------- */
+    /* ---------- equipment ---------- */
 
     rooms(): Observable<{ oid: string; name: string }[]> {
         return this._api.get<{ oid: string; name: string }[]>('/v1/rooms');
@@ -83,7 +83,7 @@ export class BusinessService {
         return this._api.patch<Ticket>(`/v1/equipment-tickets/${oid}`, body);
     }
 
-    /* ---------- catalogue (D-099) ---------- */
+    /* ---------- catalogue ---------- */
 
     products(all = false): Observable<Product[]> {
         return this._api.get<Product[]>('/v1/products', all ? { all: '1' } : undefined);
@@ -109,7 +109,7 @@ export class BusinessService {
         return this._api.patch<Supplier>(`/v1/hq/suppliers/${oid}`, body);
     }
 
-    /* ---------- stock (D-101) ---------- */
+    /* ---------- stock ---------- */
 
     stock(q: { low?: boolean; q?: string } = {}): Observable<StockList> {
         return this._api.get<StockList>('/v1/stock', { low: q.low ? '1' : undefined, q: q.q });
@@ -135,7 +135,7 @@ export class BusinessService {
         return this._api.get<HqStock>('/v1/hq/stock');
     }
 
-    /* ---------- purchase orders (D-100) ---------- */
+    /* ---------- purchase orders ---------- */
 
     orders(q: { status?: string; branch_oid?: string } = {}): Observable<PurchaseOrder[]> {
         return this._api.get<PurchaseOrder[]>('/v1/purchase-orders', q);
@@ -165,7 +165,7 @@ export class BusinessService {
         return this._api.post<PurchaseOrder>(`/v1/purchase-orders/${oid}/cancel`, { reason });
     }
 
-    /* ---------- transfers (D-101) ---------- */
+    /* ---------- transfers ---------- */
 
     transfers(direction: 'in' | 'out' | 'all' = 'all'): Observable<StockTransfer[]> {
         return this._api.get<StockTransfer[]>('/v1/transfers', { direction });
@@ -187,7 +187,7 @@ export class BusinessService {
         return this._api.post<StockTransfer>(`/v1/transfers/${oid}/${how}`, { note });
     }
 
-    /* ---------- POS (D-102) ---------- */
+    /* ---------- POS ---------- */
 
     posProducts(): Observable<PosProduct[]> {
         return this._api.get<PosProduct[]>('/v1/pos/products');

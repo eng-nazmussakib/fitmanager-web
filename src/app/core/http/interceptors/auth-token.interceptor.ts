@@ -15,7 +15,7 @@ import { SKIP_AUTH } from '../http-context.tokens';
  *    Requests that fail while a refresh is running wait for that same refresh
  *    (AuthService.refreshTokens() is single-flight), with no hand-rolled `_isRefreshing` flag or BehaviorSubject.
  * 3. If the refresh fails, the user is logged out.
- * 4. On the API's 403 `PASSWORD_CHANGE_REQUIRED` (an admin reset the password while the user was signed in, D-054),
+ * 4. On the API's 403 `PASSWORD_CHANGE_REQUIRED` (an admin reset the password while the user was signed in),
  *    opens the password page.
  */
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {

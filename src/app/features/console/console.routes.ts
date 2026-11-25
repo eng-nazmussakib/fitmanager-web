@@ -8,7 +8,7 @@ import { canMatchAbility } from '@core/auth/auth.guards';
  */
 export const CONSOLE_ROUTES: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-    // Phase 7c (D-109): the public site's content.
+    // The public site's content.
     {
         path: 'website',
         title: 'Website',
@@ -16,7 +16,7 @@ export const CONSOLE_ROUTES: Routes = [
         canMatch: [canMatchAbility('update', 'Website')],
         loadComponent: () => import('@features/website/website-page.component').then(m => m.WebsitePageComponent)
     },
-    // Phase 7b (D-108): the bell's inbox. Everyone may open it; each message shows to whoever may act on it.
+    // The bell's inbox. Everyone may open it; each message shows to whoever may act on it.
     {
         path: 'inbox',
         title: 'Inbox',
@@ -133,7 +133,7 @@ export const CONSOLE_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Locker')],
         loadComponent: () => import('./facilities/facilities-page.component').then(m => m.FacilitiesPageComponent)
     },
-    // Phase 5: governance (D-090 to D-097).
+    // Governance.
     {
         path: 'incidents',
         data: { breadcrumb: 'Incidents' },
@@ -155,7 +155,7 @@ export const CONSOLE_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Complaint')],
         loadComponent: () => import('@features/governance/complaints-page.component').then(m => m.ComplaintsPageComponent)
     },
-    // Phase 6: business (D-098 to D-102).
+    // Business.
     {
         path: 'equipment',
         title: 'Equipment',

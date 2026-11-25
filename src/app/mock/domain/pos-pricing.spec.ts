@@ -1,6 +1,6 @@
 import { averageCost, type PosLineInput, posQuote, returnAmount } from './pos-pricing';
 
-// The API's cases (fitmanager-api src/features/pos/pos-pricing.test.ts), D-102.
+// The API's cases (fitmanager-api src/features/pos/pos-pricing.test.ts).
 const line = (over: Partial<PosLineInput> = {}): PosLineInput => ({
     product_oid: 'p1',
     code: 'PRD-000005',

@@ -22,7 +22,7 @@ import { SchedulingService } from '../scheduling.service';
 export interface TrainerEditorData {
     /** Absent: a new profile for a staff member with the Trainer role. */
     trainer?: Trainer;
-    /** A trainer editing their own profile: no web address or active switch (D-083). */
+    /** A trainer editing their own profile: no web address or active switch. */
     self?: boolean;
 }
 
@@ -33,7 +33,7 @@ const slugOf = (name: string): string =>
         .replace(/^-|-$/g, '');
 
 /**
- * Add or edit a trainer profile (D-078): the public headline, bio, specialties and certificates, a photo (resized
+ * Add or edit a trainer profile: the public headline, bio, specialties and certificates, a photo (resized
  * in the browser before upload), the phone for the desk, and whether the profile shows on the public site.
  */
 @Component({

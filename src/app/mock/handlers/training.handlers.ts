@@ -21,11 +21,11 @@ import { idx } from '../queries';
 import { addDaysIso, weekStart } from '../seed/clock';
 import { commit, db, newOid } from '../store';
 import type { ExerciseRow, FileRow, MeasurementRow, MemberRow, RoutineRow, WorkoutRow } from '../types';
+import { takeUpload } from './core.handlers';
 import { branchMember } from './members.handlers';
-import { takeUpload } from './phase2.handlers';
 
 /**
- * Phase 4 in demo mode (D-084 to D-089): the API's training routes (fitmanager-api src/features/training) on the
+ * Training in demo mode: the API's training routes (fitmanager-api src/features/training) on the
  * mock's tables, with the same rules and messages: the HQ library plus each branch's own, routine templates and
  * members' snapshot copies with the next day after the last one logged, workouts editable for 7 days, records
  * computed when read, measurements with private photos.
@@ -107,7 +107,7 @@ function selfOnly(ctx: Ctx): boolean {
     return ctx.user?.assignments.find(a => a.branch.oid === ctx.branch?.oid)?.role === 'TRAINER';
 }
 
-/** A member at this branch whose training the caller may change: a trainer only their own clients (D-086). */
+/** A member at this branch whose training the caller may change: a trainer only their own clients. */
 function trainingMember(ctx: Ctx, memberOid: string, staff: boolean): MemberRow {
     const m = branchMember(ctx, memberOid);
     if (m.anonymised) fail(409, 'This member was anonymised');
@@ -131,7 +131,7 @@ function home(ctx: Ctx): { m: MemberRow; c: Ctx } {
     return { m, c: { ...ctx, branch: db().branches.find(b => b.oid === m.branch_oid) ?? null } };
 }
 
-/* ---------- the library (D-084, D-085) ---------- */
+/* ---------- the library ---------- */
 
 function listExercises(c: Ctx, branchOid: string): Exercise[] {
     const q = qStr(c, 'q').toLowerCase();
@@ -219,7 +219,7 @@ function updateExercise(ctx: Ctx): HttpResponse<unknown> {
     return ok(exerciseWire(row, ctx.branch!.oid), 'Exercise saved');
 }
 
-/* ---------- routines (D-087) ---------- */
+/* ---------- routines ---------- */
 
 function resolveDays(ctx: Ctx, input: unknown, keep: string[] = []): RoutineDay[] {
     const days = (Array.isArray(input) ? input : []) as { name: string; exercises: Partial<DayExercise>[] }[];
@@ -405,7 +405,7 @@ function end(ctx: Ctx, m: MemberRow): HttpResponse<unknown> {
     return ok(memberRoutine(m), 'Routine ended');
 }
 
-/* ---------- workouts (D-088) ---------- */
+/* ---------- workouts ---------- */
 
 function workoutWire(w: WorkoutRow, today: string): Workout {
     const sets = w.exercises.flatMap(x => x.sets);
@@ -561,7 +561,7 @@ function progress(ctx: Ctx, m: MemberRow): HttpResponse<unknown> {
     return ok(result);
 }
 
-/* ---------- measurements (D-089) ---------- */
+/* ---------- measurements ---------- */
 
 const VIEWS = ['front', 'side', 'back'] as const;
 const NUMBERS = ['weight_kg', 'body_fat_pct', 'waist_cm', 'chest_cm', 'hips_cm', 'arm_cm', 'thigh_cm'] as const;

@@ -11,12 +11,12 @@ export interface Environment {
      * Empty → the page's own origin (local development).
      */
     siteUrl: string;
-    /** Showcase build (phase 0.5): the `/demo` role picker and the "Demo mode" banner. Needs `useMockApi`. */
+    /** Showcase build: the `/demo` role picker and the "Demo mode" banner. Needs `useMockApi`. */
     demo: boolean;
     /** true → MockApiInterceptor answers every /api call in memory. Run the app with no backend. */
     useMockApi: boolean;
     /**
-     * Guest access on the real API (D-076): `/demo` lists the API's shared guest accounts and signs in as one without
+     * Guest access on the real API: `/demo` lists the API's shared guest accounts and signs in as one without
      * a password (`POST /v1/auth/guest`). Off in mock builds, which have their own demo accounts.
      */
     guestAccess: boolean;

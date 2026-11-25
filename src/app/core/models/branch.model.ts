@@ -1,10 +1,10 @@
 /**
- * HQ and the branches live in one `branch` table (D-023): exactly one row has kind 'HQ', every tenant is 'BRANCH'.
+ * HQ and the branches live in one `branch` table: exactly one row has kind 'HQ', every tenant is 'BRANCH'.
  * Wire shapes: snake_case fields, `oid` ids, as the API sends them.
  */
 export type BranchKind = 'HQ' | 'BRANCH';
 
-/** What every screen needs to name and address a branch. `slug` is the console URL segment (D-014). */
+/** What every screen needs to name and address a branch. `slug` is the console URL segment. */
 export interface BranchRef {
     oid: string;
     /** Short readable code, e.g. 'GUL'. */
@@ -48,7 +48,7 @@ export interface Branch extends BranchRef {
     /** Women-only sessions. */
     ladies_hours: HoursBlock[];
     map_url: string | null;
-    /** The public page's text (phase 7c, D-109), written by the branch manager or HQ. */
+    /** The public page's text, written by the branch manager or HQ. */
     description?: string | null;
 }
 

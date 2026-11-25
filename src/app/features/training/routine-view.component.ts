@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { type Routine, targetText } from '@core/models/training.model';
 import { BadgeComponent } from '@shared/ui/display/display';
 
-/** A routine's days and their exercises with targets; a running copy marks the day to do next (D-087). */
+/** A routine's days and their exercises with targets; a running copy marks the day to do next. */
 @Component({
     selector: 'app-routine-view',
     imports: [BadgeComponent],

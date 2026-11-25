@@ -28,9 +28,9 @@ const ASSIGNED: Record<NonNullable<Routine['assigned_by']>, string> = {
 };
 
 /**
- * The member profile's Training tab (phase 4): the running routine with the day to do next, earlier routines,
+ * The member profile's Training tab: the running routine with the day to do next, earlier routines,
  * the workout log, personal records and charts, and body measurements. A trainer changes only their own clients'
- * (the API answers 403 otherwise, D-086).
+ * (the API answers 403 otherwise).
  */
 @Component({
     selector: 'app-member-training',

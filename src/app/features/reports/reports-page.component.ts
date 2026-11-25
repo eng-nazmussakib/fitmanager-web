@@ -32,7 +32,7 @@ const RANGES: { id: RangeId; label: string }[] = [
 const iso = (d: Date): string => format(d, 'yyyy-MM-dd');
 
 /**
- * `/console/:branch/reports` and `/hq/reports` (phase 7a, D-106): the eight fixed reports, a range (quick picks
+ * `/console/:branch/reports` and `/hq/reports`: the eight fixed reports, a range (quick picks
  * or a custom range of up to 366 days), "compare with the previous period", and at HQ a branch filter. Everything
  * is in the URL (`?report=&range=&from=&to=&compare=&branch=`), so a view can be shared or bookmarked.
  */

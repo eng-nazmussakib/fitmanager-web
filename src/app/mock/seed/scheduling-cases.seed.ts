@@ -8,7 +8,7 @@ import { seededSuspended } from './governance.seed';
 import { toRef } from './organisation.seed';
 
 /**
- * Phase 3's showcase cases in demo mode (D-072): the same list as the database's seeds/showcase/103_scheduling_cases.sql.
+ * The scheduling showcase cases in demo mode: the same list as the database's seeds/showcase/103_scheduling_cases.sql.
  * Runs after `seedClasses`, on the Gulshan members with a running membership (Rahim Uddin, mem-gul-1, is the demo
  * member's portal account).
  */

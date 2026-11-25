@@ -30,7 +30,7 @@ function publicBranch(ctx: Ctx): HttpResponse<unknown> {
         trainers: db()
             .trainers.filter(t => t.branch_oid === b.oid)
             .map(t => ({ ...t, phone: '' })),
-        // Phase 7c (D-109): its photos.
+        // Its photos.
         photos: photosOf(b.slug)
     });
 }
@@ -64,7 +64,7 @@ function enquiry(ctx: Ctx): HttpResponse<unknown> {
     return ok({ received: true }, `Thanks, ${name.split(' ')[0]}. The ${b.name} team will call you within a day.`);
 }
 
-/** Sign-up: the request waits for the branch's front desk, where the member pays and gets a card (D-022). */
+/** Sign-up: the request waits for the branch's front desk, where the member pays and gets a card. */
 function joinRequest(ctx: Ctx): HttpResponse<unknown> {
     if (str(ctx.body['phone']) === '01700000000') fail(409, 'This mobile number already has an account. Sign in instead.');
     return ok({ id: `JR-${Date.now().toString(36).toUpperCase()}`, status: 'pending' }, 'Request received');

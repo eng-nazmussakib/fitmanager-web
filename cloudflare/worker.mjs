@@ -1,9 +1,9 @@
 /**
- * The web Worker (Cloudflare Workers, Free plan, D-024/D-026/D-075).
+ * The web Worker (Cloudflare Workers, Free plan).
  *
  * Workers Static Assets answer every file and prerendered page first (wrangler.jsonc, `html_handling:
  * drop-trailing-slash`, so /plans serves plans/index.html). This script only runs when no asset matches:
- * - `/api/*` goes to the API Worker through the `API` service binding (phase 1; a 503 if the binding is missing);
+ * - `/api/*` goes to the API Worker through the `API` service binding (a 503 if the binding is missing);
  * - every other path is a client-rendered route (portal, consoles, auth, demo): it gets the empty app shell
  *   `index.csr.html` (not `index.html`, which is the prerendered landing page) with `noindex`.
  * Almost no CPU per request, well inside the Free plan's 10 ms.

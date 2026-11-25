@@ -10,7 +10,7 @@ import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/dis
 import { SwitchComponent } from '@shared/ui/forms/switch.component';
 
 /**
- * HQ settings: what the public site shows (D-040). One row per group, with a switch for its section on the home
+ * HQ settings: what the public site shows. One row per group, with a switch for its section on the home
  * page and one for its own page, where it has them: blog `{ section: off, page: on }` keeps /blog but drops it
  * from the home page. Required groups (home, programs, membership, facilities) have locked switches; the API and
  * the database refuse to switch them off anyway. Each switch saves at once.

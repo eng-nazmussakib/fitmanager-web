@@ -18,7 +18,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 
 import { BusinessService } from './business.service';
 
-/** Adds a machine to the register, or edits one (D-098): what it is, where, its warranty and service schedule, a photo. */
+/** Adds a machine to the register, or edits one: what it is, where, its warranty and service schedule, a photo. */
 @Component({
     selector: 'app-equipment-dialog',
     imports: [

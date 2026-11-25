@@ -8,7 +8,7 @@ import { commit, db, newOid } from '../store';
 import type { GalleryRow, OfferRow, PostRow } from '../types';
 
 /**
- * The website's content in demo mode (phase 7c, D-109), as the API answers: public reads (live posts, running offers,
+ * The website's content in demo mode, as the API answers: public reads (live posts, running offers,
  * photos), HQ's blog and offers, the gallery (HQ any branch, a manager their own), the branch description.
  */
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;

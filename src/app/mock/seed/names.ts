@@ -1,4 +1,4 @@
-/** Bangladeshi first and last names (written in English, D-015), Dhaka areas and mobile prefixes, for the seed. */
+/** Bangladeshi first and last names (written in English), Dhaka areas and mobile prefixes, for the seed. */
 export const MALE_NAMES = [
     'Rahim',
     'Karim',

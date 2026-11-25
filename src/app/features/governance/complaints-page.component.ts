@@ -24,7 +24,7 @@ import { GovernanceService } from './governance.service';
 import { type TextPromptData, TextPromptDialogComponent, type TextPromptResult } from './text-prompt-dialog.component';
 
 /**
- * `/console/:branch/complaints` and `/hq/complaints` (D-095): newest first, with the overdue ones (no reply within the
+ * `/console/:branch/complaints` and `/hq/complaints`: newest first, with the overdue ones (no reply within the
  * HQ setting) and the escalated ones marked. The desk replies and resolves; a manager escalates to HQ; HQ sees every
  * branch's overdue and escalated complaints and the ones about branch managers. One that names the reader is hidden
  * from them.
@@ -152,7 +152,7 @@ export class ComplaintsPageComponent {
     protected readonly busy = signal(false);
 
     constructor() {
-        // `?open=<oid>`: the inbox's link to an escalated complaint (D-108).
+        // `?open=<oid>`: the inbox's link to an escalated complaint.
         const open = this._route.snapshot.queryParamMap.get('open');
         if (open) this.show(open);
     }

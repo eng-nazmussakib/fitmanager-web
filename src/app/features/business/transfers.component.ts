@@ -22,7 +22,7 @@ import { OrderDialogComponent, type OrderDialogData } from './order-dialog.compo
 import { type QtyLinesData, QtyLinesDialogComponent, type QtyLinesResult } from './qty-lines-dialog.component';
 
 /**
- * Stock transfers between branches (D-101): this branch asks another for products; the other sends what it can (at its
+ * Stock transfers between branches: this branch asks another for products; the other sends what it can (at its
  * average cost) or rejects; this branch counts it in, and anything short is written off as a shortfall.
  */
 @Component({

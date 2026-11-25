@@ -1,7 +1,7 @@
 import type { Booking, ClassSession, ClassType, Trainer } from './class.model';
 import type { Invoice } from './payment.model';
 
-/** Phase 3 (D-078 to D-083): rooms, weekly rules, PT, lockers and maintenance. The wire contract with fitmanager-api. */
+/** Rooms, weekly rules, PT, lockers and maintenance. The wire contract with fitmanager-api. */
 
 export interface Room {
     oid: string;

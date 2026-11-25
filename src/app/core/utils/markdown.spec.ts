@@ -1,6 +1,6 @@
 import { markdownText, renderMarkdown, safeHref } from './markdown';
 
-describe('renderMarkdown (D-109)', () => {
+describe('renderMarkdown', () => {
     it('headings under the page title, paragraphs, bold, italic, code, lists, quotes and rules', () => {
         expect(renderMarkdown('## Plan\n\nSome **bold** and *soft* `x*y`.\n\n- one\n- two\n\n1. first\n2. second\n\n> Quote\n\n---')).toBe(
             [

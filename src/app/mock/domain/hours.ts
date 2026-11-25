@@ -1,5 +1,5 @@
 /**
- * Pure time rules for scheduling (phase 3): opening hours, overlaps and free PT slots. No database, no clock: the
+ * Pure time rules for scheduling: opening hours, overlaps and free PT slots. No database, no clock: the
  * services pass times in. Times of day are `HH:mm` strings in Dhaka (they sort as text); weekdays are 0 = Sunday
  * … 6 = Saturday, as in the branch profile. Ported to the web mock unchanged (mock/domain/hours.ts).
  */

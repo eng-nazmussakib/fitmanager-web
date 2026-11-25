@@ -15,7 +15,7 @@ export function absolute(src: string): string {
     return /^https?:/.test(src) ? src : `${environment.siteUrl}/${src.replace(/^\//, '')}`;
 }
 
-/** A schema.org BreadcrumbList (D-110) from [name, absolute URL] pairs, the last one being the page itself. */
+/** A schema.org BreadcrumbList from [name, absolute URL] pairs, the last one being the page itself. */
 export function breadcrumbs(items: [string, string][]): Record<string, unknown> {
     return {
         '@type': 'BreadcrumbList',

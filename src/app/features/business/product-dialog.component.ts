@@ -33,7 +33,7 @@ interface Photo {
     blob?: Blob;
 }
 
-/** HQ adds or edits a product (D-099): its price (HQ's only), its own VAT rate if any, up to 3 photos, the usual supplier. */
+/** HQ adds or edits a product: its price (HQ's only), its own VAT rate if any, up to 3 photos, the usual supplier. */
 @Component({
     selector: 'app-product-dialog',
     imports: [

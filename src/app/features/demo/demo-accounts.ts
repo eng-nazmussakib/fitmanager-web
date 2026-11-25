@@ -11,25 +11,25 @@ import type { IconName } from '@shared/ui/icon/icons';
 export interface DemoRole {
     /** The mock's demo account for this role. */
     username: string;
-    /** The role code the API's guest list names (D-076): matches a guest account to its card. */
+    /** The role code the API's guest list names: matches a guest account to its card. */
     key: 'OWNER' | 'HQ_ADMIN' | 'BRANCH_MANAGER' | 'FRONT_DESK' | 'TRAINER' | 'MEMBER';
     role: string;
     icon: IconName;
-    /** What this role shows in the demo (phase 0.5 brief). */
+    /** What this role shows in the demo. */
     blurb: string;
-    /** The blurb on the hosted demo when it differs: the real API has no later features (D-070 c). */
+    /** The blurb on the hosted demo when it differs: the real API has no later features. */
     guestBlurb?: string;
 }
 
 export interface DemoAccount extends DemoRole {
-    /** Mock builds only. A guest account (D-076) has none: the API signs it in without one. */
+    /** Mock builds only. A guest account has none: the API signs it in without one. */
     password?: string;
     name: string;
 }
 
 /**
  * The roles shown on /demo. Credentials are NOT here: in mock builds they come from the mock API
- * (`GET /v1/demo/accounts`); on the hosted demo the cards are the API's guest accounts (`GET /v1/auth/guest`, D-076),
+ * (`GET /v1/demo/accounts`); on the hosted demo the cards are the API's guest accounts (`GET /v1/auth/guest`),
  * which sign in without a password. Either way a production bundle never contains a demo password
  * (`npm run check:no-mock`).
  */
@@ -79,7 +79,7 @@ export const DEMO_ROLES: DemoRole[] = [
     }
 ];
 
-/** One of the API's guest accounts (D-076). */
+/** One of the API's guest accounts. */
 interface GuestAccount {
     username: string;
     name: string;

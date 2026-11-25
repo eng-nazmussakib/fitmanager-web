@@ -15,7 +15,7 @@ import { PublicSiteService } from '../public-site.service';
 import { SiteContentService } from '../site-content.service';
 
 /**
- * `/blog/:slug` (phase 7c, D-109): one post, prerendered from the database at build time and read again in the
+ * `/blog/:slug`: one post, prerendered from the database at build time and read again in the
  * browser. The body is Markdown, rendered by `renderMarkdown` (every HTML tag a writer types is escaped). Without an
  * API, the brand config's post shows its excerpt.
  */

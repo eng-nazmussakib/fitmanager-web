@@ -15,7 +15,7 @@ import { BusinessService } from './business.service';
 type Reason = 'damaged' | 'expired' | 'count' | 'other';
 
 /**
- * Corrects the stock (D-101): damaged or expired goods taken off, or a count that found a different number. Only a
+ * Corrects the stock: damaged or expired goods taken off, or a count that found a different number. Only a
  * count adds stock; what comes from a supplier comes in on a purchase order. The ledger keeps the reason.
  */
 @Component({

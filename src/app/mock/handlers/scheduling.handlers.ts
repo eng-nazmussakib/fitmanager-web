@@ -18,7 +18,7 @@ import type { BlockRow, LockerRow, MemberRow, MessageRow, MockDb, PtRow, RentalR
 import { branchMember } from './members.handlers';
 
 /**
- * Phase 3 in demo mode (D-078 to D-083): the API's scheduling routes, on the mock's tables, with the same rules
+ * Scheduling in demo mode: the API's scheduling routes, on the mock's tables, with the same rules
  * (fitmanager-api src/features/scheduling). Sessions are made from the weekly rules when the timetable is read and
  * kept by `put` (a reload makes them again with the same oids); bookings left Booked become no-shows when read.
  */
@@ -60,7 +60,7 @@ function trainerAt(ctx: Ctx, oid: string): Trainer {
     return t;
 }
 
-/** A trainer at this branch (role TRAINER) is narrowed to their own profile, classes and PT (D-083). */
+/** A trainer at this branch (role TRAINER) is narrowed to their own profile, classes and PT. */
 function selfOnly(ctx: Ctx): string | null {
     const role = ctx.user?.assignments.find(a => a.branch.oid === ctx.branch?.oid)?.role;
     return role === 'TRAINER' ? (ctx.account?.trainer_oid ?? '-') : null;
@@ -78,7 +78,7 @@ function withBlocked(s: ClassSession): ClassSession {
     return { ...s, blocked: !!roomBlocked(s.room_oid ?? null, s.starts_at, s.ends_at) };
 }
 
-/** No-shows and lapsed waitlist places when the class is over or started; PT left Booked is done (D-081, D-079). */
+/** No-shows and lapsed waitlist places when the class is over or started; PT left Booked is done. */
 function settle(ctx: Ctx, branchOid: string): void {
     const d = db();
     const ended = new Set(d.sessions.filter(s => s.branch_oid === branchOid && s.ends_at <= ctx.now.iso).map(s => s.oid));
@@ -163,7 +163,7 @@ function blockedUntil(memberOid: string, nowIso: string): string | null {
     return until > nowIso ? until : null;
 }
 
-/** The booking rules of D-081, in the API's order. */
+/** The booking rules, in the API's order. */
 export function bookOn(ctx: Ctx, sessionOid: string, memberOid: string, source: 'portal' | 'desk'): Booking {
     const s = db().sessions.find(x => x.oid === sessionOid);
     if (!s) fail(404, 'Class not found');
@@ -262,7 +262,7 @@ function setBooking(ctx: Ctx): HttpResponse<unknown> {
     );
 }
 
-/** For check-in (D-081): a booked class from 30 minutes before its start until its end is marked Attended. */
+/** For check-in: a booked class from 30 minutes before its start until its end is marked Attended. */
 export function markArrival(memberOid: string, branchOid: string, nowIso: string): string[] {
     const titles: string[] = [];
     for (const b of db().bookings) {

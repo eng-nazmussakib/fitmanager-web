@@ -21,7 +21,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 const day = (iso: string | null): string => (iso ? format(parseISO(iso), 'EEE d MMM') : '');
 
 /**
- * `/me/routine` (D-087, D-088): the member's running routine with the day to do next, "Log this workout" (the day's
+ * `/me/routine`: the member's running routine with the day to do next, "Log this workout" (the day's
  * targets filled in), their recent workouts (changes open for 7 days) and, with no routine, an HQ template to start.
  */
 @Component({
@@ -179,7 +179,7 @@ export class PortalRoutineComponent {
     }
 }
 
-/** `/me/progress` (D-088, D-089): records, charts, and body measurements with the member's own progress photos. */
+/** `/me/progress`: records, charts, and body measurements with the member's own progress photos. */
 @Component({
     selector: 'app-portal-progress',
     imports: [ProgressPanelComponent],

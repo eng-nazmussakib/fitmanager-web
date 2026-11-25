@@ -1,6 +1,6 @@
 /**
  * Membership pricing: plan price, admission fee, discount or promo code, VAT, with the VAT-inclusive mode
- * (D-057). A pure function, the same code as the API's (fitmanager-api src/features/pricing/pricing.ts): keep
+ *. A pure function, the same code as the API's (fitmanager-api src/features/pricing/pricing.ts): keep
  * them in step. Every amount is whole taka; rounding happens once per line, here, never in the UI.
  *
  * - Exclusive (`vat_inclusive: false`): VAT = round(taxable × rate), added on top: total = taxable + VAT.
@@ -102,7 +102,7 @@ export function quote(input: PriceInput): Quote {
 }
 
 /**
- * What an invoice still owes, and its status (D-067 a). A refund never creates dues: after a full refund (nothing
+ * What an invoice still owes, and its status. A refund never creates dues: after a full refund (nothing
  * kept) the invoice owes nothing, because the plan was taken back; after a partial refund the plan carries on and
  * the member owes only what was never paid (`total − payments received`, the refund not counted).
  * `paidIn` is the sum of the payments, `refunded` the sum of the refunds.

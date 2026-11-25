@@ -35,7 +35,7 @@ const EDIT_DAYS = 7;
 const NO_DAY = -1;
 
 /**
- * Logs a workout or edits one (D-088): the day of the running routine (its exercises and targets filled in, to change
+ * Logs a workout or edits one: the day of the running routine (its exercises and targets filled in, to change
  * to what was done) or a free session, the sets as the measure takes them, the date (up to 7 days back), length and notes.
  */
 @Component({

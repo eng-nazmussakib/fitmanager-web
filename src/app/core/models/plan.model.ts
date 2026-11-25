@@ -1,4 +1,4 @@
-/** A membership (time-based) or a PT package (D-079). */
+/** A membership (time-based) or a PT package. */
 export type PlanKind = 'membership' | 'pt';
 
 /** A plan the branch sells (`GET /v1/plans`), made from an HQ template (`GET /v1/hq/plan-templates`). */
@@ -20,9 +20,9 @@ export interface Plan {
     persons: number;
     features: string[];
     featured: boolean;
-    /** From the template: whether this plan may be frozen (D-063). */
+    /** From the template: whether this plan may be frozen. */
     freezable: boolean;
-    /** A membership, or a package of PT sessions sold with one (D-079). */
+    /** A membership, or a package of PT sessions sold with one. */
     kind: PlanKind;
     /** PT sessions in the package; null for a membership. */
     sessions: number | null;

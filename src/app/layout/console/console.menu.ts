@@ -45,7 +45,7 @@ export const CONSOLE_MENU: MenuGroup[] = [
             { label: 'Complaints', icon: 'message-square', route: 'complaints', can: ['read', 'Complaint'] },
             { label: 'Feedback', icon: 'star', route: 'feedback', can: ['read', 'Feedback'] },
             { label: 'Policies', icon: 'book-open', route: 'policies', can: ['read', 'Policy'] },
-            // Every staff role reads the policies: the same gate shows each person their own record (D-094).
+            // Every staff role reads the policies: the same gate shows each person their own record.
             { label: 'My record', icon: 'badge-check', route: 'my-record', can: ['read', 'Policy'] }
         ]
     },

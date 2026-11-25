@@ -12,7 +12,7 @@ import { CategoryFilterComponent } from '../shared/category-filter.component';
 import { PageIntroComponent } from '../shared/page-intro.component';
 import { SiteContentService } from '../site-content.service';
 
-/** `/blog?category=…`: every published post (the database's, D-109; the brand config's without an API), by category. */
+/** `/blog?category=…`: every published post (the database's; the brand config's without an API), by category. */
 @Component({
     selector: 'app-blog-page',
     imports: [NgIcon, RouterLink, RevealDirective, PageIntroComponent, CategoryFilterComponent],

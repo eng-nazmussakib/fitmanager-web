@@ -2,8 +2,8 @@ import type { BranchRef } from './branch.model';
 
 /**
  * - Active: a running subscription. Expired: the last one ended. Frozen: paused for a period.
- * - Suspended: a suspension in force (D-093): no entry at any branch, the plan keeps running. Banned: a ban covering the
- *   home branch (the plan was cancelled). Pending: a join request without a first payment (D-022).
+ * - Suspended: a suspension in force: no entry at any branch, the plan keeps running. Banned: a ban covering the
+ *   home branch (the plan was cancelled). Pending: a join request without a first payment.
  */
 export type MemberStatus = 'Active' | 'Expired' | 'Frozen' | 'Suspended' | 'Banned' | 'Pending';
 
@@ -19,7 +19,7 @@ export interface MemberListItem {
     phone: string | null;
     /** Null only for a web join request, until the desk fills it in. */
     gender: Gender | null;
-    /** A signed link that works for an hour (D-058): never stored, never shared. */
+    /** A signed link that works for an hour: never stored, never shared. */
     photo_url: string | null;
     status: MemberStatus;
     plan_name: string | null;
@@ -48,12 +48,12 @@ export interface Member extends MemberListItem {
     notes: string | null;
     /** The uploaded photo's file (send it back to keep or replace the photo). */
     photo_file_oid?: string | null;
-    /** What makes the member Suspended or Banned (D-093); the cases are on the Discipline tab. */
+    /** What makes the member Suspended or Banned; the cases are on the Discipline tab. */
     sanction?: { level: 'suspension' | 'ban'; reason: string; until: string | null; branch_name: string } | null;
-    /** "Delete my data" was done (D-068 c): the record keeps only its code. */
+    /** "Delete my data" was done: the record keeps only its code. */
     anonymised?: boolean;
     frozen_until?: string | null;
-    /** Where the member came from: the desk, or the public site's forms (D-022). */
+    /** Where the member came from: the desk, or the public site's forms. */
     source?: 'desk' | 'web';
 }
 
@@ -78,7 +78,7 @@ export type MemberNotificationKind =
     | 'waitlist_promoted'
     | 'pt_booked'
     | 'pt_cancelled'
-    // Phase 7b (D-108 a).
+    // The bell.
     | 'complaint_reply'
     | 'sanction'
     | 'appeal_decided'
@@ -86,8 +86,8 @@ export type MemberNotificationKind =
     | 'shop_receipt';
 
 /**
- * `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (D-075: no email or SMS provider),
- * newest first, with the member's read state (D-108 d; read ones older than 180 days are no longer listed).
+ * `GET /v1/members/:oid/notifications`, `/v1/me/notifications`: in-app messages (no email or SMS provider),
+ * newest first, with the member's read state (read ones older than 180 days are no longer listed).
  */
 export interface MemberNotification {
     oid: string;
@@ -122,7 +122,7 @@ export interface MemberPayload {
     emergency_contact?: { name: string; phone: string; relation: string } | null;
     health_flags: string[];
     health_declared: boolean;
-    /** Signed the current policies on paper at the desk (D-090): recorded as accepted. */
+    /** Signed the current policies on paper at the desk: recorded as accepted. */
     policies_signed?: boolean;
     /** From `POST /v1/files` (kind `member_photo`) once completed. */
     photo_file_oid?: string | null;

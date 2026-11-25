@@ -42,10 +42,10 @@ export type Mutation =
     | { t: 'file.add'; row: FileRow }
     | { t: 'file.patch'; oid: string; patch: Partial<FileRow> }
     | { t: 'group.update'; key: string; patch: SiteGroupUpdate; at: string; by: string }
-    /** Staff management (phase 1): the whole account, added or replaced by username. */
+    /** Staff management: the whole account, added or replaced by username. */
     | { t: 'account.put'; account: MockAccount }
     | { t: 'audit.add'; row: AuditEntry }
-    /** Phase 3 on: add or replace a row by oid, change some of its fields, or drop it, in one of the plain tables. */
+    /** Add or replace a row by oid, change some of its fields, or drop it, in one of the plain tables. */
     | { t: 'reads.add'; rows: ReadRow[] }
     | { t: 'branch.description'; oid: string; description: string | null }
     | { t: 'put'; table: TableName; row: object }
@@ -185,7 +185,7 @@ export function apply(d: MockDb, m: Mutation): void {
             const inv = d.invoices.find(x => x.oid === m.invoice_oid);
             if (!inv) break;
             inv.payments.push(m.payment);
-            // A refund is its own row (D-067 a): paid = payments less refunds.
+            // A refund is its own row: paid = payments less refunds.
             const refund = m.payment.kind === 'refund';
             inv.paid += refund ? -m.payment.amount : m.payment.amount;
             if (refund) inv.refunded = (inv.refunded ?? 0) + m.payment.amount;
@@ -253,7 +253,7 @@ export function apply(d: MockDb, m: Mutation): void {
             break;
         }
         case 'workout.log':
-            // Phase 0.5's "logged today", left in older saved demos: the phase 4 workouts replaced it.
+            // The old "logged today" flag, left in older saved demos: workouts replaced it.
             break;
         case 'template.update': {
             const tpl = d.templates.find(x => x.oid === m.oid);

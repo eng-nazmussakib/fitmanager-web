@@ -8,8 +8,8 @@ import { environment } from '@env/environment';
 const UNSCOPED = ['/v1/auth/', '/v1/public/'];
 
 /**
- * Sends the console's active branch as `X-Branch-Id` (D-014). The API checks it against the user's assignments on
- * every request and scopes the query to it (app-layer filter + RLS, D-004). No header in the portal: the API
+ * Sends the console's active branch as `X-Branch-Id`. The API checks it against the user's assignments on
+ * every request and scopes the query to it (app-layer filter + RLS). No header in the portal: the API
  * takes a member's branch from their account.
  */
 export const branchHeaderInterceptor: HttpInterceptorFn = (req, next) => {

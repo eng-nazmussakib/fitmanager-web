@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { expect, freshDemo, sidebar, signIn, test } from './fixtures';
 
-/** Phase 7a (D-106, D-107) on the mock API: reports, their exports, and a trainer's own numbers. */
+/** Reports on the mock API: reports, their exports, and a trainer's own numbers. */
 test.describe('Reports', () => {
     test.beforeEach(async ({ page }) => {
         await freshDemo(page);

@@ -235,7 +235,7 @@ const DESCRIPTIONS: Record<string, string> = {
 };
 
 /**
- * Phase 7c (D-109), as seed 109: the website's content. Five categories; the five published posts, a draft, one
+ * As seed 109: the website's content. Five categories; the five published posts, a draft, one
  * scheduled 5 days ahead and a deleted one; twelve photos (four per branch) and a removed one; offers running (three
  * with promo codes, one without), one ended and one not published; a description on each branch page.
  */

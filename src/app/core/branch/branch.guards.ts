@@ -59,7 +59,7 @@ export const firstBranchRedirect: CanMatchFn = () => {
     );
 };
 
-/** `/hq`: HQ staff only. The HQ row becomes the branch context (D-023). */
+/** `/hq`: HQ staff only. The HQ row becomes the branch context. */
 export const hqMatch: CanMatchFn = () => {
     const auth = inject(AuthService);
     const context = inject(BranchContextService);

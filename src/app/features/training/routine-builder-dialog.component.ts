@@ -41,7 +41,7 @@ interface DraftDay {
 const DAY_NAMES = ['Day A', 'Day B', 'Day C', 'Day D', 'Day E', 'Day F', 'Day G'];
 
 /**
- * Builds a routine (D-087): name, goal, level and up to 7 days of up to 12 exercises, each with its sets and the
+ * Builds a routine: name, goal, level and up to 7 days of up to 12 exercises, each with its sets and the
  * targets its measure takes. Closes with the input; the caller saves it (a template, a member's copy, a new routine
  * for one member).
  */

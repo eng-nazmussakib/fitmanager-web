@@ -13,7 +13,7 @@ import { PublicContentService } from '../public-content.service';
 import { PublicSiteService } from '../public-site.service';
 
 /**
- * `/trainers/:slug` (D-078): one trainer's public page: photo, branch, specialties, certificates, bio and their
+ * `/trainers/:slug`: one trainer's public page: photo, branch, specialties, certificates, bio and their
  * classes in the next 7 days at every branch. From the API in the browser (trainers change at the branches, so
  * these pages are not prerendered); JSON-LD `Person`.
  */

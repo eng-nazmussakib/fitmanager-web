@@ -18,7 +18,7 @@ export function focusableElements(root: HTMLElement): HTMLElement[] {
 /**
  * Keeps Tab and Shift+Tab inside `root` (for panels that are not a modal `<dialog>`, which traps focus natively,
  * e.g. the mobile navigation drawer). Moves focus in, and returns a release function that restores the focus
- * to where it was. Replaces @angular/cdk/a11y FocusTrap (D-007). Browser-only.
+ * to where it was. Replaces @angular/cdk/a11y FocusTrap. Browser-only.
  */
 export function focusTrap(root: HTMLElement, opts: { initialFocus?: HTMLElement | null } = {}): () => void {
     const doc = root.ownerDocument;

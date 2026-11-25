@@ -23,7 +23,7 @@ export interface JoinRequest {
 }
 
 /**
- * Sign-up sends a join request. Payments are taken at the front desk (D-009), so the account becomes an active
+ * Sign-up sends a join request. Payments are taken at the front desk, so the account becomes an active
  * membership only when the branch takes the first payment.
  */
 @Injectable({ providedIn: 'root' })

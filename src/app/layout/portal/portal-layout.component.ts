@@ -37,7 +37,7 @@ const TABS: PortalTab[] = [
 
 /**
  * The member portal (`/me`), mobile-first: a top bar with the gym's brand (members are the gym's customers; the
- * staff consoles carry FitManager, D-019), a bottom tab bar on phones, a sidebar from `lg`. Client-rendered only.
+ * staff consoles carry FitManager), a bottom tab bar on phones, a sidebar from `lg`. Client-rendered only.
  */
 @Component({
     selector: 'app-portal-layout',
@@ -143,7 +143,7 @@ export class PortalLayoutComponent {
     protected readonly barTabs = TABS.filter(t => !t.sidebarOnly);
 
     constructor() {
-        // The bell's count: on opening the portal and on every page (D-108).
+        // The bell's count: on opening the portal and on every page.
         const bell = inject(BellService);
         bell.refresh(true);
         inject(Router)

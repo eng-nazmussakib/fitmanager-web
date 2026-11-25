@@ -19,13 +19,13 @@ export const PUBLIC_ROUTES: Routes = [
     { path: 'plans', canActivate: [sitePageGuard('plans')], title: 'Membership plans', loadComponent: () => import('./plans/plans-page.component').then(m => m.PlansPageComponent) },
     { path: 'join', title: 'Join or ask a question', loadComponent: () => import('./join/join-page.component').then(m => m.JoinPageComponent) },
     { path: 'trainers', canActivate: [sitePageGuard('trainers')], title: landing.trainers.page.seo.title, loadComponent: () => import('./trainers/trainers-page.component').then(m => m.TrainersPageComponent) },
-    // One page per trainer (D-078), from the database: rendered in the browser, as the trainers change at the branches.
+    // One page per trainer, from the database: rendered in the browser, as the trainers change at the branches.
     { path: 'trainers/:slug', canActivate: [sitePageGuard('trainers')], title: 'Trainer', loadComponent: () => import('./trainers/trainer-page.component').then(m => m.TrainerPageComponent) },
     { path: 'blog', canActivate: [sitePageGuard('blog')], title: landing.blog.page.seo.title, loadComponent: () => import('./blog/blog-page.component').then(m => m.BlogPageComponent) },
-    // One page per post (D-109): prerendered from the database at build time (app.routes.server.ts), read again live.
+    // One page per post: prerendered from the database at build time (app.routes.server.ts), read again live.
     { path: 'blog/:slug', canActivate: [sitePageGuard('blog')], title: 'Blog', loadComponent: () => import('./blog/post-page.component').then(m => m.PostPageComponent) },
     { path: 'gallery', canActivate: [sitePageGuard('gallery')], title: landing.gallery.page.seo.title, loadComponent: () => import('./gallery/gallery-page.component').then(m => m.GalleryPageComponent) },
-    // HQ's policies (D-090), from the database: rendered in the browser, as each new version changes them.
+    // HQ's policies, from the database: rendered in the browser, as each new version changes them.
     { path: 'policies', title: 'Policies', loadComponent: () => import('./policies/policy-pages.component').then(m => m.PoliciesIndexComponent) },
     { path: 'policies/:slug', title: 'Policy', loadComponent: () => import('./policies/policy-pages.component').then(m => m.PolicyPageComponent) },
     // Extra pages from the config (offers, careers…), each at `/<slug>`.

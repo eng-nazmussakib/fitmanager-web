@@ -10,7 +10,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 /**
  * Shown on every page of the demo build (`environment.demo`): says the data is demo data, and offers Switch role,
  * Reset data (back to the seed) and Fast mode (almost no artificial latency, for live presentations).
- * English only (D-015), so there is no language switch.
+ * English only, so there is no language switch.
  */
 @Component({
     selector: 'app-demo-banner',

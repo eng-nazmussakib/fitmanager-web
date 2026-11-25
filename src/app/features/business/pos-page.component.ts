@@ -28,7 +28,7 @@ interface Line extends CartLine {
 }
 
 /**
- * `/console/:branch/pos` (D-102): the shop at the desk. Products by photo with what is on the shelf; a cart priced by
+ * `/console/:branch/pos`: the shop at the desk. Products by photo with what is on the shelf; a cart priced by
  * the API (VAT per line); a walk-in pays it all, a member may pay part or nothing and have the rest on their account
  * (the dues limit only warns). A branch manager gives a line discount with a reason. The receipt is the invoice.
  */

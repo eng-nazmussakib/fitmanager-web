@@ -26,7 +26,7 @@ export type PaymentRow = PaymentRecord & { invoice_number: string; member_name: 
 
 /**
  * Every call of the branch console. The branch is not a parameter: the interceptor sends the active branch from
- * the URL as `X-Branch-Id`, and the API scopes each query to it (D-004, D-014).
+ * the URL as `X-Branch-Id`, and the API scopes each query to it.
  */
 @Injectable({ providedIn: 'root' })
 export class ConsoleService {
@@ -93,7 +93,7 @@ export class ConsoleService {
         return this._api.post(`/v1/members/${oid}/anonymise`, { confirm_code: confirmCode });
     }
 
-    /** D-064: a temporary password; the username is the member code. */
+    /** A temporary password; the username is the member code. */
     portalAccess(oid: string, password: string): Observable<{ username: string; must_change_password: boolean; reset: boolean }> {
         return this._api.post(`/v1/members/${oid}/portal-access`, { password });
     }

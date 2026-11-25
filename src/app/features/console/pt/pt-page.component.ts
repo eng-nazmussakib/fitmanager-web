@@ -31,7 +31,7 @@ const STATUS_TONE: Record<PtSession['status'], 'primary' | 'success' | 'warning'
 };
 
 /**
- * `/console/:branch/pt` (D-079): the week's PT sessions. Book one from a trainer's free times (availability less
+ * `/console/:branch/pt`: the week's PT sessions. Book one from a trainer's free times (availability less
  * their classes, sessions and days off) for a member with sessions left on a PT package; mark it done or a no-show
  * once it has started, or cancel it (the member's late cancel uses the session). Trainers see their own first.
  */

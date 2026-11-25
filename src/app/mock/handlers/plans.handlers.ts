@@ -8,7 +8,7 @@ import { type Ctx, fail, ok, qStr, type Route, str } from '../http';
 import { commit, db } from '../store';
 
 /**
- * HQ's plan master data (D-044: only HQ changes prices), as the API's `/v1/hq/plans`, `/v1/hq/plan-templates`
+ * HQ's plan master data (only HQ changes prices), as the API's `/v1/hq/plans`, `/v1/hq/plan-templates`
  * and `/v1/hq/promos` (fitmanager-api src/features/plans). Every change writes an audit row at HQ.
  */
 

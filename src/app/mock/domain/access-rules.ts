@@ -1,12 +1,12 @@
 /**
  * Access rules engine: may a member come in right now? PURE TypeScript, the same code as the API's
  * (fitmanager-api src/features/attendance/access-rules.ts): keep them in step. A member trains at EVERY branch
- * (D-059): no "own branch only" rule; the dues limit is the HOME branch's, the hours the branch being entered.
+ *: no "own branch only" rule; the dues limit is the HOME branch's, the hours the branch being entered.
  *
  * Every rule that fails is reported (not just the first), each with the reason the front desk reads out and
  * whether a manager may override it. Order = the order shown on screen.
  *
- * Phase 5 (D-091, D-093): a suspension in force blocks every branch and a ban the branches it covers, neither
+ * A suspension in force blocks every branch and a ban the branches it covers, neither
  * overridable; a required policy not accepted blocks once its grace period is over, and a manager may override that.
  */
 import type { RuleFailure } from '@core/models/attendance.model';
@@ -20,7 +20,7 @@ export interface AccessFacts {
     branch: { name: string; hours: { days: number[]; open: string; close: string }[] };
     /** An open visit (not checked out), anywhere: its branch and time, `HH:mm`. */
     open_check_in: { branch_name: string; time: string } | null;
-    /** Suspensions not overturned, anywhere, and the bans covering the branch entered (D-093). `branch_name`: where given. */
+    /** Suspensions not overturned, anywhere, and the bans covering the branch entered. `branch_name`: where given. */
     sanctions?: {
         level: 'suspension' | 'ban';
         starts_on: string;
@@ -29,7 +29,7 @@ export interface AccessFacts {
         branch_name: string;
         reason: string;
     }[];
-    /** Required policies the member has not accepted, and the first day each one blocks (D-091). */
+    /** Required policies the member has not accepted, and the first day each one blocks. */
     policies?: { title: string; blocks_on: string }[];
 }
 

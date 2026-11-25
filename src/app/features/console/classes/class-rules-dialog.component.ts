@@ -42,7 +42,7 @@ interface Draft {
 }
 
 /**
- * The branch's weekly classes (D-080): each rule makes one class on each of its days, filled in four weeks ahead.
+ * The branch's weekly classes: each rule makes one class on each of its days, filled in four weeks ahead.
  * Add, change or end a rule (booked classes it no longer runs are cancelled with a message); or add one class on
  * one day. The API checks the trainer, the room, the hours and clashes; its message shows as a toast.
  */

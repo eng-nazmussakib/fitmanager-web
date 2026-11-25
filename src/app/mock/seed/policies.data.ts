@@ -1,5 +1,5 @@
 /**
- * HQ's demo policies (D-090), the same as fitmanager-infra/db/seeds/demo/007_policies.sql (generated from it: keep them in step).
+ * HQ's demo policies, the same as fitmanager-infra/db/seeds/demo/007_policies.sql (generated from it: keep them in step).
  */
 export const POLICY_SEED: { slug: string; title: string; summary: string; required: boolean; public: boolean; sort_order: number }[] = [
     {

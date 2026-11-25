@@ -1,5 +1,5 @@
 /**
- * Reports and exports (phase 7a, D-106, D-107): the wire contract of `GET /v1/reports/:key`,
+ * Reports and exports: the wire contract of `GET /v1/reports/:key`,
  * `GET /v1/hq/reports/:key`, `GET /v1/trainers/:oid/numbers` and `POST /v1/exports/*`. Every report has the
  * same shape, so one component renders and exports any of them.
  */
@@ -86,5 +86,5 @@ export interface ExportPage {
     total: number | null;
 }
 
-/** The most rows one export may hold (D-107). */
+/** The most rows one export may hold. */
 export const EXPORT_LIMIT = 50_000;

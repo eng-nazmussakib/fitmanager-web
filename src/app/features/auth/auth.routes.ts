@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { TENANT } from '@config/tenant';
 
-/** Sign-in is username and password only (D-054, D-064): no reCAPTCHA, no outside identity provider (D-075). */
+/** Sign-in is username and password only: no reCAPTCHA, no outside identity provider. */
 export const AUTH_ROUTES: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
     { path: 'sign-in', title: 'Sign in', loadComponent: () => import('./sign-in/sign-in.component').then(m => m.SignInComponent) },

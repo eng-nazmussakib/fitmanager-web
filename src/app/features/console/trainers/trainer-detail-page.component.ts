@@ -32,7 +32,7 @@ const TIMES: SelectOption<string>[] = Array.from({ length: 37 }, (_, i) => {
 });
 
 /**
- * `/console/:branch/trainers/:id` (D-078): the profile, the weekly availability at this branch (the free PT slots
+ * `/console/:branch/trainers/:id`: the profile, the weekly availability at this branch (the free PT slots
  * come from it), days off, clients and the next two weeks. A trainer edits their own; a manager edits any.
  */
 @Component({
@@ -230,14 +230,14 @@ export class TrainerDetailPageComponent {
     protected readonly leaveFrom = signal('');
     protected readonly leaveTo = signal('');
     protected readonly leaveReason = signal('');
-    /** A manager edits any profile; a trainer only their own (D-083). */
+    /** A manager edits any profile; a trainer only their own. */
     protected readonly self = computed(() => !this._auth.can('manage', 'Trainer'));
     protected readonly canEdit = computed(() => {
         const t = this.data.value();
         if (!t || !this._auth.can('update', 'Trainer')) return false;
         return !this.self() || t.user_oid === this._auth.user()?.user_id;
     });
-    /** Their numbers (D-106): a trainer on their own profile; managers and HQ on any. */
+    /** Their numbers: a trainer on their own profile; managers and HQ on any. */
     protected readonly seesNumbers = computed(() => {
         const t = this.data.value();
         return !!t && (this._auth.can('read', 'Report') || t.user_oid === this._auth.user()?.user_id);

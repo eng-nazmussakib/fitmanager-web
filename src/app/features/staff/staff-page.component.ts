@@ -21,7 +21,7 @@ import { type StaffLevel, StaffService } from './staff.service';
 import { ResetPasswordDialogComponent, type StaffEditorData, StaffEditorDialogComponent } from './staff-dialogs.component';
 
 /**
- * `/hq/staff` and `/console/:branch/staff` (phase 1, D-054, D-055). HQ lists every account and edits assignments
+ * `/hq/staff` and `/console/:branch/staff`. HQ lists every account and edits assignments
  * at any branch; a branch lists the people assigned there. Actions appear only on rows the API marks `manageable`.
  */
 @Component({

@@ -1,6 +1,6 @@
 import { seed } from './seed';
 
-/** D-072: phase 3's cases in the demo data, the same list as the database's showcase seed 103. */
+/** The scheduling cases in the demo data, the same list as the database's showcase seed 103. */
 describe('every scheduling case in the demo data', () => {
     const today = '2026-11-19';
     const db = seed(today, 12 * 60);

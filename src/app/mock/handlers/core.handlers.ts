@@ -20,9 +20,9 @@ import { branchMember } from './members.handlers';
 import { memberTraining } from './training.handlers';
 
 /**
- * Phase 2's new actions, as the API answers them (fitmanager-api: members, sales, files, portal, join):
+ * The membership and sales actions, as the API answers them (fitmanager-api: members, sales, files, portal, join):
  * transfer, anonymise, portal access, cancel, upgrade, refund, closing the day, uploads, documents and
- * messages. The rules match the API's (D-063, D-064, D-067, D-068, D-069); the demo keeps everything in memory.
+ * messages. The rules match the API's; the demo keeps everything in memory.
  */
 
 const METHODS: PaymentMethod[] = ['cash', 'card', 'bkash', 'nagad', 'bank'];
@@ -35,7 +35,7 @@ const manager = (ctx: Ctx, subject: 'Member' | 'Subscription' | 'Payment', actio
     if (!ctx.ability.can(action, subject)) fail(403, 'You do not have permission to do this');
 };
 
-/* ---------- files (D-058, D-069) ---------- */
+/* ---------- files ---------- */
 
 /** Bytes the mock was sent, by file, until "complete" turns them into an object URL (this session only). */
 const uploads = new Map<string, Blob>();
@@ -94,7 +94,7 @@ const RULES: Record<FileRow['kind'], { types: readonly string[]; max: number; la
         can: ['create', 'Complaint'],
         hq: false
     },
-    // Phase 6 (D-098, D-099): HQ's product photos; a machine's photo (the register's keepers); a ticket's photo (anyone who raises one).
+    // HQ's product photos; a machine's photo (the register's keepers); a ticket's photo (anyone who raises one).
     product_photo: { types: IMAGES, max: 300 * 1024, label: 'A product photo is a JPEG, PNG or WebP of at most 300 KB', can: ['update', 'Product'], hq: true },
     equipment_photo: {
         types: IMAGES,
@@ -106,7 +106,7 @@ const RULES: Record<FileRow['kind'], { types: readonly string[]; max: number; la
     ticket_photo: { types: IMAGES, max: 300 * 1024, label: 'A ticket photo is a JPEG, PNG or WebP of at most 300 KB', can: ['create', 'Equipment'], hq: false },
     site_image: { types: IMAGES, max: 500 * 1024, label: 'A website image is a JPEG, PNG or WebP of at most 500 KB', can: ['update', 'Website'], hq: true }
 };
-/** The API's `FILE_STORAGE_LIMIT_MB` default (D-074): every branch's files together, inside R2's free 10 GB. */
+/** The API's `FILE_STORAGE_LIMIT_MB` default: every branch's files together, inside R2's free 10 GB. */
 const FILE_STORAGE_LIMIT_BYTES = 6144 * 1024 * 1024;
 
 /** Like the API: ready files plus pending uploads, across every branch; 409 when `adding` would pass the limit. */
@@ -209,7 +209,7 @@ function documents(ctx: Ctx): HttpResponse<unknown> {
     return ok(rows);
 }
 
-/* ---------- members (D-064, D-068) ---------- */
+/* ---------- members ---------- */
 
 function transfer(ctx: Ctx): HttpResponse<unknown> {
     manager(ctx, 'Member');
@@ -271,13 +271,13 @@ function portalAccess(ctx: Ctx): HttpResponse<unknown> {
     );
 }
 
-/** The member's in-app messages (D-075, D-108): the same derivation as the portal's (mock/inbox.ts). */
+/** The member's in-app messages: the same derivation as the portal's (mock/inbox.ts). */
 function messages(ctx: Ctx): HttpResponse<unknown> {
     const m = branchMember(ctx, ctx.params[0] ?? '');
     return ok(memberMessages(db(), m, ctx.now.date, ctx.now.iso).slice(0, 50));
 }
 
-/* ---------- plans and money (D-067) ---------- */
+/* ---------- plans and money ---------- */
 
 function subscriptionAt(ctx: Ctx): { sub: Subscription; member: MemberRow } {
     const sub = db().subscriptions.find(s => s.oid === ctx.params[0]);
@@ -396,7 +396,7 @@ function upgrade(ctx: Ctx): HttpResponse<unknown> {
     return ok({ subscription: next, invoice, credit }, `Upgraded to ${plan.name}`);
 }
 
-/** Full refund within 3 days, unused: the desk. Anything else: a manager (D-067 a). */
+/** Full refund within 3 days, unused: the desk. Anything else: a manager. */
 function refund(ctx: Ctx): HttpResponse<unknown> {
     const inv = db().invoices.find(i => i.oid === ctx.params[0]);
     if (inv?.branch.oid !== ctx.branch!.oid) fail(404, 'Invoice not found');
@@ -486,7 +486,7 @@ function closeDay(ctx: Ctx): HttpResponse<unknown> {
     return ok({ day: ctx.now.date, expected_cash: expected, counted_cash: counted, difference: counted - expected, note }, 'Day closed');
 }
 
-export const PHASE2_ROUTES: Route[] = [
+export const CORE_ROUTES: Route[] = [
     { method: 'POST', path: /^\/v1\/files$/, scope: 'staff', handler: startUpload },
     { method: 'PUT', path: /^\/v1\/files\/([\w-]+)\/content$/, scope: 'public', handler: receive },
     { method: 'POST', path: /^\/v1\/files\/([\w-]+)\/complete$/, scope: 'staff', handler: complete },

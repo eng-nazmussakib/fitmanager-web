@@ -28,7 +28,7 @@ const CODE = /^MEM-[A-Z]{3}-\d{6}$/i;
 const AUTO_KEY = 'app.checkin-auto';
 
 /**
- * H3: the front desk check-in. Built for a USB barcode scanner (it types like a keyboard, D-010): the search field
+ * H3: the front desk check-in. Built for a USB barcode scanner (it types like a keyboard): the search field
  * keeps focus, an exact member code is evaluated at once, and with "Check in automatically" an allowed member is
  * checked in with no click. The access rules come from the API (mock/domain/access-rules.ts); a blocked member shows
  * every failed rule, and a manager can override with a reason, which is recorded on the check-in and the timeline.
@@ -225,7 +225,7 @@ const AUTO_KEY = 'app.checkin-auto';
                                             </button>
                                         }
                                     }
-                                    <!-- A visitor's plan and money belong to their home branch (D-059, D-066): send them there. -->
+                                    <!-- A visitor's plan and money belong to their home branch: send them there. -->
                                     @if (!d.member.visitor) {
                                         @if (hasRule(d, 'policy') || d.policies_due?.length) {
                                             <a fmButton size="lg" [queryParams]="{ tab: 'discipline' }" [routerLink]="['../members', d.member.oid]">

@@ -12,7 +12,7 @@ import { SwitchComponent } from '@shared/ui/forms/switch.component';
 import { slugify } from './site-image';
 import { WebsiteService } from './website.service';
 
-/** HQ adds or edits an offer on the website (D-109): its text, conditions, the promo code the desk applies, and dates. */
+/** HQ adds or edits an offer on the website: its text, conditions, the promo code the desk applies, and dates. */
 @Component({
     selector: 'app-offer-dialog',
     imports: [FormsModule, ButtonComponent, DialogShellComponent, DialogFooterDirective, AlertComponent, FieldComponent, InputDirective, SwitchComponent],

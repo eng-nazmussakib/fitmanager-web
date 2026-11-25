@@ -13,7 +13,7 @@ import { list as memberList } from './members.handlers';
 import { auditMatches } from './staff.handlers';
 
 /**
- * Reports and exports in demo mode (D-106, D-107), with the API's rules: reports for `read Report` (branch
+ * Reports and exports in demo mode, with the API's rules: reports for `read Report` (branch
  * managers and HQ), a trainer's own numbers, exports for `export Report` a page at a time, the first page counted
  * (over 50 000 refused) and audited.
  */

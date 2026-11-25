@@ -37,7 +37,7 @@ test.describe('Sign-in and landing pages per role', () => {
         });
     }
 
-    test('the sidebar says FitManager (D-019) and signs out from the user menu', async ({ page }) => {
+    test('the sidebar says FitManager and signs out from the user menu', async ({ page }) => {
         await page.goto('/auth/sign-in');
         await signIn(page, 'manager.gulshan', 'Manager@123');
         await expect(page.getByRole('complementary', { name: 'Sidebar' }).getByText('FitManager')).toBeVisible();

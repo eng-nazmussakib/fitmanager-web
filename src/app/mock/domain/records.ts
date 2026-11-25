@@ -1,5 +1,5 @@
 /**
- * A copy of the API's personal records and progress (fitmanager-api src/features/training/records.ts, D-088), so the
+ * A copy of the API's personal records and progress (fitmanager-api src/features/training/records.ts), so the
  * demo computes the same numbers. Keep the two in step.
  */
 import type { Measure } from '@core/models/training.model';

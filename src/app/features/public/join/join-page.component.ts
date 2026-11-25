@@ -16,7 +16,7 @@ import { PublicSiteService, slug } from '../public-site.service';
 
 /**
  * `/join`: ask a branch to call back (H7). Posts to the public enquiries endpoint; the branch's front desk sees it.
- * The full online sign-up (an account and a join request, D-022) stays at /auth/sign-up. `?branch=&plan=` pre-fill it.
+ * The full online sign-up (an account and a join request) stays at /auth/sign-up. `?branch=&plan=` pre-fill it.
  */
 @Component({
     selector: 'app-join-page',

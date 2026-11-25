@@ -14,7 +14,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { SchedulingService } from '../scheduling.service';
 import { type TrainerEditorData, TrainerEditorDialogComponent } from './trainer-editor-dialog.component';
 
-/** `/console/:branch/trainers` (D-078): the branch's trainers, with their clients and whether they can sign in. */
+/** `/console/:branch/trainers`: the branch's trainers, with their clients and whether they can sign in. */
 @Component({
     selector: 'app-trainers-page',
     imports: [

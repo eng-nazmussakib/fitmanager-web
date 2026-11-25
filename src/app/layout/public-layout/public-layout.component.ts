@@ -103,7 +103,7 @@ export class PublicLayoutComponent {
             this._watchHeader();
             this._watchSections();
         });
-        // The site groups' switches from the database (D-040). On the server this finishes before the HTML is written.
+        // The site groups' switches from the database. On the server this finishes before the HTML is written.
         inject(PublicContentService)
             .siteGroups()
             .pipe(takeUntilDestroyed())
@@ -128,7 +128,7 @@ export class PublicLayoutComponent {
             });
         // With hydration, Angular's router ignores scroll events until the app is stable (no pending tasks, such as
         // the site-groups request above). Without this, "Membership" clicked in the first moments changed the URL
-        // to /#plans but did not scroll (changelog 0.29.2).
+        // to /#plans but did not scroll.
         void inject(ApplicationRef)
             .whenStable()
             .then(() => {

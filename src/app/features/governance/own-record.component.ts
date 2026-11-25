@@ -14,7 +14,7 @@ import { GovernanceService } from './governance.service';
 import { type TextPromptData, TextPromptDialogComponent, type TextPromptResult } from './text-prompt-dialog.component';
 
 /**
- * The person's own record (D-094): their sanctions with the reason and the rule, never the notes, witnesses or evidence,
+ * The person's own record: their sanctions with the reason and the rule, never the notes, witnesses or evidence,
  * and an appeal within 7 days, decided by someone other than the person who gave the step. `portal`: the member portal
  * (`/me/record`); otherwise a staff member's "My record" in the console.
  */

@@ -34,7 +34,7 @@ const ACTIONS: Record<string, string> = {
 const ENTITIES: Record<string, string> = { staff: 'Staff', site_group: 'Public site' };
 
 /**
- * `/hq/audit` and `/console/:branch/audit` (phase 1): the append-only log of every change, newest first. HQ sees every
+ * `/hq/audit` and `/console/:branch/audit`: the append-only log of every change, newest first. HQ sees every
  * branch it reaches (and can pick one); a branch manager sees their branch. Paged with the API's cursor ("Load more").
  */
 @Component({
@@ -193,7 +193,7 @@ export class AuditPageComponent {
         return `${ENTITIES[r.entity] ?? r.entity}: ${name}`;
     }
 
-    /** Every entry the filters match, as Excel or PDF (D-107). The export itself is logged too. */
+    /** Every entry the filters match, as Excel or PDF. The export itself is logged too. */
     protected async exportLog(format: ExportFormat): Promise<void> {
         this.exporting.set(true);
         const q = this._query();

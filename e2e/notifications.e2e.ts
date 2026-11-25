@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { expect, freshDemo, signIn, test } from './fixtures';
 
-/** Phase 7b (D-108) on the mock API: the bell, the member's messages and the staff inbox. */
+/** Notifications on the mock API: the bell, the member's messages and the staff inbox. */
 test.describe('The bell', () => {
     test.beforeEach(async ({ page }) => {
         await freshDemo(page);

@@ -9,7 +9,7 @@ export const BREAKPOINTS = {
 } as const;
 
 /**
- * Media queries as signals, safe on the server (replaces `BreakpointObserver` from @angular/cdk/layout, D-007).
+ * Media queries as signals, safe on the server (replaces `BreakpointObserver` from @angular/cdk/layout).
  * In the browser each query follows `matchMedia`; on the server it holds its initial value, so prerendered HTML is
  * the mobile-first default and the browser corrects it after hydration.
  */

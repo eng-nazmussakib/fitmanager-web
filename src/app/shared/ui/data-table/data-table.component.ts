@@ -49,7 +49,7 @@ export class CellDirective {
 
 /**
  * Server-side data table: the parent fetches, the table renders and emits `queryChange` (page, size, sort).
- * Replaces the nz-table wrapper (D-007).
+ * Replaces the nz-table wrapper.
  *
  * - Columns are a typed array in the page; `type` formats dates (Asia/Dhaka), taka (lakh grouping) and statuses.
  * - Sortable headers are buttons with `aria-sort` on the `<th>`; row actions sit in a menu, filtered by CASL once.

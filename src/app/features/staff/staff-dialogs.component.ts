@@ -27,7 +27,7 @@ export interface StaffEditorData {
 }
 
 /**
- * Add or edit a staff account (D-054, D-055). A new account gets a temporary password the admin types; the person
+ * Add or edit a staff account. A new account gets a temporary password the admin types; the person
  * must change it at sign-in. At HQ the assignments are edited as a set (one role per branch); at a branch, the role
  * there. Only the roles the caller may hand out are offered (`assignable_roles` from the API).
  */
@@ -225,7 +225,7 @@ export class StaffEditorDialogComponent {
     }
 }
 
-/** A new temporary password for someone (D-054): they must change it at their next sign-in; every session ends. */
+/** A new temporary password for someone: they must change it at their next sign-in; every session ends. */
 @Component({
     selector: 'app-reset-password-dialog',
     imports: [ReactiveFormsModule, ButtonComponent, DialogShellComponent, DialogFooterDirective, FieldComponent, InputDirective],

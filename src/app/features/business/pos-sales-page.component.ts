@@ -23,7 +23,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { BusinessService } from './business.service';
 
 /**
- * `/console/:branch/pos-sales` (D-102): the shop's sales, newest first, and returns. Money goes back only from what was
+ * `/console/:branch/pos-sales`: the shop's sales, newest first, and returns. Money goes back only from what was
  * paid (a sale on the account is paid first); undamaged items go back on the shelf. The desk takes returns for 3 days,
  * a branch manager after that.
  */

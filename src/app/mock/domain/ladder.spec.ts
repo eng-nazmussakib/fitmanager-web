@@ -1,7 +1,7 @@
 import { allowedLevels, appealDeadline, banScopes, giverRole, mayDecideAppeal, mayLift, strikes, suggestLevel } from './ladder';
 
-// The API's cases (fitmanager-api src/features/discipline/ladder.test.ts), D-092 to D-094.
-describe('the discipline ladder (D-092)', () => {
+// The API's cases (fitmanager-api src/features/discipline/ladder.test.ts).
+describe('the discipline ladder', () => {
     it('suggests one step per strike, capped at a ban', () => {
         expect([0, 1, 2, 3, 7].map(suggestLevel)).toEqual(['verbal', 'written', 'suspension', 'ban', 'ban']);
     });

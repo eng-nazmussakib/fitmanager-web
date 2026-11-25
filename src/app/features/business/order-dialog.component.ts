@@ -17,7 +17,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { BusinessService } from './business.service';
 
 export interface OrderDialogData {
-    /** A purchase order to a supplier (D-100), or a transfer asked of another branch (D-101). */
+    /** A purchase order to a supplier, or a transfer asked of another branch. */
     kind: 'order' | 'transfer';
     /** The other branches, for a transfer. */
     branches?: Pick<Branch, 'oid' | 'name'>[];

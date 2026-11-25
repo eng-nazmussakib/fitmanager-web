@@ -1,4 +1,4 @@
-// Draws the brand's PNG images, then commit them; run it again after changing the brand (Q-006): `npm run brand-images`.
+// Draws the brand's PNG images, then commit them; run it again after changing the brand: `npm run brand-images`.
 // - public/og-image.png (1200×630): the share image every public page sends as og:image and the Twitter card, built
 //   from the SHARE text below and the brand config (first theme, hero photo);
 // - public/icons/icon-192.png, icon-512.png (the manifest's install icons) and apple-touch-icon.png (180, iOS home
@@ -19,7 +19,7 @@ const hero = landing?.hero.image.src;
 const photo = hero ? `data:image/webp;base64,${readFileSync(join('public', hero)).toString('base64')}` : '';
 // The public host, from the production build's siteUrl (the file has value imports, so it is read, not imported).
 const host = readFileSync('src/environments/environment.prod.ts', 'utf8').match(/siteUrl: '(?:https?:\/\/)?([^'/]*)/)?.[1] ?? '';
-// For now the share image names the product, not the demo gym's brand (switch back to brand.* once Q-006 is settled).
+// For now the share image names the product, not the demo gym's brand (the demo gym's brand is a placeholder).
 const SHARE = {
     kicker: 'Gym management · live demo',
     name: ['Fit', 'Manager'],

@@ -18,8 +18,8 @@ export interface PolicyEditorData {
 }
 
 /**
- * HQ's policy editor (D-090): a new policy with its first version, or the next version of one, its clauses numbered in
- * order. A new version is "accept again" (every member must accept it, after the grace period, D-091) or "wording only"
+ * HQ's policy editor: a new policy with its first version, or the next version of one, its clauses numbered in
+ * order. A new version is "accept again" (every member must accept it, after the grace period) or "wording only"
  * (no new acceptance). Published versions are never edited.
  */
 @Component({

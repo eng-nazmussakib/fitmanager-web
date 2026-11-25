@@ -16,8 +16,8 @@ import { GovernanceService } from './governance.service';
 import { type PolicyEditorData, PolicyEditorDialogComponent } from './policy-editor-dialog.component';
 
 /**
- * `/hq/policies` (HQ edits) and `/console/:branch/policies` (read): HQ's policies (D-090) with their numbered clauses
- * and version history. "Accept again" versions must be accepted by every member (D-091); "wording only" ones not.
+ * `/hq/policies` (HQ edits) and `/console/:branch/policies` (read): HQ's policies with their numbered clauses
+ * and version history. "Accept again" versions must be accepted by every member; "wording only" ones not.
  */
 @Component({
     selector: 'app-policies-page',

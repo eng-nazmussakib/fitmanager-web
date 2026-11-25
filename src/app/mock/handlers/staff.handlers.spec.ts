@@ -14,7 +14,7 @@ interface Res<T> {
     data: T;
 }
 
-/** The mock follows the API's staff rules (D-054, D-055), so demo mode behaves like the real thing. */
+/** The mock follows the API's staff rules, so demo mode behaves like the real thing. */
 describe('mock API: staff, audit log, temporary passwords', () => {
     let http: HttpClient;
     const base = environment.apiBaseUrl;

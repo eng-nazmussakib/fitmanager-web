@@ -1,5 +1,5 @@
 /**
- * A small Markdown renderer for the website's posts and offers (phase 7c, D-109): no library, safe by construction.
+ * A small Markdown renderer for the website's posts and offers: no library, safe by construction.
  * Every character of the input is HTML-escaped FIRST; only then are the few Markdown forms below turned into tags,
  * so no HTML a writer types can reach the page. Links keep only http(s), mailto, tel and site-relative targets.
  *

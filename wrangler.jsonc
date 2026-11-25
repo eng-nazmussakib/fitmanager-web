@@ -1,5 +1,5 @@
-// Cloudflare Workers config for the web app (target A, Free plan only: D-024, D-026).
-// Deployed by Cloudflare's Git integration (build `npm run build:cloudflare`, deploy `npx wrangler deploy`, D-046);
+// Cloudflare Workers config for the web app (Free plan only).
+// Deployed by Cloudflare's Git integration (build `npm run build:cloudflare`, deploy `npx wrangler deploy`);
 // see ../fitmanager-infra/cloudflare/web.md.
 {
     "$schema": "node_modules/wrangler/config-schema.json",
@@ -14,10 +14,10 @@
         // Unmatched paths run the Worker (client routes get index.csr.html with noindex).
         "not_found_handling": "none"
     },
-    // The API Worker, called without a public round trip (phase 1, D-036). Deploy the API Worker first: a binding to a
+    // The API Worker, called without a public round trip. Deploy the API Worker first: a binding to a
     // Worker that does not exist yet fails the web deploy. Locally: `wrangler dev -c wrangler.jsonc -c ../fitmanager-api/wrangler.jsonc`.
     "services": [{ "binding": "API", "service": "fitmanager-api" }],
-    // The demo's one public hostname (Q-010): the web app, with the API behind it at /api through the binding above.
+    // The demo's one public hostname: the web app, with the API behind it at /api through the binding above.
     // `custom_domain` makes Cloudflare create the DNS record and certificate on deploy; the API Worker has no domain.
     "routes": [{ "pattern": "fitmanager.nazmussakib.app", "custom_domain": true }],
     "observability": { "enabled": true }

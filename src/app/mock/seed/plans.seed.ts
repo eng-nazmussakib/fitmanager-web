@@ -68,7 +68,7 @@ export function seedPlans(branches: Branch[]): { templates: PlanTemplate[]; plan
             }
         }
     }
-    // PT packages (D-079), as the API's seed (005_scheduling.sql): sold with a membership, never on the public list.
+    // PT packages, as the API's seed (005_scheduling.sql): sold with a membership, never on the public list.
     const pt: [string, string, number, number, number, string[]][] = [
         ['pt-1', '1 session', 1, 1, 1500, ['One hour with your trainer', 'Book a slot in the member portal']],
         ['pt-8', '8 sessions', 2, 8, 10000, ['Eight hours with your trainer', 'A routine built for you', 'Use within 2 months']],

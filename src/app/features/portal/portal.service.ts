@@ -9,7 +9,7 @@ import type { MemberPt, PortalBookings, PtSession, PtSlots } from '@core/models/
 
 export type UpcomingBooking = Booking & { session: ClassSession };
 
-/** The member portal's calls (`/v1/me/*`). No branch header: the API knows the member's branch (D-003). */
+/** The member portal's calls (`/v1/me/*`). No branch header: the API knows the member's branch. */
 @Injectable({ providedIn: 'root' })
 export class PortalService {
     private readonly _api = inject(ApiService);

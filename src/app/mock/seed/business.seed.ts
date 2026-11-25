@@ -22,7 +22,7 @@ import { addDaysIso, weekdayOf } from './clock';
 import { Rng } from './prng';
 
 /**
- * Phase 6 showcase (D-072, D-098 to D-102): the same catalogue as the API's demo seed (008_catalogue.sql) and the same
+ * Business showcase: the same catalogue as the API's demo seed (008_catalogue.sql) and the same
  * cases as its showcase seed (106_business_cases.sql), dated from the seed day. The stock, orders, transfers and POS
  * sales go through the same steps as the handlers (../business.ts), oldest first, so the ledger's running balance is
  * right. The photos are credited in fitmanager-infra db/seeds/showcase/MEDIA-CREDITS.md.
@@ -456,7 +456,7 @@ export function seedBusiness(db: MockDb, today: string): void {
     const close = (t: TransferRow, status: 'rejected' | 'cancelled', note: string, at: [number, string]): void =>
         apply(db, { t: 'patch', table: 'transfers', oid: t.oid, patch: { status, closing_note: note, closed_at: when(...at).iso } });
 
-    // Three months of everyday walk-in sales first (D-111, as seed 106): an order for the quarter received 93 days
+    // Three months of everyday walk-in sales first (as seed 106): an order for the quarter received 93 days
     // back, then sales from 92 to 31 days back that sell exactly that stock, so every product is back at zero when
     // the cases start and the cases' receipts set the average cost afresh.
     const COST: Record<number, number> = { 1: 3000, 2: 3000, 3: 1300, 4: 1500, 5: 110, 6: 55, 7: 15, 8: 80, 9: 260, 10: 320, 11: 560, 12: 850, 13: 480 };

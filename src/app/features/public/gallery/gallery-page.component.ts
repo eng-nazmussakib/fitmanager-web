@@ -135,7 +135,7 @@ export class GalleryPageComponent {
     private readonly _dialog = viewChild.required<ElementRef<HTMLDialogElement>>('lightbox');
 
     protected readonly c = this._site.c;
-    /** Every photo (the database's, D-109; the brand config's without an API). Category = the branch. */
+    /** Every photo (the database's; the brand config's without an API). Category = the branch. */
     protected readonly all = inject(SiteContentService).photos;
     protected readonly categories = computed(() => {
         const items = this.all();

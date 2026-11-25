@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { expect, freshDemo, sidebar, signIn, test } from './fixtures';
 
-/** Phase 6 (D-098 to D-102) on the mock API: the shop, stock, purchase orders and the equipment register. */
+/** Business on the mock API: the shop, stock, purchase orders and the equipment register. */
 test.describe('Business', () => {
     test.beforeEach(async ({ page }) => {
         const dhakaDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dhaka' }).format(new Date());

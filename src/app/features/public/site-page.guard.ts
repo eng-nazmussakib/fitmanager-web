@@ -6,7 +6,7 @@ import { PublicContentService } from './public-content.service';
 import { PublicSiteService } from './public-site.service';
 
 /**
- * A public page that HQ can switch off (D-040): `/blog`, `/trainers`, `/gallery`, `/branches/:slug`, `/plans`.
+ * A public page that HQ can switch off: `/blog`, `/trainers`, `/gallery`, `/branches/:slug`, `/plans`.
  * When the page is off, the visitor lands on the group's landing section if that is on, else the top of the home
  * page. On a prerendered page it happens in the browser.
  */

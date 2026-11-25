@@ -21,7 +21,7 @@ import { type TextPromptData, TextPromptDialogComponent, type TextPromptResult }
 const ROLE_LABEL: Record<string, string> = { BRANCH_MANAGER: 'Branch manager', FRONT_DESK: 'Front desk', TRAINER: 'Trainer' };
 
 /**
- * One case (D-092 to D-094): what happened, the rule, the evidence and the internal notes; the person's strikes in 12
+ * One case: what happened, the rule, the evidence and the internal notes; the person's strikes in 12
  * months and the suggested step; each step given, with its appeal (decided by someone else; HQ for a ban) and, for a
  * ban, lifting it. The caller's buttons follow what the API says they may do.
  */
@@ -94,7 +94,7 @@ const ROLE_LABEL: Record<string, string> = { BRANCH_MANAGER: 'Branch manager', F
                         </dl>
                         <p class="mt-3 text-sm leading-relaxed whitespace-pre-line">{{ c.description }}</p>
                     </fm-card>
-                    <fm-card subtitle="Never shown to the person (D-094)." title="Internal">
+                    <fm-card subtitle="Never shown to the person." title="Internal">
                         @if (c.actions.can_edit) {
                             <div class="grid gap-3">
                                 <fm-field label="Witnesses"><input fmInput maxlength="500" [(ngModel)]="witnesses" /></fm-field>

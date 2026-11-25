@@ -62,7 +62,7 @@ export function code39Bars(text: string, wide = 2.5): { bars: [number, number][]
 
 /**
  * `<fm-barcode value="MEM-GUL-000123" />`: the member code as a Code 39 barcode, for the front desk's USB scanner
- * (D-010). Black on white with quiet zones, whatever the theme, so it scans from a phone screen too.
+ *. Black on white with quiet zones, whatever the theme, so it scans from a phone screen too.
  */
 @Component({
     selector: 'fm-barcode',

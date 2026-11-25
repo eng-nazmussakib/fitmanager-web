@@ -69,12 +69,12 @@ const SEARCH_WORDS: Partial<Record<SectionId | 'contact', string>> = {
 };
 
 /**
- * Groups whose home page section is more than one template section (D-042): the home group is the hero and the
+ * Groups whose home page section is more than one template section: the home group is the hero and the
  * key numbers under it (the latter only when the brand config has them).
  */
 const GROUP_SECTIONS: Record<string, string[]> = { hero: ['hero', 'stats'] };
 
-/** The public pages that belong to a site group (D-040), for before the database's list arrives. */
+/** The public pages that belong to a site group, for before the database's list arrives. */
 const PAGE_PATHS: Record<string, string> = { plans: '/plans', trainers: '/trainers', blog: '/blog', branches: '/branches', gallery: '/gallery' };
 
 /** Fragments that always exist on the landing page, whatever sections are enabled. */
@@ -148,7 +148,7 @@ export class PublicSiteService {
     /** The landing content with `{brand}` filled in. */
     readonly c: LandingConfig = fillBrand(landingConfig(), this.brand);
     /**
-     * The site groups' switches from the database (D-040: `GET /v1/public/site-groups`, applied by the public layout
+     * The site groups' switches from the database (`GET /v1/public/site-groups`, applied by the public layout
      * and the page guards through `applyGroups`). Null until then, or with no API (a Cloudflare prerender without
      * one): the brand config's sections and every page.
      */
@@ -219,7 +219,7 @@ export class PublicSiteService {
     );
     private readonly _searchIndex = computed(() => this._buildSearchIndex(this.sections()));
 
-    /** The database's switches (D-040). Groups the templates do not know are ignored. */
+    /** The database's switches. Groups the templates do not know are ignored. */
     applyGroups(groups: SiteGroup[]): void {
         this._groups.set(groups);
     }

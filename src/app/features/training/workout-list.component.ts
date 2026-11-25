@@ -9,7 +9,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 
 const SOURCE: Record<Workout['source'], string> = { member: 'Logged by the member', trainer: 'Logged by the trainer', desk: 'Logged at the desk' };
 
-/** Logged workouts, newest first: the day, sets, who logged it; edit and delete within 7 days (D-088). */
+/** Logged workouts, newest first: the day, sets, who logged it; edit and delete within 7 days. */
 @Component({
     selector: 'app-workout-list',
     imports: [ButtonComponent, BadgeComponent, EmptyStateComponent, IconComponent],

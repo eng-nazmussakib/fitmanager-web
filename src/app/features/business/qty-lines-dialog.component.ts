@@ -27,7 +27,7 @@ export interface QtyLinesResult {
     date: string | null;
 }
 
-/** How many of each line: a delivery against an order, or what is sent or received on a transfer (D-100, D-101). */
+/** How many of each line: a delivery against an order, or what is sent or received on a transfer. */
 @Component({
     selector: 'app-qty-lines-dialog',
     imports: [

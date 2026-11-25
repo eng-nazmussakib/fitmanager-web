@@ -11,7 +11,7 @@ import { addDaysIso, at } from './seed/clock';
 import type { MemberRow, MockDb, ReadRow } from './types';
 
 /**
- * The bell in demo mode (phase 7b, D-108). Like the receipts before it, every message is DERIVED from the mock's data
+ * The bell in demo mode. Like the receipts before it, every message is DERIVED from the mock's data
  * each time it is read (so whatever the demo does shows up at once), with the API's wording; only the read marks
  * are stored (`reads`). As in seed 108, what is older than 3 days before the seed day counts as read: by staff, and
  * by members with a portal account. Read messages older than 180 days are not listed.
@@ -58,7 +58,7 @@ export function memberMessages(d: MockDb, m: MemberRow, today: string, nowIso: s
     };
     for (const inv of d.invoices.filter(x => x.member_oid === m.oid)) {
         if (inv.kind === 'pos') {
-            // A shop receipt (D-108 a): what they bought, paid at the till, and what went on the account.
+            // A shop receipt: what they bought, paid at the till, and what went on the account.
             const paid = inv.payments.filter(p => p.kind !== 'refund' && p.received_at === inv.issued_at).reduce((s, p) => s + p.amount, 0);
             const items = inv.lines.filter(l => l.qty !== undefined).map(l => l.label);
             add(
@@ -99,7 +99,7 @@ export function memberMessages(d: MockDb, m: MemberRow, today: string, nowIso: s
     }
     for (const r of d.messages.filter(x => x.member_oid === m.oid)) add(r.oid, r.kind, r.subject, r.body, r.created_at);
 
-    // Phase 7b: replies to the member's complaints, sanctions and appeals decided, policies still to accept.
+    // Replies to the member's complaints, sanctions and appeals decided, policies still to accept.
     for (const c of d.complaints.filter(x => x.member_oid === m.oid))
         for (const u of c.updates.filter(x => x.author === 'staff' && !x.body.startsWith('Escalated to HQ:')))
             add(

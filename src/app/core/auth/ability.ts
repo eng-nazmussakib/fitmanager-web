@@ -26,10 +26,10 @@ export type Action = 'manage' | 'read' | 'create' | 'update' | 'delete' | 'expor
  * - HQ: HqDashboard, Branch, PlanTemplate, Staff, Settings.
  * - Both consoles: AuditLog (read only; HQ reads across its branches, a branch manager their own branch).
  * - Member portal: Portal.
- * - Phase 3 (D-083): Room, Locker (`manage` = set up; `create`/`update` = rent), PtSession, ClassType (HQ).
- * - Phase 4 (D-086): Exercise, Routine, Workout, Measurement.
- * - Phase 5 (D-097): Policy, Incident, Complaint, Feedback.
- * - Phase 6 (D-102): Equipment (`create` = raise a ticket), Product, Supplier (HQ), Stock, PurchaseOrder, Transfer, Sale
+ * - Scheduling: Room, Locker (`manage` = set up; `create`/`update` = rent), PtSession, ClassType (HQ).
+ * - Training: Exercise, Routine, Workout, Measurement.
+ * - Governance: Policy, Incident, Complaint, Feedback.
+ * - Business: Equipment (`create` = raise a ticket), Product, Supplier (HQ), Stock, PurchaseOrder, Transfer, Sale
  *   (`manage` = line discounts and late returns).
  */
 export type Subject =
@@ -72,7 +72,7 @@ export type Subject =
     | 'PurchaseOrder'
     | 'Transfer'
     | 'Sale'
-    // Phase 7c (D-109): the public site's content.
+    // The public site's content.
     | 'Website'
     | 'all';
 

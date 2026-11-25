@@ -1,7 +1,7 @@
 /**
  * Shape of the build-time brand config. The VALUES live in one file: `src/app/config/tenant.ts`.
  *
- * FitManager ships one brand (D-001). A second brand would swap that file with `fileReplacements`.
+ * FitManager ships one brand. A second brand would swap that file with `fileReplacements`.
  *
  * Text in the landing content may contain `{brand}`; it is replaced with `brand.name`.
  */
@@ -61,7 +61,7 @@ export interface ThemeConfig {
 
 // ───────────── Landing page ─────────────
 
-/** Landing page sections the templates can render. The database's `site_group` keys match these (D-040). */
+/** Landing page sections the templates can render. The database's `site_group` keys match these. */
 export const SECTION_IDS = ['hero', 'stats', 'services', 'plans', 'facilities', 'reviews', 'trainers', 'blog', 'branches', 'gallery', 'faq'] as const;
 export type SectionId = (typeof SECTION_IDS)[number];
 
@@ -96,7 +96,7 @@ export interface PageConfig extends Heading {
 
 export interface LandingConfig {
     /**
-     * The fallback list of sections, in order, for when the database's switches (D-040) are not available: a
+     * The fallback list of sections, in order, for when the database's switches are not available: a
      * prerender without an API. Normally HQ switches sections on and off at /hq/settings.
      */
     sections: SectionId[];

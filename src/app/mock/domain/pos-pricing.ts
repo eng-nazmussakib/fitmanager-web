@@ -1,9 +1,9 @@
 /**
- * POS pricing (phase 6, D-102): pure functions, copied from the API's (fitmanager-api
+ * POS pricing: pure functions, copied from the API's (fitmanager-api
  * src/features/pos/pos-pricing.ts), with the same cases in pos-pricing.spec.ts: keep them in step. Whole taka, rounded once per line.
  *
  * Each line: gross = unit price × quantity; less the line discount (a branch manager's, with a reason); VAT at the
- * product's own rate (or the HQ rate), worked out on the line as plans do (pricing.ts, D-057):
+ * product's own rate (or the HQ rate), worked out on the line as plans do (pricing.ts):
  * - exclusive: VAT = round(net × rate), added: line total = net + VAT;
  * - inclusive: the price already has VAT in it: line total = net, VAT = round(net × rate ÷ (1 + rate)).
  * The invoice adds the lines up. A return gives back a share of a line's total (`returnAmount`), so returning
@@ -76,7 +76,7 @@ export function returnAmount(line: Pick<PosLine, 'qty' | 'total'>, before: numbe
 }
 
 /**
- * Weighted average cost (D-101) after `qty` units come in at `unitCost`, to whole paisa. Units going out leave the
+ * Weighted average cost after `qty` units come in at `unitCost`, to whole paisa. Units going out leave the
  * average where it is.
  */
 export function averageCost(onHand: number, avgCost: number, qty: number, unitCost: number): number {

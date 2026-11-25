@@ -23,7 +23,7 @@ export interface PostDialogData {
 type When = 'draft' | 'now' | 'later';
 
 /**
- * HQ writes a blog post (D-109): Markdown with a live preview (the same renderer as the public page, which escapes any
+ * HQ writes a blog post: Markdown with a live preview (the same renderer as the public page, which escapes any
  * HTML typed), a cover shrunk in the browser, a category, and when it goes live: a draft, now, or a date (scheduled).
  */
 @Component({

@@ -1,7 +1,7 @@
 import type { BranchKind, StaffRole } from '@core/models/branch.model';
 
 /**
- * Who may manage which staff (D-055). The SAME rules as the API's `src/features/staff/staff.policy.ts`; change both
+ * Who may manage which staff. The SAME rules as the API's `src/features/staff/staff.policy.ts`; change both
  * together.
  * - OWNER at HQ: every role, every branch.
  * - HQ_ADMIN at HQ: branch roles at any branch; never OWNER or HQ_ADMIN.

@@ -3,7 +3,7 @@ import type { StaffRole } from '@core/models/branch.model';
 
 import { ROLE_RULES } from './staff.seed';
 
-/** Only HQ changes the plans a branch sells (D-044). Mirrors migration 004 in fitmanager-infra/db. */
+/** Only HQ changes the plans a branch sells. Mirrors migration 004 in fitmanager-infra/db. */
 describe('who may change branch plans', () => {
     it.each<[StaffRole, boolean]>([
         ['OWNER', true],

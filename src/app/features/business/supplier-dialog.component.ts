@@ -11,7 +11,7 @@ import { SwitchComponent } from '@shared/ui/forms/switch.component';
 
 import { BusinessService } from './business.service';
 
-/** HQ adds or edits a supplier (D-099): who to call, and notes on how they deliver. */
+/** HQ adds or edits a supplier: who to call, and notes on how they deliver. */
 @Component({
     selector: 'app-supplier-dialog',
     imports: [FormsModule, ButtonComponent, DialogShellComponent, DialogFooterDirective, AlertComponent, FieldComponent, InputDirective, SwitchComponent],

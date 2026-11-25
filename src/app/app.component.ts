@@ -23,8 +23,8 @@ import { ToastHostComponent } from '@shared/ui/toast/toast-host.component';
 })
 export class AppComponent {
     private readonly _auth = inject(AuthService);
-    /** The showcase build (phase 0.5): a banner on every page. */
+    /** The showcase build: a banner on every page. */
     protected readonly demo = environment.demo;
-    /** Signed in as a shared guest account of the hosted demo (D-076). */
+    /** Signed in as a shared guest account of the hosted demo. */
     protected readonly guest = computed(() => !!this._auth.user()?.guest);
 }

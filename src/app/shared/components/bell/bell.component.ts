@@ -6,7 +6,7 @@ import { ButtonComponent } from '@shared/ui/button/button.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 /**
- * The bell in the console and portal top bars (phase 7b, D-108): a link to the messages page with the unread count.
+ * The bell in the console and portal top bars: a link to the messages page with the unread count.
  * The layout calls `BellService.refresh()` when a page opens; the badge is the service's number.
  */
 @Component({

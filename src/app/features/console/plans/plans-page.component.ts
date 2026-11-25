@@ -8,7 +8,7 @@ import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/dis
 
 import { ConsoleService } from '../console.service';
 
-/** The plans this branch sells: HQ templates at the branch's prices (editing comes with the plans module, phase 2). */
+/** The plans this branch sells: HQ templates at the branch's prices (only HQ edits plans). */
 @Component({
     selector: 'app-branch-plans-page',
     imports: [PageHeaderComponent, TakaPipe, BadgeComponent, CardComponent, SkeletonComponent],

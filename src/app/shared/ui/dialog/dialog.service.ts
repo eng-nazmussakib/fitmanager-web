@@ -72,7 +72,7 @@ export class DialogHostComponent {
 
 /**
  * Opens a component in a modal native `<dialog>` (`showModal()`: focus trap, Esc, inert page and top layer for free).
- * Replaces NzModalService (D-007).
+ * Replaces NzModalService.
  *
  *   const ref = inject(DialogService).open(FreezeDialogComponent, { data: { member }, size: 'sm' });
  *   ref.afterClosed.subscribe(result => …);

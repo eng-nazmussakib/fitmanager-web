@@ -25,7 +25,7 @@ import type {
 } from '@core/models/governance.model';
 
 /**
- * The phase 5 calls (D-090 to D-097): policies, discipline, complaints, NPS and ratings, for the consoles (the branch or
+ * The governance calls: policies, discipline, complaints, NPS and ratings, for the consoles (the branch or
  * HQ in `X-Branch-Id`) and the member portal (`/v1/me/*`).
  */
 @Injectable({ providedIn: 'root' })

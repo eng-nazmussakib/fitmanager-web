@@ -22,7 +22,7 @@ export function accountFromToken(header: string | null): ReturnType<typeof db>['
     const [prefix, username, issuedAt] = token.split(':');
     if (prefix !== 'mock' || Date.now() - Number(issuedAt) > ACCESS_TTL_MS) return null;
     // A deactivated account's token stops working at once, as the API's profile check does.
-    // So does a suspended staff member's (D-093).
+    // So does a suspended staff member's.
     const account = db().accounts.find(a => a.username === username && a.status !== 'Inactive') ?? null;
     return account && staffSuspendedUntil(account.username, dhakaNow().date) ? null : account;
 }

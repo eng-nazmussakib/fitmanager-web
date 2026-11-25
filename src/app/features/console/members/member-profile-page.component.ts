@@ -256,7 +256,7 @@ const TIMELINE_ICON: Record<string, IconName> = {
                             </dl>
                         </fm-card>
                         @if (pt.value(); as p) {
-                            <fm-card subtitle="Personal training (D-079)" title="PT">
+                            <fm-card subtitle="Personal training" title="PT">
                                 <ul class="grid gap-2 text-sm">
                                     @for (k of p.packages; track k.oid) {
                                         <li class="flex justify-between gap-2">
@@ -707,7 +707,7 @@ export class MemberProfilePageComponent {
     protected readonly payMethod = signal<PaymentMethod>('cash');
     protected readonly payRef = signal('');
     protected readonly payAmount = signal<number | null>(null);
-    /** HQ's freeze rule (D-063, D-067 e): the dialog shows it and the API enforces it. */
+    /** HQ's freeze rule: the dialog shows it and the API enforces it. */
     protected readonly rules = rxResource({ stream: () => this._service.rules() });
     private readonly _scheduling = inject(SchedulingService);
     private readonly _trainers = rxResource({ stream: () => (this.auth.can('update', 'Member') ? this._scheduling.trainers() : of([])) });
@@ -786,7 +786,7 @@ export class MemberProfilePageComponent {
     }
 
     /**
-     * Sending a message by hand (D-075: no SMS or email provider): open the staff member's own SMS or email app
+     * Sending a message by hand (no SMS or email provider): open the staff member's own SMS or email app
      * with the text filled in, or copy it for WhatsApp or anything else.
      */
     protected smsLink(phone: string, body: string): string {

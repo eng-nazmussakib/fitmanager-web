@@ -27,7 +27,7 @@ const ICONS: Record<MemberNotificationKind, IconName> = {
 };
 
 /**
- * `/me/messages` (phase 7b, D-108): the member's messages, newest first. Opening the page marks them read (the ones
+ * `/me/messages`: the member's messages, newest first. Opening the page marks them read (the ones
  * new at that moment keep a "New" mark until the next visit).
  */
 @Component({

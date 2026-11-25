@@ -12,7 +12,7 @@ import { FieldComponent, InputDirective } from '@shared/ui/forms/field.component
 import { GovernanceService } from './governance.service';
 
 /**
- * The next step on a case (D-092, D-093): the levels the caller may give, the suggested one first (from the strikes in
+ * The next step on a case: the levels the caller may give, the suggested one first (from the strikes in
  * 12 months), a reason the person will read, a reason for choosing another step, the dates of a suspension and the
  * reach of a ban, with what each does said up front.
  */

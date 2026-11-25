@@ -12,8 +12,8 @@ import { idx, memberState } from '../queries';
 import { addDaysIso, dateOf } from '../seed/clock';
 import { toRef } from '../seed/organisation.seed';
 import { commit, db, newOid } from '../store';
+import { staffTakings } from './core.handlers';
 import { branchMember } from './members.handlers';
-import { staffTakings } from './phase2.handlers';
 
 const METHODS: PaymentMethod[] = ['cash', 'card', 'bkash', 'nagad', 'bank'];
 
@@ -102,7 +102,7 @@ function createSale(ctx: Ctx): HttpResponse<unknown> {
     if (!METHODS.includes(method)) fail(400, 'Choose a payment method.');
     if (amount < 0 || amount > q.total) fail(400, `The payment must be between ৳0 and ৳${q.total.toLocaleString('en-IN')}.`);
     if (amount > 0 && METHODS_NEEDING_REFERENCE.includes(method) && !str(pay?.reference)) fail(400, 'Enter the transaction reference for this payment method.');
-    // Memberships may not overlap; a PT package runs next to one, and only with one (D-079).
+    // Memberships may not overlap; a PT package runs next to one, and only with one.
     const memberships = idx().subs.get(member.oid) ?? [];
     if (plan.kind === 'pt' && !memberships.some(s => !s.cancelled_at && s.end_date >= sale.start_date))
         fail(409, 'A PT package goes with a membership. Sell the membership first.');
@@ -182,7 +182,7 @@ function freeze(ctx: Ctx): HttpResponse<unknown> {
     const from = str(ctx.body['from']) || ctx.now.date;
     const days = Math.round(num(ctx.body['days']));
     const reason = str(ctx.body['reason']);
-    // The rule is HQ's (D-063, D-067 e): the range and count from the settings, `freezable` from the plan's template.
+    // The rule is HQ's: the range and count from the settings, `freezable` from the plan's template.
     const { freeze_min_days: min, freeze_max_days: max, freeze_max_count: count } = db().settings;
     const plan = db().plans.find(p => p.oid === sub.plan_oid);
     if (plan && !plan.freezable) fail(409, 'This plan cannot be frozen.');
@@ -235,7 +235,7 @@ function cashClosing(ctx: Ctx): HttpResponse<unknown> {
         if (inv.branch.oid !== ctx.branch!.oid) continue;
         if (dateOf(inv.issued_at) === today) {
             invoicesToday++;
-            // POS sales (D-102) are counted on their own, not as renewals.
+            // POS sales are counted on their own, not as renewals.
             if (inv.kind === 'pos') posSales++;
             else if (inv.lines.some(l => l.label === 'Admission fee')) newMembers++;
             else renewals++;

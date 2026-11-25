@@ -23,7 +23,7 @@ export interface NewStaff {
 }
 
 /**
- * The staff API (D-054, D-055) at either level: `/v1/hq/staff` in the HQ console, `/v1/branch/staff` in a branch
+ * The staff API at either level: `/v1/hq/staff` in the HQ console, `/v1/branch/staff` in a branch
  * console (`X-Branch-Id` comes from the URL, branch-header interceptor). Messages are toasted by notifyInterceptor.
  */
 @Injectable({ providedIn: 'root' })

@@ -146,7 +146,7 @@ export class InvoiceViewComponent {
 
     readonly invoice = input.required<Invoice>();
     readonly actions = input(true);
-    /** A POS sale (D-102): each line has its own VAT rate (bottled water 5 %), shown on the line. */
+    /** A POS sale: each line has its own VAT rate (bottled water 5 %), shown on the line. */
     protected readonly pos = computed(() => this.invoice().kind === 'pos');
 
     protected readonly brand = TENANT.brand.name;

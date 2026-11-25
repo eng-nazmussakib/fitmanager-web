@@ -25,7 +25,7 @@ import { AdjustDialogComponent } from './adjust-dialog.component';
 import { BusinessService } from './business.service';
 
 /**
- * A branch's stock (D-101): every product with what is on hand, its reorder level and a "low" badge at or below it,
+ * A branch's stock: every product with what is on hand, its reorder level and a "low" badge at or below it,
  * what is on order and in transit; costs for the branch manager only. A product's ledger shows every move with the
  * running balance; the manager adjusts and sets the reorder level there.
  */
@@ -208,7 +208,7 @@ export class StockLevelsComponent {
         if (o) this.show(o.product);
     }
 
-    /** The stock as Excel or PDF, with the same filters (D-107; costs only for those who see them). */
+    /** The stock as Excel or PDF, with the same filters (costs only for those who see them). */
     protected async exportStock(format: ExportFormat): Promise<void> {
         this.exporting.set(true);
         try {

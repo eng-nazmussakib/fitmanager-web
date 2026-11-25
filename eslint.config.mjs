@@ -37,14 +37,14 @@ export default defineConfig(
             // `fm` for the design system (src/app/shared/ui), `app` for everything else.
             '@angular-eslint/directive-selector': ['error', { type: 'attribute', prefix: ['app', 'fm'], style: 'camelCase' }],
             '@angular-eslint/component-selector': ['error', { type: 'element', prefix: ['app', 'fm'], style: 'kebab-case' }],
-            // No UI component libraries and no CDK (D-007): build it in src/app/shared/ui instead.
+            // No UI component libraries and no CDK: build it in src/app/shared/ui instead.
             'no-restricted-imports': [
                 'error',
                 {
                     patterns: [
-                        { group: ['ng-zorro-antd', 'ng-zorro-antd/*'], message: 'No UI component libraries (D-007): use the fm-* kit in @shared/ui.' },
-                        { group: ['@ant-design/*'], message: 'No UI component libraries (D-007): use the fm-* kit in @shared/ui.' },
-                        { group: ['@angular/cdk', '@angular/cdk/*'], message: 'No @angular/cdk (D-007): use the utilities in @shared/ui.' }
+                        { group: ['ng-zorro-antd', 'ng-zorro-antd/*'], message: 'No UI component libraries: use the fm-* kit in @shared/ui.' },
+                        { group: ['@ant-design/*'], message: 'No UI component libraries: use the fm-* kit in @shared/ui.' },
+                        { group: ['@angular/cdk', '@angular/cdk/*'], message: 'No @angular/cdk: use the utilities in @shared/ui.' }
                     ]
                 }
             ],

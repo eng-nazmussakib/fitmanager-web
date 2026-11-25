@@ -1,6 +1,6 @@
 import type { MemberStatus } from './member.model';
 
-/** No 'branch' rule: a member trains at every branch (D-059). */
+/** No 'branch' rule: a member trains at every branch. */
 export type AccessRuleId = 'membership' | 'expired' | 'frozen' | 'suspended' | 'banned' | 'dues' | 'policy' | 'hours' | 'already_in' | 'pending';
 
 /** One failed rule, with the reason shown to the front desk. */
@@ -15,7 +15,7 @@ export interface RuleFailure {
 export interface AccessDecision {
     allowed: boolean;
     failures: RuleFailure[];
-    /** Required policies due but not blocking yet (D-091): ask the member to sign. */
+    /** Required policies due but not blocking yet: ask the member to sign. */
     policies_due?: { title: string; blocks_on: string }[];
     member: {
         oid: string;
@@ -27,7 +27,7 @@ export interface AccessDecision {
         valid_until: string | null;
         days_left: number | null;
         dues: number;
-        /** Another branch's member (D-059): the plan and dues stay with their home branch. */
+        /** Another branch's member: the plan and dues stay with their home branch. */
         visitor?: boolean;
         home_branch_name?: string;
     };
@@ -45,10 +45,10 @@ export interface CheckIn {
     checked_out_at: string | null;
     override: { reason: string; by: string } | null;
     by: string;
-    /** A visitor from another branch (D-066), and their home branch. */
+    /** A visitor from another branch, and their home branch. */
     visitor?: boolean;
     home_branch_name?: string;
-    /** Closed automatically at closing time (D-070 a, D-075). */
+    /** Closed automatically at closing time. */
     auto_out?: boolean;
     backdated?: boolean;
 }
@@ -56,7 +56,7 @@ export interface CheckIn {
 /** `POST /v1/attendance/check-in`. */
 export interface CheckInRequest {
     member_oid?: string;
-    /** The scanned code: any branch's member (D-059). */
+    /** The scanned code: any branch's member. */
     code?: string;
     override?: { reason: string } | null;
 }

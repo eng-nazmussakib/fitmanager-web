@@ -12,7 +12,7 @@ const ALL = ['br-gul', 'br-dha', 'br-utt'];
 const last = (days: number) => ({ from: addDaysIso(today, -(days - 1)), to: today });
 const kpi = (r: ReturnType<typeof mockReport>, key: string) => r.kpis.find(k => k.key === key);
 
-/** D-106 in demo mode: the API's report definitions over the mock's data, with three months of history (D-111). */
+/** Reports in demo mode: the API's report definitions over the mock's data, with three months of history. */
 describe('the reports in demo mode', () => {
     it('answers every report at a branch and across the branches', () => {
         for (const { key } of REPORTS) {

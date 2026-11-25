@@ -107,7 +107,7 @@ export class PlansPageComponent {
     private readonly _site = inject(PublicSiteService);
 
     protected readonly periods = this._site.c.plans.periods;
-    /** Branch pages can be switched off (D-040); then branch names are plain text. */
+    /** Branch pages can be switched off; then branch names are plain text. */
     protected readonly branchPages = computed(() => this._site.pageEnabled('branches'));
     protected readonly tiers = this._site.plans;
     protected readonly period = signal(this.periods[0]?.id ?? 'monthly');

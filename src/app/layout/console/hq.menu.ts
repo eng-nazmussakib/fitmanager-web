@@ -1,6 +1,6 @@
 import type { MenuGroup } from '@core/models/menu.model';
 
-/** HQ console menu (`/hq/…`). HQ is the `kind = 'HQ'` branch row (D-023), so the same `can` checks apply. */
+/** HQ console menu (`/hq/…`). HQ is the `kind = 'HQ'` branch row, so the same `can` checks apply. */
 export const HQ_MENU: MenuGroup[] = [
     {
         group: 'Overview',

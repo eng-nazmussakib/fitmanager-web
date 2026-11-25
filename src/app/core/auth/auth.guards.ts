@@ -20,7 +20,7 @@ export const authGuard: CanMatchFn = (_route, segments) => {
     const router = inject(Router);
     const returnUrl = '/' + segments.map(s => s.path).join('/');
     const toLogin = router.createUrlTree([APP.LOGIN_ROUTE], { queryParams: { returnUrl } });
-    // A temporary password (D-054): the password page first; the API refuses everything else until then.
+    // A temporary password: the password page first; the API refuses everything else until then.
     const passwordFirst = (): true | UrlTree =>
         auth.user()?.must_change_password && returnUrl !== APP.PASSWORD_ROUTE
             ? router.createUrlTree([APP.PASSWORD_ROUTE], { queryParams: { returnUrl } })

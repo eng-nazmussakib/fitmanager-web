@@ -1,5 +1,5 @@
 /**
- * The discipline ladder (phase 5, D-092): `Warning → Written → Suspension → Ban`, and who may give each step. Pure
+ * The discipline ladder: `Warning → Written → Suspension → Ban`, and who may give each step. Pure
  * functions, copied from the API's (fitmanager-api src/features/discipline/ladder.ts), with the same cases in
  * ladder.spec.ts: keep them in step.
  *
@@ -19,7 +19,7 @@ export type GiverRole = 'desk' | 'trainer' | 'manager' | 'hq';
 
 /** Strikes count back this many days (12 months). */
 export const STRIKE_DAYS = 365;
-/** An appeal is filed within this many days of the sanction (D-094). */
+/** An appeal is filed within this many days of the sanction. */
 export const APPEAL_DAYS = 7;
 /** The longest suspension, and how far ahead one may start. */
 export const MAX_SUSPENSION_DAYS = 90;
@@ -64,7 +64,7 @@ export function banScopes(role: GiverRole): ('branch' | 'all')[] {
     return role === 'hq' ? ['branch', 'all'] : role === 'manager' ? ['branch'] : [];
 }
 
-/** May this caller decide an appeal? Not the person who gave the sanction; HQ only for a ban (D-094). */
+/** May this caller decide an appeal? Not the person who gave the sanction; HQ only for a ban. */
 export function mayDecideAppeal(role: GiverRole, s: { level: Level; given_by: string | null; hq_only: boolean }, callerOid: string): boolean {
     if (s.given_by === callerOid) return false;
     if (role === 'hq') return true;

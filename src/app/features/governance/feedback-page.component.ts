@@ -14,9 +14,9 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { GovernanceService } from './governance.service';
 
 /**
- * `/console/:branch/feedback` and `/hq/feedback` (D-096): the NPS (promoters minus detractors), the answers with names
+ * `/console/:branch/feedback` and `/hq/feedback`: the NPS (promoters minus detractors), the answers with names
  * and comments, each trainer's class and PT averages, and the ratings. A trainer sees their own averages only. Trends
- * and comparisons between branches are phase 7 reports.
+ * and comparisons between branches are in the reports.
  */
 @Component({
     selector: 'app-feedback-page',

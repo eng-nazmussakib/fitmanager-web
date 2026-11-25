@@ -1,4 +1,4 @@
-/** The public website's content (phase 7c, D-109): the wire contract of `/v1/public/*` and `/v1/website/*`. */
+/** The public website's content: the wire contract of `/v1/public/*` and `/v1/website/*`. */
 
 export interface SiteImage {
     src: string;

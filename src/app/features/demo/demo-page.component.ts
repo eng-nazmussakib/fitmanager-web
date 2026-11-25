@@ -12,10 +12,10 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { type DemoAccount, DemoAccountsService } from './demo-accounts';
 
 /**
- * `/demo`: the showcase entry (phase 0.5). One click signs in as a demo role and lands on that role's home
+ * `/demo`: the showcase entry. One click signs in as a demo role and lands on that role's home
  * (owner → HQ dashboard, manager → Gulshan dashboard, front desk → check-in, trainer → classes, member → portal).
  * Mock builds sign in with the mock's demo passwords; the hosted demo as the API's shared guest accounts, without a
- * password (D-076).
+ * password.
  */
 @Component({
     selector: 'app-demo-page',

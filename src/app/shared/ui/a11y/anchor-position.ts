@@ -13,7 +13,7 @@ const MARGIN = 8;
 
 /**
  * Positions `floating` (a `position: fixed` popover in the top layer) next to `anchor`, flips it to the other side
- * when it does not fit, and keeps it inside the viewport. Replaces @angular/cdk/overlay (D-007). CSS anchor
+ * when it does not fit, and keeps it inside the viewport. Replaces @angular/cdk/overlay. CSS anchor
  * positioning would do this natively, but it is not in every supported browser yet, so one code path for all.
  *
  * Returns a cleanup function: the position follows scrolling and resizing until it is called. Browser-only: call

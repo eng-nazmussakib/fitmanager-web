@@ -10,7 +10,7 @@ import { StockLevelsComponent } from './stock-levels.component';
 import { TransfersComponent } from './transfers.component';
 
 /**
- * `/console/:branch/stock` (D-100, D-101): the branch's stock and ledger, its purchase orders and its transfers. HQ's
+ * `/console/:branch/stock`: the branch's stock and ledger, its purchase orders and its transfers. HQ's
  * purchase orders page (`/hq/purchase-orders`) is the same orders panel with `hq`.
  */
 const TABS = ['stock', 'orders', 'transfers'] as const;
@@ -47,7 +47,7 @@ export class StockPageComponent {
     protected readonly auth = inject(AuthService);
     private readonly _route = inject(ActivatedRoute).snapshot;
     protected readonly hq = this._route.data['hq'] === true;
-    /** `?tab=orders` / `?tab=transfers` open those tabs (the inbox's links, D-108). */
+    /** `?tab=orders` / `?tab=transfers` open those tabs (the inbox's links). */
     protected readonly tab = signal<string>(TABS.find(t => t === this._route.queryParamMap.get('tab')) ?? 'stock');
     private readonly _orders = viewChild(PurchaseOrdersComponent);
 

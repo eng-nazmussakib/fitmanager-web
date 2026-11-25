@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { expect, freshDemo, test } from './fixtures';
 
-/** The phase 0.5 demo script, end to end on the mock API (docs/demo-script.md). */
+/** The demo script, end to end on the mock API (docs/demo-script.md). */
 test.describe('Showcase script', () => {
     test.beforeEach(async ({ page }) => {
         // Check-in follows opening hours (closed after 11 PM, Fridays until 3 PM): pin the clock to 4 PM in Dhaka

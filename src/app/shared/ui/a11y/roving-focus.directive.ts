@@ -4,7 +4,7 @@ import { booleanAttribute, Directive, ElementRef, inject, input } from '@angular
  * Arrow-key navigation between the items of a composite widget (menus, tabs, listboxes, toolbars), following the
  * WAI-ARIA "roving tabindex" pattern: only one item is in the Tab order, the arrows move between them, Home and End
  * jump to the ends, and typing a letter jumps to the next item starting with it. Replaces @angular/cdk/a11y
- * ListKeyManager (D-007).
+ * ListKeyManager.
  *
  *   <div role="tablist" fmRovingFocus orientation="horizontal" itemSelector="[role=tab]">…</div>
  *

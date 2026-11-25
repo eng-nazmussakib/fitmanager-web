@@ -9,8 +9,8 @@ import { idx, listItem, memberDetail, memberState } from '../queries';
 import { addDaysIso, dateOf, timeOf } from '../seed/clock';
 import { commit, db, newOid } from '../store';
 import type { MemberRow } from '../types';
+import { photoUrl } from './core.handlers';
 import { acceptAllOnPaper } from './governance.handlers';
-import { photoUrl } from './phase2.handlers';
 
 /** A member of the request's branch, or 404 (never another branch's: tenancy). */
 export function branchMember(ctx: Ctx, oid: string): MemberRow {
@@ -87,7 +87,7 @@ function validate(body: Record<string, unknown>, partial: boolean): Partial<Memb
     return out;
 }
 
-/** `photo_file_oid` from an upload (D-058) → the photo's link; `null` removes the photo. */
+/** `photo_file_oid` from an upload → the photo's link; `null` removes the photo. */
 function photoOf(ctx: Ctx): Partial<MemberRow> {
     if (!('photo_file_oid' in ctx.body)) return {};
     const oid = str(ctx.body['photo_file_oid']);
@@ -98,7 +98,7 @@ function create(ctx: Ctx): HttpResponse<unknown> {
     const fields = { ...validate(ctx.body, false), ...photoOf(ctx) };
     if (!fields.health_declared) fail(400, 'The member must sign the health declaration.');
     const d = db();
-    // One mobile number, one member, across every branch (D-068 a).
+    // One mobile number, one member, across every branch.
     if (d.members.some(m => m.phone === fields.phone)) fail(409, 'This mobile number already belongs to a member (at this or another branch).');
     const code = ctx.branch!.code;
     const seq = (d.counters[`member:${code}`] ?? 0) + 1;
@@ -117,7 +117,7 @@ function create(ctx: Ctx): HttpResponse<unknown> {
         health_declared: true,
         photo_url: fields.photo_url ?? null,
         joined_on: ctx.now.date,
-        // No subscription yet: the membership starts with the first payment (D-022).
+        // No subscription yet: the membership starts with the first payment.
         pending: true,
         trainer_oid: null,
         notes: null,
@@ -126,7 +126,7 @@ function create(ctx: Ctx): HttpResponse<unknown> {
     };
     commit({ t: 'member.create', row, seq });
     recordAudit(ctx, 'create', 'member', row.code, null, { name: row.name });
-    // Signed the policies on paper at the desk (D-090): recorded as accepted.
+    // Signed the policies on paper at the desk: recorded as accepted.
     if (ctx.body['policies_signed'] === true) acceptAllOnPaper(ctx, row);
     return ok(memberDetail(row, ctx.now.date), `Member ${row.code} created`);
 }
@@ -190,7 +190,7 @@ function timeline(ctx: Ctx): HttpResponse<unknown> {
             detail: c.out_at ? `${clock12(timeOf(c.in_at))} to ${clock12(timeOf(c.out_at))}` : `${clock12(timeOf(c.in_at))}, still inside`,
             by: c.by
         });
-    // Sanctions (D-093) and policy acceptances (D-090), as the API's timeline lists them.
+    // Sanctions and policy acceptances, as the API's timeline lists them.
     const LEVEL = { verbal: 'Verbal warning', written: 'Written warning', suspension: 'Suspended', ban: 'Banned' } as const;
     for (const x of (d.sanctions ?? []).filter(s => s.member_oid === m.oid)) {
         const where = d.branches.find(b => b.oid === x.branch_oid)?.name ?? '';

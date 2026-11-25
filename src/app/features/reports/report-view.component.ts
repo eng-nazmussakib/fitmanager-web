@@ -43,8 +43,8 @@ export function change(k: ReportKpi): { text: string; up: boolean } | null {
 }
 
 /**
- * One report (D-106), whatever its key: the KPI tiles (with the previous period and, at HQ, each branch), its
- * charts (ApexCharts, loaded in the browser) and its tables, each with Excel and PDF export (D-107). Every chart
+ * One report, whatever its key: the KPI tiles (with the previous period and, at HQ, each branch), its
+ * charts (ApexCharts, loaded in the browser) and its tables, each with Excel and PDF export. Every chart
  * has its numbers in a table nearby.
  */
 @Component({

@@ -16,7 +16,7 @@ export interface StaffAssignment {
 
 /**
  * `GET /v1/auth/me`. Staff get one assignment per branch they work at (an HQ assignment covers HQ screens and,
- * with `all_branches`, every branch). Members get `member` (their one branch, D-003) and portal rules.
+ * with `all_branches`, every branch). Members get `member` (their one branch) and portal rules.
  *
  * The ability in the UI = `rules` (global) + the active branch's assignment rules (AuthService). The API checks the
  * same rules against `X-Branch-Id` on every request; the UI check is only a convenience.
@@ -34,9 +34,9 @@ export interface CurrentUser {
     assignments: StaffAssignment[];
     /** HQ staff (owner): every branch is reachable, with the role of the HQ assignment. */
     all_branches: boolean;
-    /** A temporary password is set (D-054): every screen except the password page is closed until it is changed. */
+    /** A temporary password is set: every screen except the password page is closed until it is changed. */
     must_change_password?: boolean;
-    /** A shared guest account of the hosted demo (D-076): its password and sessions cannot be changed. */
+    /** A shared guest account of the hosted demo: its password and sessions cannot be changed. */
     guest?: boolean;
     /** Members only. */
     member?: { oid: string; code: string; branch: BranchRef } | null;

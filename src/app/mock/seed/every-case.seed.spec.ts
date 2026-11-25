@@ -1,7 +1,7 @@
 import { addDaysIso } from './clock';
 import { seed } from './seed';
 
-/** D-072: the demo has one record for every phase 2 case, the same list as the database's showcase seed. */
+/** The demo has one record for every membership and sales case, the same list as the database's showcase seed. */
 describe('every case in the demo data', () => {
     const today = '2026-11-19';
     const db = seed(today, 12 * 60);

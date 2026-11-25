@@ -32,7 +32,7 @@ const STATUS: Record<PostStatus, { label: string; tone: 'success' | 'info' | 'ne
 };
 
 /**
- * `/hq/website` and `/console/:branch/website` (phase 7c, D-109): the public site's content.
+ * `/hq/website` and `/console/:branch/website`: the public site's content.
  * - HQ: the blog, the offers, every branch's photos and text. The public pages are prerendered at each deploy, so
  *   new content is in the built pages (and the sitemap) from the next deploy; in the browser they read it live.
  * - A branch manager: their branch's photos and the text on its page.

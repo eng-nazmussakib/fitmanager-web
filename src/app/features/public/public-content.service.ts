@@ -17,7 +17,7 @@ import { environment } from '@env/environment';
 
 import { slug } from './public-site.service';
 
-/** A branch's public page: its profile, trainers, and (phase 7c, D-109) its description and photos. */
+/** A branch's public page: its profile, trainers, and its description and photos. */
 export type PublicBranch = Branch & { trainers: Trainer[]; photos?: GalleryPhoto[] };
 export interface BranchPlans {
     branch: BranchRef;
@@ -37,7 +37,7 @@ export function vatNote(rate: number | undefined, inclusive = false): string {
 const quiet = (): HttpContext => new HttpContext().set(SKIP_AUTH, true).set(NOTIFY, 'none');
 
 /**
- * Where the API is while PRERENDERING (phase 7c, D-109, item 22 b): the build reads the website's content from the
+ * Where the API is while PRERENDERING: the build reads the website's content from the
  * live API (`https://<site>/api`), so the prerendered pages carry the database's posts, offers and photos. Provided by
  * the server config only (`SITE_API_ORIGIN`, default the site's own URL); in the browser the relative `/api` is used.
  */
@@ -46,8 +46,8 @@ export const PRERENDER_API_ORIGIN = new InjectionToken<string>('PRERENDER_API_OR
 /**
  * Data for the public gym pages from the public API (`/v1/public/*`), with the brand config as the fallback.
  *
- * Pages are prerendered at build time (Cloudflare, D-026). The demo build answers from the mock; a production build
- * before the API exists (phase 2) has nothing to call, so the pages fall back to the config's branches and plan
+ * Pages are prerendered at build time (Cloudflare). The demo build answers from the mock; a production build
+ * without an API has nothing to call, so the pages fall back to the config's branches and plan
  * prices and still render complete, indexable HTML. The transfer cache hands prerendered responses to the browser.
  */
 @Injectable({ providedIn: 'root' })
@@ -62,7 +62,7 @@ export class PublicContentService {
     private readonly _api = isPlatformBrowser(inject(PLATFORM_ID)) || environment.useMockApi || !!this._origin;
 
     /**
-     * The site groups' section and page switches HQ sets (D-040), or null when there is no API to ask or it does not
+     * The site groups' section and page switches HQ sets, or null when there is no API to ask or it does not
      * answer: the site then keeps the brand config's sections and every page. One request per app instance (the
      * public layout and the page guards share it).
      */
@@ -105,7 +105,7 @@ export class PublicContentService {
         );
     }
 
-    /** The public trainers (D-078), or null when there is no API to ask: the page keeps the brand config's. */
+    /** The public trainers, or null when there is no API to ask: the page keeps the brand config's. */
     trainers(branchSlug = ''): Observable<Trainer[] | null> {
         if (!this._api) return of(null);
         return this._http.get<ApiResponse<Trainer[]>>(`${this._base}/trainers`, { params: branchSlug ? { branch: branchSlug } : {}, context: quiet() }).pipe(
@@ -125,7 +125,7 @@ export class PublicContentService {
         );
     }
 
-    /** HQ's public policies (D-090), for `/policies`; empty without an API. */
+    /** HQ's public policies, for `/policies`; empty without an API. */
     policies(): Observable<PublicPolicySummary[]> {
         if (!this._api) return of([]);
         return this._http.get<ApiResponse<PublicPolicySummary[]>>(`${this._base}/policies`, { context: quiet() }).pipe(
@@ -145,7 +145,7 @@ export class PublicContentService {
         );
     }
 
-    /* ---------- the website's content (phase 7c, D-109); null when there is no API: the pages keep the config's ---------- */
+    /* ---------- the website's content; null when there is no API: the pages keep the config's ---------- */
 
     posts(): Observable<BlogPost[] | null> {
         return this._get<BlogPost[]>('posts');

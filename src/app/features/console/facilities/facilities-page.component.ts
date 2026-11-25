@@ -32,7 +32,7 @@ const STATUS_TONE: Record<Locker['status'], 'success' | 'primary' | 'warning' | 
 };
 
 /**
- * `/console/:branch/facilities` (D-082): lockers (rent one on its own invoice, take the key back), rooms (where
+ * `/console/:branch/facilities`: lockers (rent one on its own invoice, take the key back), rooms (where
  * classes and PT happen) and maintenance blocks on either. A blocked room takes no new classes; the classes already
  * in it are listed for the manager to move or cancel.
  */

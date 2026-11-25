@@ -5,7 +5,7 @@ const today = '2026-11-19';
 const db = seed(today, 12 * 60);
 const now = new Date(at(today, 12 * 60)).getTime();
 
-/** Phase 7c (D-109), as seed 109: every case of the website's content is in the demo data. */
+/** As seed 109: every case of the website's content is in the demo data. */
 describe('the website in the demo data', () => {
     it('posts: five published, a draft, one scheduled and one deleted, each with a category and a cover', () => {
         const live = db.posts.filter(p => !p.deleted_at && p.published_at && new Date(p.published_at).getTime() <= now);

@@ -5,7 +5,7 @@ import { addDaysIso } from './clock';
 import { POLICY_CLAUSE_SEED, POLICY_SEED, POLICY_VERSION_SEED } from './policies.data';
 
 /**
- * Phase 5 in demo mode (D-072, D-090 to D-097): the policies (the demo seed 007's, plus gym rules v2) and one record for
+ * Governance in demo mode: the policies (the demo seed 007's, plus gym rules v2) and one record for
  * every governance case, on the mock's own members, the same cases as fitmanager-infra/db/seeds/showcase/105:
  *
  * - Policies: everyone signed the policies in force on paper when they joined, and gym rules v2 since, but for one
@@ -181,7 +181,7 @@ function appeal(s: SanctionRow, body: string, on: string, by: string, decided?: 
     if (decided?.status === 'upheld') s.overturned_at = at(decided.on, '12:00');
 }
 
-/** A ban covering the home branch cancels the membership (D-093), as the API does. */
+/** A ban covering the home branch cancels the membership, as the API does. */
 function cancelMembership(db: MockDb, m: MemberRow, on: string, reason: string): boolean {
     let any = false;
     for (const s of db.subscriptions.filter(x => x.member_oid === m.oid && x.kind !== 'pt' && !x.cancelled_at && x.end_date >= on)) {

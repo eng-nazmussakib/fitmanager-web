@@ -8,11 +8,11 @@ import { ATTENDANCE_ROUTES } from './handlers/attendance.handlers';
 import { accountFromToken, AUTH_ROUTES } from './handlers/auth.handlers';
 import { BUSINESS_ROUTES } from './handlers/business.handlers';
 import { CLASS_ROUTES } from './handlers/classes.handlers';
+import { CORE_ROUTES } from './handlers/core.handlers';
 import { DASHBOARD_ROUTES } from './handlers/dashboard.handlers';
 import { GOVERNANCE_ROUTES } from './handlers/governance.handlers';
 import { INBOX_ROUTES } from './handlers/inbox.handlers';
 import { MEMBER_ROUTES } from './handlers/members.handlers';
-import { PHASE2_ROUTES } from './handlers/phase2.handlers';
 import { PLAN_ROUTES } from './handlers/plans.handlers';
 import { PORTAL_ROUTES } from './handlers/portal.handlers';
 import { REPORT_ROUTES } from './handlers/reports.handlers';
@@ -38,7 +38,7 @@ const ROUTES: Route[] = [
     ...MEMBER_ROUTES,
     ...SALES_ROUTES,
     ...PLAN_ROUTES,
-    ...PHASE2_ROUTES,
+    ...CORE_ROUTES,
     ...ATTENDANCE_ROUTES,
     ...CLASS_ROUTES,
     ...DASHBOARD_ROUTES,
@@ -49,7 +49,7 @@ const ROUTES: Route[] = [
 
 /**
  * The mock API: answers `${apiBaseUrl}/v1/*` in memory with the API's envelope `{ code, message, data }`. It is
- * the first draft of the phase 1–2 API contract, and it enforces what the API will:
+ * the API contract, and it enforces what the API does:
  * - 401 without a valid token (tokens expire; the auth interceptor refreshes once and retries);
  * - branch scoping: `X-Branch-Id` must be a branch the user is assigned to (403 otherwise), and handlers only
  *   read rows of that branch (another branch's member is a 404);
@@ -72,7 +72,7 @@ function handle(req: HttpRequest<unknown>, path: string, route: Route): Observab
         const account = route.scope === 'public' ? null : accountFromToken(req.headers.get('Authorization'));
         if (route.scope !== 'public' && !account) return throwError(() => httpError(401, 'Token expired or invalid'));
         const user = account?.user ?? null;
-        // A temporary password (D-054): only /auth/me, change-password and sign-out answer until it is replaced.
+        // A temporary password: only /auth/me, change-password and sign-out answer until it is replaced.
         if (user?.must_change_password && !/^\/v1\/auth\/(me|change-password|logout)$/.test(path))
             return throwError(() =>
                 httpError(403, 'Set a new password to continue', [{ path: PASSWORD_CHANGE_REQUIRED, message: 'Set a new password to continue' }])

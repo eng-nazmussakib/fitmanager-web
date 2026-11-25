@@ -4,7 +4,7 @@ import type { PaymentMethod } from './subscription.model';
 export interface PaymentRecord {
     oid: string;
     invoice_oid: string;
-    /** A refund is its own row, never an edit (D-067 a). */
+    /** A refund is its own row, never an edit. */
     kind?: 'payment' | 'refund';
     amount: number;
     method: PaymentMethod;
@@ -21,14 +21,14 @@ export interface Invoice {
     oid: string;
     /** "INV-GUL-2026-00123" */
     number: string;
-    /** A sale, an upgrade, a locker rental (D-082), or a POS sale (D-102). */
+    /** A sale, an upgrade, a locker rental, or a POS sale. */
     kind?: 'sale' | 'upgrade' | 'locker' | 'pos';
     branch: BranchRef;
-    /** Null on a POS sale to a walk-in (member_code 'WALK-IN', D-102). */
+    /** Null on a POS sale to a walk-in (member_code 'WALK-IN'). */
     member_oid: string | null;
     member_name: string;
     member_code: string;
-    /** Null once the member was anonymised (D-068 c). */
+    /** Null once the member was anonymised. */
     member_phone: string | null;
     issued_at: string;
     /** A POS invoice's product lines carry their own VAT (rate, vat, total); its discount lines do not. */
@@ -49,7 +49,7 @@ export interface Invoice {
     discount: number;
     /** The VAT rate in force when the invoice was issued (OrgSettings.vat_rate then). */
     vat_rate: number;
-    /** Whether the prices included VAT then (D-057). */
+    /** Whether the prices included VAT then. */
     vat_inclusive?: boolean;
     /** The seller's VAT BIN at the time, if registered. */
     vat_bin: string | null;
@@ -79,9 +79,9 @@ export interface CashClosing {
     invoices: number;
     new_members: number;
     renewals: number;
-    /** POS sales today (D-102), counted apart from plan sales. */
+    /** POS sales today, counted apart from plan sales. */
     pos_sales?: number;
-    /** What each staff member took today, and their closing if done (D-061: the daily count per person). */
+    /** What each staff member took today, and their closing if done (the daily count per person). */
     by_staff?: {
         staff_oid: string;
         name: string;

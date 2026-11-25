@@ -26,7 +26,7 @@ const SWATCH: Record<ClassType['color'], string> = {
     pink: 'bg-pink-500'
 };
 
-/** `/hq/class-types` (D-080): the classes every branch can timetable, HQ master data like the plan templates. */
+/** `/hq/class-types`: the classes every branch can timetable, HQ master data like the plan templates. */
 @Component({
     selector: 'app-hq-class-types-page',
     imports: [

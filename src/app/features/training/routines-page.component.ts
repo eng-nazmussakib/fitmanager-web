@@ -19,7 +19,7 @@ import { RoutineViewComponent } from './routine-view.component';
 import { TrainingService } from './training.service';
 
 /**
- * `/routines` (branch) and `/hq/routines` (HQ): routine templates (D-087). HQ's are read by every branch (and members
+ * `/routines` (branch) and `/hq/routines` (HQ): routine templates. HQ's are read by every branch (and members
  * may start them in the portal); a branch builds its own. Assigning one gives the member a copy (the member profile).
  */
 @Component({

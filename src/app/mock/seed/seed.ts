@@ -78,7 +78,7 @@ export function seed(today: string, nowMinutes: number): MockDb {
         posReturns: [],
         counters: {}
     };
-    // Before the members: their seeded suspensions are discipline cases (D-093) on the policies' clauses.
+    // Before the members: their seeded suspensions are discipline cases on the policies' clauses.
     seedPolicies(db, today);
     seedMembers(db, today);
     db.accounts = seedAccounts(branches, 'mem-gul-1', SCRIPTED[0].code);

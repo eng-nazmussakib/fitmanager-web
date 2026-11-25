@@ -1,5 +1,5 @@
 /**
- * Browser-only helpers that keep uploads small (D-085): photos are scaled down and re-encoded as JPEG before they
+ * Browser-only helpers that keep uploads small: photos are scaled down and re-encoded as JPEG before they
  * leave the browser, and videos are checked for length. Call them only in the browser (from an event handler):
  * they use `document`, canvas and object URLs.
  */
@@ -45,7 +45,7 @@ export async function videoSeconds(file: Blob): Promise<number> {
     }
 }
 
-/** A short exercise video (D-085): MP4 or WebM, at most 8 MB and 10 seconds. Returns a message when it is not. */
+/** A short exercise video: MP4 or WebM, at most 8 MB and 10 seconds. Returns a message when it is not. */
 export async function checkVideo(file: File, maxBytes = 8 * 1024 * 1024, maxSeconds = 10): Promise<string | null> {
     if (!['video/mp4', 'video/webm'].includes(file.type)) return 'A video is an MP4 or WebM file.';
     if (file.size > maxBytes) return `A video is at most ${Math.round(maxBytes / 1024 / 1024)} MB.`;

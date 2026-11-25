@@ -4,7 +4,7 @@ import { type Complaint, COMPLAINT_CATEGORY_LABEL, COMPLAINT_STATUS } from '@cor
 import { AppDatePipe } from '@shared/pipes/app-date.pipe';
 import { BadgeComponent } from '@shared/ui/display/display';
 
-/** A complaint and its replies, for the consoles and the portal (D-095). */
+/** A complaint and its replies, for the consoles and the portal. */
 @Component({
     selector: 'app-complaint-thread',
     imports: [AppDatePipe, BadgeComponent],

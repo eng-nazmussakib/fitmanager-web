@@ -10,9 +10,9 @@ import { type MockAccount, ROLE_RULES } from '../seed/staff.seed';
 import { commit, db } from '../store';
 
 /**
- * Staff management, the audit log, sessions and the password change (phase 1): the same contract and the same
+ * Staff management, the audit log, sessions and the password change: the same contract and the same
  * rules as the API (`/v1/hq/staff`, `/v1/branch/staff`, `/v1/*\/audit`, `/v1/auth/sessions`,
- * `/v1/auth/change-password`; D-054, D-055). Every staff change appends an audit entry, as the API does.
+ * `/v1/auth/change-password`). Every staff change appends an audit entry, as the API does.
  */
 const ROLES: StaffRole[] = ['OWNER', 'HQ_ADMIN', 'BRANCH_MANAGER', 'FRONT_DESK', 'TRAINER'];
 const USERNAME = /^[a-z0-9][a-z0-9._-]{2,49}$/;

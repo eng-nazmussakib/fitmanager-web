@@ -56,7 +56,7 @@ export class AuthService {
         );
     }
 
-    /** Signs in as one of the hosted demo's shared guest accounts, without a password (D-076). */
+    /** Signs in as one of the hosted demo's shared guest accounts, without a password. */
     loginAsGuest(username: string): Observable<CurrentUser> {
         return this._http.post<ApiResponse<AuthTokens>>(`${environment.apiBaseUrl}${API.AUTH.GUEST}`, { username }, { context: publicContext('errors') }).pipe(
             map(res => res.data),
@@ -91,7 +91,7 @@ export class AuthService {
     }
 
     /**
-     * Sets the user's own password (D-054: replaces a temporary one). The API ends every session and answers with
+     * Sets the user's own password (replaces a temporary one). The API ends every session and answers with
      * the tokens of a new one, so the user stays signed in here and is signed out everywhere else.
      */
     changePassword(currentPassword: string, newPassword: string): Observable<CurrentUser> {

@@ -1,9 +1,9 @@
 /**
- * Phase 5, governance (D-090 to D-097): policies and their acceptance, discipline cases about members and staff, appeals,
+ * Governance: policies and their acceptance, discipline cases about members and staff, appeals,
  * complaints, NPS and ratings. The shapes of fitmanager-api src/features/policies, discipline and feedback.
  */
 
-/* ---------- policies (D-090, D-091) ---------- */
+/* ---------- policies ---------- */
 
 export type PolicyMode = 'accept_again' | 'wording_only';
 
@@ -132,7 +132,7 @@ export const POLICY_STATE: Record<PolicyState, { label: string; tone: 'success' 
     optional: { label: 'Not required', tone: 'neutral' }
 };
 
-/* ---------- discipline (D-092 to D-094) ---------- */
+/* ---------- discipline ---------- */
 
 export type SanctionLevel = 'verbal' | 'written' | 'suspension' | 'ban';
 export const LADDER: SanctionLevel[] = ['verbal', 'written', 'suspension', 'ban'];
@@ -281,7 +281,7 @@ export interface MemberDiscipline {
     suggestion: SanctionLevel;
 }
 
-/** What the person sees of their own sanction (D-094): `GET /v1/me/record`, `GET /v1/my-record`. */
+/** What the person sees of their own sanction: `GET /v1/me/record`, `GET /v1/my-record`. */
 export interface OwnSanction {
     oid: string;
     level: SanctionLevel;
@@ -298,7 +298,7 @@ export interface OwnSanction {
     can_appeal: boolean;
 }
 
-/* ---------- complaints (D-095) ---------- */
+/* ---------- complaints ---------- */
 
 export const COMPLAINT_CATEGORIES = ['facilities', 'equipment', 'cleanliness', 'staff', 'billing', 'classes', 'other'] as const;
 export type ComplaintCategory = (typeof COMPLAINT_CATEGORIES)[number];
@@ -366,7 +366,7 @@ export interface ComplaintInput {
     member_name?: string | null;
 }
 
-/* ---------- NPS and ratings (D-096) ---------- */
+/* ---------- NPS and ratings ---------- */
 
 export interface Rateable {
     kind: 'class' | 'pt';

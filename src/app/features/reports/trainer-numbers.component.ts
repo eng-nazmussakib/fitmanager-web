@@ -11,7 +11,7 @@ import { ReportViewComponent } from './report-view.component';
 import { ReportsService } from './reports.service';
 
 /**
- * A trainer's numbers on their profile (D-106, item 8): PT sessions done, no-shows and cancellations, classes
+ * A trainer's numbers on their profile: PT sessions done, no-shows and cancellations, classes
  * taught and their attendees, and members' ratings, over the last 30 or 90 days. Counts only, no commission. The
  * page shows it to the trainer on their own profile and to managers and HQ on any (the API checks the same).
  */

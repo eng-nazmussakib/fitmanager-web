@@ -15,7 +15,7 @@ export interface ReportQuery {
 }
 
 /**
- * Reports (D-106) and exports (D-107). Reports: one branch (`X-Branch-Id` = that branch) or HQ across branches.
+ * Reports and exports. Reports: one branch (`X-Branch-Id` = that branch) or HQ across branches.
  * Exports page through `POST /v1/exports/:kind` (the API writes the audit row on the first page and refuses more
  * than 50 000 rows), then the file is made here; a report table is already on screen, so only its audit row is
  * sent before the file is made.

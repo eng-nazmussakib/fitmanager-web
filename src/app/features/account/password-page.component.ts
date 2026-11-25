@@ -27,7 +27,7 @@ function passwordRule(c: AbstractControl<string>): ValidationErrors | null {
 
 /**
  * `/account/password`: change your own password, and see or end your sessions. While a temporary password is set
- * (D-054: a new account or an admin reset), every other page sends the user here, and the API refuses everything
+ * (a new account or an admin reset), every other page sends the user here, and the API refuses everything
  * else until it is changed.
  */
 @Component({

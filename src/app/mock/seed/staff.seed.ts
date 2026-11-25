@@ -9,7 +9,7 @@ export interface MockAccount {
     username: string;
     password: string;
     user: CurrentUser;
-    /** Staff management (phase 1): a deactivated account cannot sign in. */
+    /** Staff management: a deactivated account cannot sign in. */
     status?: 'Active' | 'Inactive';
     created_at?: string;
     /** For trainers: their trainer row ("My classes"). */
@@ -19,10 +19,10 @@ export interface MockAccount {
 /**
  * CASL rules per role, the same JSON the API sends (fitmanager-infra/db/migrations/002_branches_and_staff.sql, 004, 006, 007,
  * 018: change both together). One subject per screen or entity; a button is gated by the action IT performs.
- * Phase 3 (D-083): `manage Locker` sets lockers up, the desk's `create`/`update Locker` rents them; a trainer's
+ * Scheduling: `manage Locker` sets lockers up, the desk's `create`/`update Locker` rents them; a trainer's
  * `update Trainer` and `update PtSession` are narrowed to their own profile and sessions (by the API, and here).
  */
-/** The role rules of migration 020 (D-083, D-086, D-097): the full set per role, as the API sends them. */
+/** The role rules of migration 020: the full set per role, as the API sends them. */
 export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
     OWNER: [{ action: 'manage', subject: 'all' }],
     HQ_ADMIN: [
@@ -73,7 +73,7 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
                 'Sale'
             ]
         },
-        // Phase 7c (D-109, migration 024): the public site's content.
+        // Migration 024: the public site's content.
         { action: 'manage', subject: ['Website'] }
     ],
     BRANCH_MANAGER: [
@@ -107,9 +107,9 @@ export const ROLE_RULES: Record<StaffRole, AppRule[]> = {
             ]
         },
         { action: ['read', 'create', 'update'], subject: ['PurchaseOrder'] },
-        // Exports (D-107, migration 022): `export Report`.
+        // Exports (migration 022): `export Report`.
         { action: ['read', 'export'], subject: ['Report'] },
-        // Their branch's page and photos (D-109, migration 024).
+        // Their branch's page and photos (migration 024).
         { action: ['read', 'update'], subject: ['Website'] },
         { action: 'read', subject: ['Dashboard', 'Plan', 'AuditLog', 'Policy', 'Feedback', 'Product', 'Supplier'] }
     ],

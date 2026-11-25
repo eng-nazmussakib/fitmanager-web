@@ -5,7 +5,7 @@ import { canMatchAbility } from '@core/auth/auth.guards';
 /** The HQ console, under `/hq` (branch context = the HQ row, set by `hqMatch`). */
 export const HQ_ROUTES: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-    // Phase 7c (D-109): the public site's content.
+    // The public site's content.
     {
         path: 'website',
         title: 'Website',
@@ -13,7 +13,7 @@ export const HQ_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Website')],
         loadComponent: () => import('@features/website/website-page.component').then(m => m.WebsitePageComponent)
     },
-    // Phase 7b (D-108): the bell's inbox. Everyone may open it; each message shows to whoever may act on it.
+    // The bell's inbox. Everyone may open it; each message shows to whoever may act on it.
     {
         path: 'inbox',
         title: 'Inbox',
@@ -62,7 +62,7 @@ export const HQ_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Routine')],
         loadComponent: () => import('@features/training/routines-page.component').then(m => m.RoutinesPageComponent)
     },
-    // Phase 5: governance (D-090 to D-097).
+    // Governance.
     {
         path: 'incidents',
         data: { breadcrumb: 'Incidents', hq: true },
@@ -84,7 +84,7 @@ export const HQ_ROUTES: Routes = [
         canMatch: [canMatchAbility('read', 'Complaint')],
         loadComponent: () => import('@features/governance/complaints-page.component').then(m => m.ComplaintsPageComponent)
     },
-    // Phase 6 (D-099 to D-101): the catalogue, every branch's purchase orders and stock.
+    // The catalogue, every branch's purchase orders and stock.
     {
         path: 'catalogue',
         title: 'Catalogue',

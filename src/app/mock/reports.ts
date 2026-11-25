@@ -8,7 +8,7 @@ import { db } from './store';
 import type { MockDb } from './types';
 
 /**
- * The reports in demo mode (D-106): each SQL query of the API's `reports.repo.ts` done over the mock's tables,
+ * The reports in demo mode: each SQL query of the API's `reports.repo.ts` done over the mock's tables,
  * then the very same definitions (`domain/report-defs.ts`, a copy of the API's). Keep the two loaders in step.
  */
 

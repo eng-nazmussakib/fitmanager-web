@@ -20,7 +20,7 @@ export type Who = string;
 export const ME: Who = 'me';
 
 /**
- * The training calls (phase 4), for the console (a member by oid, at the branch in `X-Branch-Id`, or HQ for the
+ * The training calls, for the console (a member by oid, at the branch in `X-Branch-Id`, or HQ for the
  * library) and the portal (`'me'`). The paths differ only in their prefix.
  */
 @Injectable({ providedIn: 'root' })

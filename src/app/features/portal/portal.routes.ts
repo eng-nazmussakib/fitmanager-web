@@ -33,14 +33,14 @@ export const PORTAL_ROUTES: Routes = [
         data: { breadcrumb: 'Payments' },
         loadComponent: () => import('./portal-pages.component').then(m => m.PortalPaymentsComponent)
     },
-    // Phase 7b (D-108).
+    // The bell.
     {
         path: 'messages',
         title: 'Messages',
         data: { breadcrumb: 'Messages' },
         loadComponent: () => import('./portal-messages.component').then(m => m.PortalMessagesComponent)
     },
-    // Phase 5 (D-090 to D-096).
+    // Governance.
     {
         path: 'policies',
         title: 'Policies',

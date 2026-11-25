@@ -29,7 +29,7 @@ const COLLAPSED_KEY = 'app.sidebar-collapsed';
 
 /**
  * Frame of the branch console (`/console/:branch`) and the HQ console (`/hq`), chosen by `data.area`.
- * - Sidebar: "FitManager" at the top (the software, not the gym, D-019), the menu filtered by the role at the
+ * - Sidebar: "FitManager" at the top (the software, not the gym), the menu filtered by the role at the
  *   active branch; collapsible to icons on desktop, a drawer on phones and tablets.
  * - Top bar: menu button, branch switcher, breadcrumb, user menu.
  * Client-rendered only (never indexed). Uses semantic tokens, so it works in light and dark mode.

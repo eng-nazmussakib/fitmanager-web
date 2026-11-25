@@ -11,9 +11,9 @@ import type { MemberNotification } from '@core/models/member.model';
 const MIN_GAP_MS = 15_000;
 
 /**
- * The bell's number (phase 7b, D-108): a member's unread messages in the portal, or the staff inbox at the active
+ * The bell's number: a member's unread messages in the portal, or the staff inbox at the active
  * branch (or HQ) in the consoles. Read when a page opens and when the user moves to another page, never pushed
- * (live updates are deferred, D-108). Errors are silent: the bell simply keeps its last number.
+ * (live updates are deferred). Errors are silent: the bell simply keeps its last number.
  */
 @Injectable({ providedIn: 'root' })
 export class BellService {

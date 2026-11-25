@@ -10,9 +10,9 @@ const required = {
     title: /<title>[^<]{5,}<\/title>/,
     description: /<meta name="description" content="[^"]{20,}"/,
     canonical: /<link rel="canonical" href="https?:\/\/[^"]+"/,
-    // The site's share image, or a page's own (a blog post's cover, D-110).
+    // The site's share image, or a page's own (a blog post's cover).
     'og:image': /<meta property="og:image" content="https?:\/\/[^"]+"/,
-    // Structured data on every public page (D-110): at least the breadcrumbs or the page's own type.
+    // Structured data on every public page: at least the breadcrumbs or the page's own type.
     'json-ld': /<script id="seo-json-ld" type="application\/ld\+json">\{/,
     'twitter:card': /<meta name="twitter:card" content="summary_large_image"/
 };

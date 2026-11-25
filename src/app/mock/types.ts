@@ -44,19 +44,19 @@ export interface MemberRow {
     health_declared: boolean;
     photo_url: string | null;
     joined_on: string;
-    /** A join request without a first payment (D-022). */
+    /** A join request without a first payment. */
     pending: boolean;
     trainer_oid: string | null;
-    /** For the BMI (D-089), set with a measurement. */
+    /** For the BMI, set with a measurement. */
     height_cm?: number | null;
     notes: string | null;
     /** How often this member trains (0–1), for the attendance seed. */
     regularity: number;
     /** Usual training time, minutes after midnight. */
     habit_minutes: number;
-    /** "Delete my data" (D-068 c). */
+    /** "Delete my data". */
     anonymised?: boolean;
-    /** A portal account was given (D-064). */
+    /** A portal account was given. */
     portal?: boolean;
 }
 
@@ -115,7 +115,7 @@ export interface EnquiryRow {
     at: string;
 }
 
-/* ---------- phase 3: scheduling (D-078 to D-083) ---------- */
+/* ---------- scheduling ---------- */
 
 export interface RoomRow {
     oid: string;
@@ -217,7 +217,7 @@ export interface BlockRow {
     removed?: boolean;
 }
 
-/** An in-app message written by a scheduling change (D-081); receipts and reminders are derived instead. */
+/** An in-app message written by a scheduling change; receipts and reminders are derived instead. */
 export interface MessageRow {
     oid: string;
     member_oid: string;
@@ -227,13 +227,13 @@ export interface MessageRow {
     created_at: string;
 }
 
-/** Phase 7b (D-108): a read mark on a derived message; `oid` is `<reader>|<message oid>` (mock/inbox.ts). */
+/** A read mark on a derived message; `oid` is `<reader>|<message oid>` (mock/inbox.ts). */
 export interface ReadRow {
     oid: string;
     read_at: string;
 }
 
-/* ---------- phase 7c: the website (D-109) ---------- */
+/* ---------- the website ---------- */
 
 export interface PostCategoryRow {
     oid: string;
@@ -289,7 +289,7 @@ export interface OfferRow {
 }
 
 /** The tables the generic `put` / `patch` mutations reach. */
-/** Phase 4 (D-084): an exercise of HQ's library (HQ branch oid) or a branch's own. */
+/** An exercise of HQ's library (HQ branch oid) or a branch's own. */
 export interface ExerciseRow {
     oid: string;
     branch_oid: string;
@@ -304,7 +304,7 @@ export interface ExerciseRow {
     active: boolean;
 }
 
-/** Phase 4 (D-087): a template (`member_oid` null) or a member's snapshot copy. */
+/** A template (`member_oid` null) or a member's snapshot copy. */
 export interface RoutineRow {
     oid: string;
     branch_oid: string;
@@ -324,7 +324,7 @@ export interface RoutineRow {
     created_at: string;
 }
 
-/** Phase 4 (D-088): a workout with its sets (names copied). */
+/** A workout with its sets (names copied). */
 export interface WorkoutRow {
     oid: string;
     branch_oid: string;
@@ -341,7 +341,7 @@ export interface WorkoutRow {
     exercises: { exercise_oid: string; name: string; measure: Measure; sets: WorkoutSet[] }[];
 }
 
-/** Phase 4 (D-089): a body measurement; photos are file oids. */
+/** A body measurement; photos are file oids. */
 export interface MeasurementRow {
     oid: string;
     branch_oid: string;
@@ -363,7 +363,7 @@ export interface MeasurementRow {
     created_at: string;
 }
 
-/* ---------- phase 5: governance (D-090 to D-097) ---------- */
+/* ---------- governance ---------- */
 
 /** HQ master data, read by every branch (no RLS in the API). */
 export interface PolicyRow {
@@ -513,7 +513,7 @@ export interface RatingRow {
     created_at: string;
 }
 
-/* ---------- phase 6: business (D-098 to D-102) ---------- */
+/* ---------- business ---------- */
 
 export interface EquipmentRow {
     oid: string;
@@ -734,7 +734,7 @@ export interface MockDb extends Tables {
     promos: (Promo & { active: boolean })[];
     settings: OrgSettings;
     siteGroups: SiteGroup[];
-    /** Append-only, newest last (migration 005 / phase 1): staff and settings changes. */
+    /** Append-only, newest last (migration 005): staff and settings changes. */
     audit: AuditEntry[];
     members: MemberRow[];
     subscriptions: Subscription[];

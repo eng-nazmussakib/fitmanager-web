@@ -132,7 +132,7 @@ export class InfoPageComponent {
     /** The page's slug (route data). */
     readonly slug = input.required<string>();
     private readonly _config = computed(() => this._site.c.pages.find(p => p.slug === this.slug()) ?? null);
-    /** `/offers` (phase 7c, D-109): the offers running today, from the database; the config's blocks without an API. */
+    /** `/offers`: the offers running today, from the database; the config's blocks without an API. */
     private readonly _offers = toSignal(toObservable(this.slug).pipe(switchMap(s => (s === 'offers' ? this._content.offers() : of(null)))), { initialValue: null });
     protected readonly page = computed(() => {
         const page = this._config();

@@ -32,7 +32,7 @@ export interface PromoCode {
 type Effect = 'percent' | 'amount' | 'waive';
 
 /**
- * `/hq/plans`: HQ's price list (D-044: only HQ changes prices). Templates (tier × period, `freezable`, D-063), each
+ * `/hq/plans`: HQ's price list (only HQ changes prices). Templates (tier × period, `freezable`), each
  * branch's price and admission fee for them, and promo codes. Every save is audited at HQ.
  */
 @Component({

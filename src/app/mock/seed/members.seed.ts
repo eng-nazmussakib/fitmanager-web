@@ -12,7 +12,7 @@ import { AREAS, FEMALE_NAMES, FEMALE_ONLY_LAST, HEALTH_FLAGS, LAST_NAMES, MALE_N
 import { toRef } from './organisation.seed';
 import { Rng } from './prng';
 
-/** Members per branch (phase 0.5 brief). */
+/** Members per branch. */
 export const MEMBER_COUNTS: Record<string, number> = { GUL: 250, DHA: 180, UTT: 140 };
 
 /** Gulshan members with fixed situations, for the demo script (check-in outcomes, renewals, overrides). */

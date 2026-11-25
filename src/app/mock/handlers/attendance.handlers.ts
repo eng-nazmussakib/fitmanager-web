@@ -30,7 +30,7 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
     const open = idx().openCheckIn.get(m.oid);
     const openBranch = open ? d.branches.find(b => b.oid === open.branch_oid) : undefined;
     const policies = policiesOutstanding(m, ctx.now.date);
-    // Any branch's member may train here (D-059); their HOME branch's dues limit applies.
+    // Any branch's member may train here; their HOME branch's dues limit applies.
     const failures = evaluateAccess(
         {
             member: { status: s.status, dues: s.dues, home_branch_name: home.name, dues_limit: home.dues_limit },
@@ -51,7 +51,7 @@ export function decide(ctx: Ctx, m: MemberRow): AccessDecision {
             oid: m.oid,
             code: m.code,
             name: m.name,
-            // A visitor's photo is copied onto the visit (D-066), so the desk sees who it lets in.
+            // A visitor's photo is copied onto the visit, so the desk sees who it lets in.
             photo_url: m.photo_url,
             status: s.status,
             plan_name: sameBranch ? (s.relevant?.plan_name ?? null) : null,
@@ -115,7 +115,7 @@ function checkIn(ctx: Ctx): HttpResponse<unknown> {
         by: ctx.user!.name
     };
     commit({ t: 'checkin.create', row });
-    // A booked class starting soon, or under way, at the member's home branch is marked Attended (D-081).
+    // A booked class starting soon, or under way, at the member's home branch is marked Attended.
     const classes = m.branch_oid === ctx.branch!.oid ? markArrival(m.oid, m.branch_oid, ctx.now.iso) : [];
     const base = decision.allowed ? `${m.name} checked in` : `${m.name} checked in with an override`;
     return ok(toCheckIn(row), classes.length ? `${base}; marked present for ${classes.join(', ')}` : base);

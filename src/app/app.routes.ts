@@ -6,7 +6,7 @@ import { branchMatch, firstBranchRedirect, homeRedirect, hqMatch, memberMatch } 
 import { environment } from '@env/environment';
 
 /**
- * The URL map (fitmanager-infra/docs/02-architecture.md §3). English only, plain URLs (D-015).
+ * The URL map (fitmanager-infra/docs/02-architecture.md §3). English only, plain URLs.
  * - Public gym pages sit at the top level and are prerendered (app.routes.server.ts); every other area renders
  *   in the browser only and is never indexed.
  * - Areas are lazy: a user who never opens HQ never downloads it. `canMatch` guards run parent first, so the
@@ -27,12 +27,12 @@ export const routes: Routes = [
         canActivate: [guestGuard],
         loadChildren: () => import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES)
     },
-    // Showcase entry (phase 0.5): role cards that sign in as a demo user. Mock builds use the mock's demo accounts;
-    // the hosted demo (guestAccess) the API's shared guest accounts, without passwords (D-076).
+    // Showcase entry: role cards that sign in as a demo user. Mock builds use the mock's demo accounts;
+    // the hosted demo (guestAccess) the API's shared guest accounts, without passwords.
     ...(environment.demo || environment.useMockApi || environment.guestAccess
         ? [{ path: 'demo', title: 'Demo', loadComponent: () => import('@features/demo/demo-page.component').then(m => m.DemoPageComponent) }]
         : []),
-    // Your own password and sessions; forced while a temporary password is set (D-054).
+    // Your own password and sessions; forced while a temporary password is set.
     {
         path: 'account/password',
         title: 'Password',

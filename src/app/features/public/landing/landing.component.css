@@ -340,7 +340,7 @@
     }
 }
 
-/* The hero is the page's largest paint (LCP, D-110): it moves in, but is never transparent, so it counts as painted
+/* The hero is the page's largest paint (LCP): it moves in, but is never transparent, so it counts as painted
    from the first frame. */
 @keyframes rise {
     from {

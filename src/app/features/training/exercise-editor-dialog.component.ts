@@ -44,9 +44,9 @@ const options = <T extends string>(labels: Record<T, string>): SelectOption<T>[]
     Object.entries(labels).map(([value, label]) => ({ value: value as T, label: label as string }));
 
 /**
- * Adds or edits an exercise (D-084): name, category, how sets are measured, muscles (the first is the main one),
+ * Adds or edits an exercise: name, category, how sets are measured, muscles (the first is the main one),
  * equipment and instructions, up to 3 photos (made small in the browser) and a short video (MP4 or WebM, at most
- * 8 MB and 10 seconds, D-085). The files are uploaded on save.
+ * 8 MB and 10 seconds). The files are uploaded on save.
  */
 @Component({
     selector: 'app-exercise-editor-dialog',

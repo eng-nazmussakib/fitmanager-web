@@ -33,7 +33,7 @@ export function photoItem(g: GalleryPhoto): GalleryItem {
 }
 
 /**
- * The website's content for the public pages (phase 7c, D-109): the database's posts, photos and offers, read while
+ * The website's content for the public pages: the database's posts, photos and offers, read while
  * prerendering and again in the browser, starting from the brand config's (the fallback when there is no API).
  */
 @Injectable({ providedIn: 'root' })

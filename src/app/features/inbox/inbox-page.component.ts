@@ -26,7 +26,7 @@ const ICONS: Record<StaffMessageKind, IconName> = {
 };
 
 /**
- * `/console/:branch/inbox` and `/hq/inbox` (phase 7b, D-108 b): what needs the reader's action here, newest first.
+ * `/console/:branch/inbox` and `/hq/inbox`: what needs the reader's action here, newest first.
  * Opening one marks it read and goes to its page; "Mark all read" clears the bell.
  */
 @Component({

@@ -6,7 +6,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
 import { MenuComponent, MenuItemDirective, MenuTriggerDirective } from '@shared/ui/menu/menu';
 
 /**
- * "Export" with Excel and PDF (D-107). Presentational: the page does the export when `export` fires and shows
+ * "Export" with Excel and PDF. Presentational: the page does the export when `export` fires and shows
  * `busy` meanwhile. Gate it with `*appCan="'export'; on: 'Report'"` where it is used.
  */
 @Component({

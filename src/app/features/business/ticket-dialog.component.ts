@@ -38,7 +38,7 @@ const STATUSES: SelectOption<TicketStatus>[] = [
     { value: 'cannot_fix', label: 'Cannot be fixed' }
 ];
 
-/** Raises a maintenance ticket, moves one on, or records a service (D-098). */
+/** Raises a maintenance ticket, moves one on, or records a service. */
 @Component({
     selector: 'app-ticket-dialog',
     imports: [

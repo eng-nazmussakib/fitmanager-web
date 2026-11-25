@@ -12,7 +12,7 @@ import type { Mutation } from './store';
 import type { MemberRow, MockDb, MovementRow, PoRow, PosReturnRow, ProductRow, StockRow, TransferRow } from './types';
 
 /**
- * Phase 6 in demo mode (D-098 to D-102): the API's stock, order, transfer and POS steps (fitmanager-api
+ * Business in demo mode: the API's stock, order, transfer and POS steps (fitmanager-api
  * src/features/stock, pos) on the mock's tables. Each step takes the state to read and an `emit` for its changes:
  * the handlers pass `commit` (so a change is logged and replayed), the seed applies them straight away, so both
  * build the same rows. The arithmetic is the API's: `moveStock`, the weighted average cost, `posQuote`, `returnAmount`.
@@ -29,7 +29,7 @@ export interface When {
     iso: string;
 }
 
-/** The desk takes returns for this many days; a manager after (D-102, the refund window of plans). */
+/** The desk takes returns for this many days; a manager after (the refund window of plans). */
 export const REFUND_WINDOW_DAYS = 3;
 export const WALK_IN = { code: 'WALK-IN', name: 'Walk-in customer' };
 
@@ -40,7 +40,7 @@ export function product(d: MockDb, oid: string): ProductRow {
     return d.products.find(p => p.oid === oid) ?? fail(400, 'A product is not in the catalogue');
 }
 
-/** The product's own VAT rate, or the HQ rate (D-057, D-099). */
+/** The product's own VAT rate, or the HQ rate. */
 export const vatOf = (d: MockDb, p: ProductRow): number => p.vat_rate ?? d.settings.vat_rate;
 
 export function stockRow(d: MockDb, branchOid: string, productOid: string): StockRow {
@@ -111,7 +111,7 @@ export function moveStock(d: MockDb, emit: Emit, a: Actor, at: string, m: Move):
     return { on_hand: onHand, avg_cost: avg, unit_cost: unitCost };
 }
 
-/* ---------- purchase orders (D-100) ---------- */
+/* ---------- purchase orders ---------- */
 
 export function raisePo(
     d: MockDb,
@@ -192,7 +192,7 @@ export function receivePo(
     return row;
 }
 
-/* ---------- transfers (D-101) ---------- */
+/* ---------- transfers ---------- */
 
 export function requestTransfer(
     d: MockDb,
@@ -314,7 +314,7 @@ export function receiveTransfer(
     return row;
 }
 
-/* ---------- POS (D-102) ---------- */
+/* ---------- POS ---------- */
 
 export interface Customer {
     oid: string | null;

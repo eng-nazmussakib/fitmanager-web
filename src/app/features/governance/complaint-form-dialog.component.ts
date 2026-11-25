@@ -28,7 +28,7 @@ export interface ComplaintFormData {
 const ROLE_LABEL: Record<string, string> = { BRANCH_MANAGER: 'Branch manager', FRONT_DESK: 'Front desk', TRAINER: 'Trainer' };
 
 /**
- * Files a complaint (D-095): in the portal, the member's own; at the desk, for a member of the branch or a visitor by
+ * Files a complaint: in the portal, the member's own; at the desk, for a member of the branch or a visitor by
  * name. A category, what happened, an optional photo (made small before it is sent) and, for a complaint about staff,
  * who: it is hidden from them, and one about the branch manager goes to HQ.
  */

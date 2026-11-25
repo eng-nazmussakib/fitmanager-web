@@ -7,7 +7,7 @@ import { commit, db } from '../store';
 import type { MemberRow } from '../types';
 
 /**
- * The bell (phase 7b, D-108) in demo mode: the member's messages and the staff inbox, derived from the mock's data
+ * The bell in demo mode: the member's messages and the staff inbox, derived from the mock's data
  * (mock/inbox.ts), with read marks stored.
  */
 function me(ctx: Ctx): MemberRow {

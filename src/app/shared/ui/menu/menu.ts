@@ -22,7 +22,7 @@ type PopoverElement = HTMLElement & { showPopover?: () => void; hidePopover?: ()
 
 /**
  * A dropdown menu (WAI-ARIA menu button pattern), on a `popover="auto"` element in the top layer: light dismiss
- * and Esc for free. Replaces nz-dropdown (D-007).
+ * and Esc for free. Replaces nz-dropdown.
  *
  *   <button fmButton [fmMenuTrigger]="rowMenu" aria-label="Row actions">…</button>
  *   <fm-menu #rowMenu>

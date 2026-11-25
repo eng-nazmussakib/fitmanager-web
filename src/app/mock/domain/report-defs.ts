@@ -21,7 +21,7 @@ import {
 
 /**
  * A copy of the API's `features/reports/reports.defs.ts` (keep the two the same): what each of the eight reports
- * shows (D-106), from rows already loaded. The mock loads them from its tables in `mock/reports.ts`.
+ * shows, from rows already loaded. The mock loads them from its tables in `mock/reports.ts`.
  */
 
 export const REPORT_KEYS = ['revenue', 'dues', 'members', 'attendance', 'classes', 'trainers', 'shop', 'operations'] as const;
@@ -450,7 +450,7 @@ export function classes(s: Scope, x: ClassesInput): Built {
     };
 }
 
-/* ---------- trainers (counts only: no commission, D-106) ---------- */
+/* ---------- trainers (counts only: no commission) ---------- */
 
 export interface TrainerNumbers {
     branch_oid: string;
@@ -476,7 +476,7 @@ export const TRAINER_KPIS: Figure[] = [
     { key: 'rating', label: 'Average rating', unit: 'number', value: ratio('rating_sum', 'ratings'), hint: 'Members’ 1–5 ratings of classes and PT sessions.' }
 ];
 
-const TRAINER_NOTE = 'Counts only: commission and pay are not worked out here (D-106).';
+const TRAINER_NOTE = 'Counts only: commission and pay are not worked out here.';
 
 export interface TrainersInput {
     rows: TrainerNumbers[];
@@ -564,14 +564,14 @@ export function trainerNumbers(s: Scope, x: { rows: TrainerNumbers[]; days: DayR
     };
 }
 
-/* ---------- shop (margin at average cost, D-101) ---------- */
+/* ---------- shop (margin at average cost) ---------- */
 
 const net = (y: Comp): number => (y['net'] ?? 0) - (y['returned_net'] ?? 0);
 const margin = (y: Comp): number => net(y) - (y['cost'] ?? 0);
 const SHOP_MEASURES: Figure[] = [
     count('qty', 'Items sold'),
     money('net_sales', 'Sales without VAT', net, 'After returns.'),
-    money('cost', 'Cost', c('cost'), 'At the average cost when sold (D-101); items back on the shelf come off it.'),
+    money('cost', 'Cost', c('cost'), 'At the average cost when sold; items back on the shelf come off it.'),
     money('margin', 'Margin', margin),
     percent('margin_pct', 'Margin %', y => (net(y) > 0 ? Math.round((1000 * margin(y)) / net(y)) / 10 : null))
 ];

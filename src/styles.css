@@ -2,7 +2,7 @@
  * Global stylesheet.
  *
  * Tailwind v4 is configured CSS-first (no tailwind.config.js). Design tokens live in @theme below
- * (fitmanager-infra/docs/03-design-system.md §2). There is no UI component library (D-007): the kit's styles are
+ * (fitmanager-infra/docs/03-design-system.md §2). There is no UI component library: the kit's styles are
  * `src/styles/ui.css` (the fm-* classes).
  *
  * Cascade-layer order: theme < base (preflight) < ng-icon < components < utilities.

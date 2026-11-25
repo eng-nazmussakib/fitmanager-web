@@ -2,7 +2,7 @@ import type { MockDb } from '../types';
 import { addDaysIso, at } from './clock';
 
 /**
- * Phase 7b (D-108), like seed 108: the messages themselves are derived from the data (mock/inbox.ts), so the seed
+ * The bell, like seed 108: the messages themselves are derived from the data (mock/inbox.ts), so the seed
  * adds only what the earlier seeds lack:
  * - an appeal the BRANCH decides: the member with the desk's verbal warning (20 days ago) appealed it two days
  *   later, still open (the other appeals go to HQ);

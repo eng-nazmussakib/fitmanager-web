@@ -36,7 +36,7 @@ type PopoverElement = HTMLElement & { showPopover?: () => void; hidePopover?: ()
 
 /**
  * `<fm-select formControlName="plan" [options]="plans" placeholder="Choose a plan" />`: a single choice from a
- * list. Replaces nz-select (D-007).
+ * list. Replaces nz-select.
  *
  * The trigger is a button (`aria-haspopup="listbox"`); the list is a `popover="auto"` listbox in the top layer
  * (light dismiss and Esc for free), positioned under the trigger. Keyboard: ↓/↑/Enter/Space open it on the

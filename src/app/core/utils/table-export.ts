@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import type { ReportCell, ReportColumn } from '@core/models/report.model';
 
 /**
- * Excel and PDF files made in the browser (D-107): `exceljs` and `jspdf` + `jspdf-autotable` are imported inside
+ * Excel and PDF files made in the browser: `exceljs` and `jspdf` + `jspdf-autotable` are imported inside
  * the functions, so they are lazy chunks fetched on the first export, never at start-up (and never while
  * prerendering: only a click calls these).
  *

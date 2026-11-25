@@ -5,12 +5,12 @@ import type { PaymentMethod } from './subscription.model';
 type BadgeTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
 
 /**
- * Phase 6 (D-098 to D-102, D-104): the equipment register and its tickets, HQ's catalogue and suppliers, each
+ * The equipment register and its tickets, HQ's catalogue and suppliers, each
  * branch's stock and ledger, purchase orders, transfers between branches, and POS sales with their returns. The
  * shapes are the API's (fitmanager-api src/features/equipment, catalogue, stock, pos).
  */
 
-/* ---------- equipment and tickets (D-098) ---------- */
+/* ---------- equipment and tickets ---------- */
 
 export const EQUIPMENT_CATEGORIES = ['cardio', 'strength', 'free_weights', 'benches_racks', 'functional', 'other'] as const;
 export type EquipmentCategory = (typeof EQUIPMENT_CATEGORIES)[number];
@@ -146,7 +146,7 @@ export interface ServiceInput {
     note?: string | null;
 }
 
-/* ---------- catalogue and suppliers (D-099) ---------- */
+/* ---------- catalogue and suppliers ---------- */
 
 export const PRODUCT_CATEGORIES = ['supplements', 'drinks', 'snacks', 'apparel', 'accessories', 'other'] as const;
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
@@ -210,7 +210,7 @@ export interface Supplier {
 
 export type SupplierInput = Partial<Omit<Supplier, 'oid' | 'products' | 'updated_at'>> & { name: string };
 
-/* ---------- stock (D-101) ---------- */
+/* ---------- stock ---------- */
 
 export interface StockLevel {
     product_oid: string;
@@ -295,7 +295,7 @@ export interface HqStock {
     value: number;
 }
 
-/* ---------- purchase orders (D-100) ---------- */
+/* ---------- purchase orders ---------- */
 
 export type PoStatus = 'pending' | 'approved' | 'rejected' | 'sent' | 'partial' | 'received' | 'cancelled';
 export const PO_STATUS: Record<PoStatus, { label: string; tone: BadgeTone }> = {
@@ -350,7 +350,7 @@ export interface DeliveryInput {
     lines: { line_oid: string; qty: number; unit_cost?: number }[];
 }
 
-/* ---------- transfers (D-101) ---------- */
+/* ---------- transfers ---------- */
 
 export type TransferStatus = 'requested' | 'in_transit' | 'received' | 'rejected' | 'cancelled';
 export const TRANSFER_STATUS: Record<TransferStatus, { label: string; tone: BadgeTone }> = {
@@ -397,7 +397,7 @@ export interface TransferInput {
     lines: { product_oid: string; qty: number }[];
 }
 
-/* ---------- POS (D-102) ---------- */
+/* ---------- POS ---------- */
 
 export interface PosProduct {
     oid: string;

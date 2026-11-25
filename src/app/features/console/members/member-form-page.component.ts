@@ -23,7 +23,7 @@ const HEALTH = ['Asthma', 'Diabetes', 'High blood pressure', 'Heart condition', 
 
 /**
  * H2: "Add member". A new member starts as a join request (Pending); the membership starts with the first payment
- * (D-022), so saving goes straight on to selling the first plan.
+ *, so saving goes straight on to selling the first plan.
  */
 @Component({
     selector: 'app-member-form-page',
@@ -174,7 +174,7 @@ export class MemberFormPageComponent {
         }
         const v = this.form.getRawValue();
         this.saving.set(true);
-        // The photo goes to the file store first (D-058); the member then points at the checked file.
+        // The photo goes to the file store first; the member then points at the checked file.
         const photo = this.photo();
         const photoFile$: Observable<string | null> = photo ? this._files.upload('member_photo', dataUrlToBlob(photo), 'photo.jpg') : of(null);
         photoFile$

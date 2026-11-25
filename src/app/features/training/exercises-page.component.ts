@@ -33,7 +33,7 @@ const all = <T extends string>(labels: Record<T, string>, none: string): SelectO
 ];
 
 /**
- * `/exercises` (branch) and `/hq/exercises` (HQ): the exercise library (D-084). A branch sees HQ's exercises, read
+ * `/exercises` (branch) and `/hq/exercises` (HQ): the exercise library. A branch sees HQ's exercises, read
  * only, and its own; HQ sees and edits HQ's. Each opens with its photos, video and instructions.
  */
 @Component({

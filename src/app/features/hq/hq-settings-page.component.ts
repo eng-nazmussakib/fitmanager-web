@@ -21,8 +21,8 @@ import { SiteGroupsCardComponent } from './site-groups-card.component';
 const SAMPLE = 3000;
 
 /**
- * `/hq/settings`: organisation-wide settings owned by HQ: VAT and its mode (D-037, D-057), the freeze rule (D-063, D-067 e)
- * and what the public site shows (D-040). The rate applies to every quote and
+ * `/hq/settings`: organisation-wide settings owned by HQ: VAT and its mode, the freeze rule
+ * and what the public site shows. The rate applies to every quote and
  * sale from the moment it is saved; invoices already issued keep the rate they carry.
  */
 @Component({
@@ -73,7 +73,7 @@ const SAMPLE = 3000;
                         A new rate applies to quotes and sales from the moment you save. Invoices already issued keep the rate printed on them.
                     </fm-alert>
                 </fm-card>
-                <fm-card subtitle="Every branch's timetable and the member portal follow these (D-081)." title="Class booking">
+                <fm-card subtitle="Every branch's timetable and the member portal follow these." title="Class booking">
                     <div class="grid gap-4 sm:grid-cols-3">
                         <fm-field label="Opens, days ahead" required>
                             <fm-number-input formControlName="booking_open_days" [max]="60" [min]="1" />
@@ -98,7 +98,7 @@ const SAMPLE = 3000;
                         A late cancel or a no-show is a missed class. The same window applies to PT sessions a member cancels.
                     </p>
                 </fm-card>
-                <fm-card subtitle="Policies and complaints at every branch follow these (D-091, D-095)." title="Governance">
+                <fm-card subtitle="Policies and complaints at every branch follow these." title="Governance">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <fm-field
                             hint="After a new “accept again” version (or joining), check-in is blocked once this has passed without acceptance."

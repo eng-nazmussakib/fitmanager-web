@@ -19,7 +19,7 @@ import { FieldComponent, InputDirective } from '@shared/ui/forms/field.component
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 /**
- * `/me/policies` (D-090, D-091): each policy, its current wording and where the member stands; a tick accepts the version
+ * `/me/policies`: each policy, its current wording and where the member stands; a tick accepts the version
  * read. A required one not accepted blocks check-in after the grace period.
  */
 @Component({
@@ -119,7 +119,7 @@ export class PortalPoliciesComponent {
     }
 }
 
-/** `/me/record` (D-094): the member's own sanctions, and appeals. */
+/** `/me/record`: the member's own sanctions, and appeals. */
 @Component({
     selector: 'app-portal-record',
     imports: [OwnRecordComponent],
@@ -131,7 +131,7 @@ export class PortalPoliciesComponent {
 export class PortalRecordComponent {}
 
 /**
- * `/me/complaints` (D-095): the member's complaints and the replies; a resolution can be accepted (closed) or sent on
+ * `/me/complaints`: the member's complaints and the replies; a resolution can be accepted (closed) or sent on
  * to HQ within 7 days; after that it closes by itself.
  */
 @Component({
@@ -234,7 +234,7 @@ export class PortalComplaintsComponent {
 }
 
 /**
- * The portal home's feedback card (D-096): the 0–10 question after 30 days of membership, at most every 90 days, and
+ * The portal home's feedback card: the 0–10 question after 30 days of membership, at most every 90 days, and
  * the classes and PT sessions of the last 7 days to rate 1–5. Shows nothing when there is nothing to ask.
  */
 @Component({

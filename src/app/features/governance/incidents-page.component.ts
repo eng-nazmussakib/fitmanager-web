@@ -23,7 +23,7 @@ import { IncidentDialogComponent, type IncidentDialogData } from './incident-dia
 const ROLE_LABEL: Record<string, string> = { BRANCH_MANAGER: 'Branch manager', FRONT_DESK: 'Front desk', TRAINER: 'Trainer' };
 
 /**
- * `/console/:branch/incidents` and `/hq/incidents` (D-092 to D-094): discipline cases about members and staff, newest
+ * `/console/:branch/incidents` and `/hq/incidents`: discipline cases about members and staff, newest
  * first. A branch sees its cases and those about its members elsewhere, never one about a branch manager (HQ's) or about
  * the person looking; HQ sees every branch's, and the appeals waiting for it.
  */

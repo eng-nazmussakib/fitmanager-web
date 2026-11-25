@@ -41,7 +41,7 @@ function branchHours(branchName: string): Pick<Branch, 'hours' | 'ladies_hours'>
     return { hours: wireHours(blocks[0]), ladies_hours: wireHours(blocks.find(b => /ladies/i.test(b.title))) };
 }
 
-/** The HQ row (D-023) and the three branches. */
+/** The HQ row and the three branches. */
 export function seedBranches(): Branch[] {
     const common = {
         email: 'hello@example.com'
@@ -134,7 +134,7 @@ export function seedPromos(today: string): (Promo & { active: boolean })[] {
 }
 
 /**
- * The VAT setting the demo starts with (Q-009: 15 % is Bangladesh's standard rate, to confirm with the client).
+ * The VAT setting the demo starts with (15 % is Bangladesh's standard rate, to confirm with the client).
  * HQ changes it at `/hq/settings`; sales read `db().settings`, never this constant.
  */
 export function seedSettings(): OrgSettings {
@@ -158,7 +158,7 @@ export function seedSettings(): OrgSettings {
     };
 }
 
-/** The site groups and their switches: the same rows as migration 003_site_groups.sql (D-040). */
+/** The site groups and their switches: the same rows as migration 003_site_groups.sql. */
 export function seedSiteGroups(): SiteGroup[] {
     const row = (key: string, name: string, required: boolean, sortOrder: number, section: boolean | null, pagePath: string | null = null): SiteGroup => ({
         key,

@@ -1,5 +1,5 @@
 /**
- * Training (phase 4; D-084 to D-089): the exercise library, routines, workouts, personal records and body
+ * Training: the exercise library, routines, workouts, personal records and body
  * measurements. The API's wire format (fitmanager-api src/features/training); the mock answers the same.
  */
 
@@ -96,7 +96,7 @@ export interface ExerciseInput {
     active?: boolean;
 }
 
-/** One exercise of a routine day, with its targets (names copied when saved, D-087). */
+/** One exercise of a routine day, with its targets (names copied when saved). */
 export interface DayExercise {
     exercise_oid: string;
     name: string;
@@ -178,7 +178,7 @@ export interface Workout {
     logged_by_name: string | null;
     set_count: number;
     volume_kg: number;
-    /** Within 7 days of its date (D-088). */
+    /** Within 7 days of its date. */
     editable: boolean;
     exercises: { exercise_oid: string; name: string; measure: Measure; sets: WorkoutSet[] }[];
 }
@@ -213,7 +213,7 @@ export interface ProgressSeries {
     points: { date: string; value: number }[];
 }
 
-/** `GET /v1/members/:oid/progress`, `GET /v1/me/progress` (D-088): computed when read. */
+/** `GET /v1/members/:oid/progress`, `GET /v1/me/progress`: computed when read. */
 export interface TrainingProgress {
     records: ExerciseRecord[];
     series: ProgressSeries[];
@@ -223,7 +223,7 @@ export interface TrainingProgress {
 
 export type PhotoView = 'front' | 'side' | 'back';
 
-/** One entry (D-089). Photos are `null` for a caller who may not see them (`photos_hidden`). */
+/** One entry. Photos are `null` for a caller who may not see them (`photos_hidden`). */
 export interface Measurement {
     oid: string;
     measured_on: string;

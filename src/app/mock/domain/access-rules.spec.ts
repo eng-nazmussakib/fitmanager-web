@@ -1,6 +1,6 @@
 import { type AccessClock, type AccessFacts, daysBetween, evaluateAccess } from './access-rules';
 
-// Table-driven: the API's cases (fitmanager-api src/features/attendance/access-rules.test.ts), D-059: every branch.
+// Table-driven: the API's cases (fitmanager-api src/features/attendance/access-rules.test.ts), every branch.
 const BRANCH = {
     name: 'Gulshan',
     hours: [
@@ -21,7 +21,7 @@ function facts(over: Omit<Partial<AccessFacts>, 'member'> & { member?: Partial<A
     };
 }
 
-describe('access rules (D-059, D-061)', () => {
+describe('access rules', () => {
     const cases: [string, AccessFacts, AccessClock, string[], boolean[]][] = [
         ['allowed: active, no dues, open hours', facts(), NOW, [], []],
         [

@@ -1,7 +1,7 @@
 import { productLines } from '../business';
 import { seed } from './seed';
 
-/** D-072: phase 6's cases in the demo data, the same list as the database's showcase seed 106. */
+/** The business cases in the demo data, the same list as the database's showcase seed 106. */
 describe('every business case in the demo data', () => {
     const today = '2026-11-19';
     const db = seed(today, 12 * 60);

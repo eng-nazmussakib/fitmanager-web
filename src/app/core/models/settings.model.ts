@@ -1,5 +1,5 @@
 /**
- * `GET|PATCH /v1/hq/settings`: organisation-wide settings, owned by HQ (D-037).
+ * `GET|PATCH /v1/hq/settings`: organisation-wide settings, owned by HQ.
  *
  * VAT is a setting, not a constant: the rate can change by law or by the client's tax status, and a gym that is
  * not VAT-registered charges none (rate 0). A sale uses the rate in force when it is made, and the invoice keeps
@@ -10,13 +10,13 @@ export interface OrgSettings {
     vat_rate: number;
     /** The business identification number printed on invoices (NBR "BIN"), when VAT-registered. */
     vat_bin: string | null;
-    /** true: prices already include VAT ("of which VAT"); false: VAT is added on top (D-057). */
+    /** true: prices already include VAT ("of which VAT"); false: VAT is added on top. */
     vat_inclusive: boolean;
-    /** The freeze rule (D-063, D-067): how short and how long one freeze may be, and how many one plan may have. */
+    /** The freeze rule: how short and how long one freeze may be, and how many one plan may have. */
     freeze_min_days: number;
     freeze_max_days: number;
     freeze_max_count: number;
-    /** Class booking (D-081): how far ahead classes open, upcoming bookings a member may hold, the free cancel window. */
+    /** Class booking: how far ahead classes open, upcoming bookings a member may hold, the free cancel window. */
     booking_open_days: number;
     booking_max_active: number;
     booking_cancel_hours: number;
@@ -24,7 +24,7 @@ export interface OrgSettings {
     noshow_limit: number;
     noshow_window_days: number;
     noshow_block_days: number;
-    /** Governance (D-091, D-095): days before an unaccepted "accept again" policy blocks check-in; hours to a first complaint reply. */
+    /** Governance: days before an unaccepted "accept again" policy blocks check-in; hours to a first complaint reply. */
     policy_grace_days: number;
     complaint_response_hours: number;
     updated_at: string | null;
@@ -48,7 +48,7 @@ export function vatPercent(rate: number): string {
 }
 
 /**
- * `GET /v1/public/site-groups`, `GET /v1/hq/site-groups`: one topic of the public site (D-040). A group can have a
+ * `GET /v1/public/site-groups`, `GET /v1/hq/site-groups`: one topic of the public site. A group can have a
  * landing SECTION and a PAGE of its own (`page_path`), switched separately: blog `{ section: false, page: true }`
  * keeps /blog but drops it from the home page. `null` = the group has no such part. Required groups (home,
  * programs, membership, facilities) keep every part on; the flag is set by database migrations only.

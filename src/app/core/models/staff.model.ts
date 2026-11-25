@@ -1,7 +1,7 @@
 import type { BranchKind, StaffRole } from './branch.model';
 
 /**
- * Staff management (phase 1, D-054, D-055): `GET /v1/hq/staff` (every account) and `GET /v1/branch/staff` (the people
+ * Staff management: `GET /v1/hq/staff` (every account) and `GET /v1/branch/staff` (the people
  * assigned at the active branch). Wire shapes, as the API sends them.
  */
 export interface StaffPlacement {
@@ -21,13 +21,13 @@ export interface StaffMember {
     status: 'Active' | 'Inactive';
     /** HQ staff (the owner): every branch, with the HQ assignment's role. */
     all_branches: boolean;
-    /** A temporary password is set; the person picks their own at the next sign-in (D-054). */
+    /** A temporary password is set; the person picks their own at the next sign-in. */
     must_change_password: boolean;
     created_at: string;
     updated_at: string;
     /** Explicit rows only (an `all_branches` account lists just its HQ row). */
     assignments: StaffPlacement[];
-    /** Whether the caller may change this account (D-055); the UI shows the actions only then. */
+    /** Whether the caller may change this account; the UI shows the actions only then. */
     manageable: boolean;
 }
 

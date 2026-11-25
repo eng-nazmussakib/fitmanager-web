@@ -9,7 +9,7 @@ import { seededSuspended } from './governance.seed';
 import { toRef } from './organisation.seed';
 
 /**
- * The phase 2 cases the generated members do not have (D-072), the same as the database's showcase seed
+ * The membership and sales cases the generated members do not have, the same as the database's showcase seed
  * (fitmanager-infra db/seeds/showcase/101_every_case.sql), so every screen and state can be seen in the demo:
  * refunds in full and in part, an upgrade with its credit line, a plan ended early, a member transferred in, an
  * anonymised member (whose messages show as "skipped"), a web join request, a document, and yesterday's cash

@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { expect, freshDemo, sidebar, signIn, test } from './fixtures';
 
-/** Phase 7c (D-109, D-110) on the mock API: HQ writes a post with a live preview; the public page shows it. */
+/** The website on the mock API: HQ writes a post with a live preview; the public page shows it. */
 test.describe('Website content', () => {
     test.beforeEach(async ({ page }) => {
         await freshDemo(page);

@@ -1,7 +1,7 @@
 /** App-wide constants. Use UPPER_CASE (guideline 2.3) and `as const` so values are literal types. */
 export const APP = {
     LOGIN_ROUTE: '/auth/sign-in',
-    /** Change password and the user's sessions; forced while a temporary password is set (D-054). */
+    /** Change password and the user's sessions; forced while a temporary password is set. */
     PASSWORD_ROUTE: '/account/password',
     HOME_ROUTE: '/home',
     PAGE_SIZE: 10,

@@ -12,7 +12,7 @@ import { todayIso } from '@shared/ui/forms/date-picker.component';
 import { PortalService } from './portal.service';
 
 /**
- * `/me/pt` (D-079): the member's trainer and PT package, a free hour to book in the next 7 days (from the trainer's
+ * `/me/pt`: the member's trainer and PT package, a free hour to book in the next 7 days (from the trainer's
  * availability, less their classes and other sessions), and their sessions. A cancel less than the window before
  * uses the session; the window is said on the page.
  */

@@ -62,7 +62,7 @@ test.describe('HQ settings: VAT', () => {
     });
 });
 
-test.describe('HQ settings: website sections and pages (D-040)', () => {
+test.describe('HQ settings: website sections and pages', () => {
     test.beforeEach(async ({ page }) => freshDemo(page));
 
     test('blog { section: off, page: on }, then the page off too; required groups are locked', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('HQ settings: website sections and pages (D-040)', () => {
         // Section off, page on: gone from the home page, the menu links to /blog instead, and /blog opens.
         await page.goto('/');
         await expect(page.locator('#plans')).toHaveCount(1);
-        // The key numbers belong to the home group (D-042): shown with it, and not listed as a group of their own.
+        // The key numbers belong to the home group: shown with it, and not listed as a group of their own.
         await expect(page.getByRole('region', { name: 'Key figures' })).toBeVisible();
         await expect(page.locator('#blog')).toHaveCount(0);
         await page.goto('/blog');

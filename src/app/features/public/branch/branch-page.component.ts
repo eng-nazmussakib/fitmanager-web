@@ -153,14 +153,14 @@ export class BranchPageComponent {
     readonly slug = input.required<string>();
 
     protected readonly brand = this._site.brand;
-    /** The plans page can be switched off (D-040); then the "Compare branches" link goes. */
+    /** The plans page can be switched off; then the "Compare branches" link goes. */
     protected readonly plansPage = computed(() => this._site.pageEnabled('plans'));
     private readonly _branch = toSignal(toObservable(this.slug).pipe(switchMap(s => this._content.branch(s))));
     private readonly _plans = toSignal(toObservable(this.slug).pipe(switchMap(s => this._content.plans(s))), { initialValue: [] });
 
     protected readonly branch = computed(() => this._branch() ?? null);
     protected readonly loaded = computed(() => this._branch() !== undefined);
-    /** The branch's photos (the database's, D-109; the brand config's gallery without an API). */
+    /** The branch's photos (the database's; the brand config's gallery without an API). */
     protected readonly photos = computed(() => {
         const own = this.branch()?.photos;
         if (own?.length) return own.slice(0, 3);

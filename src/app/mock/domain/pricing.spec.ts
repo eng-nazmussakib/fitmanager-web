@@ -56,7 +56,7 @@ describe('pricing', () => {
     });
 });
 
-describe('pricing, VAT inclusive (D-057)', () => {
+describe('pricing, VAT inclusive', () => {
     it.each([
         ['15% inside 5000', input({ vat_rate: 0.15, vat_inclusive: true }), 5000, 0, 652, 5000],
         ['5% inside 3150 after a discount', input({ vat_inclusive: true, discount: { kind: 'amount', value: 1850 } }), 5000, 1850, 150, 3150],
@@ -68,7 +68,7 @@ describe('pricing, VAT inclusive (D-057)', () => {
     });
 });
 
-describe('invoice dues and status after refunds (D-067 a)', () => {
+describe('invoice dues and status after refunds', () => {
     it.each([
         // total, paid in, refunded → due, status
         [6325, 0, 0, 6325, 'Due'],

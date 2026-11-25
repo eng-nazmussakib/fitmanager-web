@@ -10,7 +10,7 @@ import { routes } from './app.routes';
 
 /**
  * Application-wide providers, shared by the browser and the server (app.config.server.ts adds server rendering).
- * Standalone APIs only, no NgModules, and no UI component library (D-007): overlays, toasts and dialogs are the
+ * Standalone APIs only, no NgModules, and no UI component library: overlays, toasts and dialogs are the
  * in-house kit in `@shared/ui`, which needs no providers.
  *
  * Change detection is zoneless (Angular 21+ default, no zone.js). Every component is OnPush and state lives in signals.

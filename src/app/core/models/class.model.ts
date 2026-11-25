@@ -1,4 +1,4 @@
-/** Class types are HQ master data (D-080): every branch uses the same names, colours and lengths. */
+/** Class types are HQ master data: every branch uses the same names, colours and lengths. */
 export interface ClassType {
     oid: string;
     name: string;
@@ -36,7 +36,7 @@ export interface ClassSession {
     detached?: boolean;
     cancelled?: boolean;
     cancel_reason?: string | null;
-    /** A maintenance block covers its room (D-082): move or cancel it. */
+    /** A maintenance block covers its room: move or cancel it. */
     blocked?: boolean;
     /** Public timetable only: the class is full. */
     full?: boolean;
@@ -51,7 +51,7 @@ export interface Booking {
     member_name: string;
     member_code: string;
     status: BookingStatus;
-    /** Cancelled inside the window: counts like a no-show (D-081). */
+    /** Cancelled inside the window: counts like a no-show. */
     late_cancel?: boolean;
     source?: 'portal' | 'desk';
     booked_at: string;
@@ -68,7 +68,7 @@ export interface Certification {
     year: number | null;
 }
 
-/** A trainer's profile (D-078). The public pages get the same shape with `phone: ''` and no account fields. */
+/** A trainer's profile. The public pages get the same shape with `phone: ''` and no account fields. */
 export interface Trainer {
     oid: string;
     branch_oid: string;

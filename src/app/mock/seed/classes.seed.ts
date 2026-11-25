@@ -5,7 +5,7 @@ import { addDaysIso, at, weekdayOf, weekStart } from './clock';
 import { seededSuspended } from './governance.seed';
 import { Rng } from './prng';
 
-/** HQ class types (D-080): the same as the API's seed (fitmanager-infra/db/seeds/demo/005_scheduling.sql). */
+/** HQ class types: the same as the API's seed (fitmanager-infra/db/seeds/demo/005_scheduling.sql). */
 export const CLASS_TYPES: ClassType[] = [
     { oid: 'ct-hiit', name: 'HIIT', color: 'red', minutes: 45, description: 'Short, hard intervals for fitness and fat loss.', sort_order: 1, active: true },
     { oid: 'ct-yoga', name: 'Yoga', color: 'teal', minutes: 60, description: 'Mobility, balance and breathing, for every level.', sort_order: 2, active: true },
@@ -123,7 +123,7 @@ export function sessionFor(d: MockDb, rule: RuleRow, date: string): ClassSession
 
 /**
  * Makes the sessions of the branch's active rules from `from` to `to` (Dhaka dates) that do not exist yet, and
- * counts their bookings: the API's `materialise`, run when the timetable is read (D-075).
+ * counts their bookings: the API's `materialise`, run when the timetable is read.
  */
 export function materialise(d: MockDb, branchOid: string, from: string, to: string): void {
     const have = new Set(d.sessions.filter(s => s.branch_oid === branchOid).map(s => s.oid));

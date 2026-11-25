@@ -262,7 +262,7 @@ export class MemberListPageComponent {
         void this._router.navigate([], { relativeTo: this._route, queryParams: params, queryParamsHandling: 'merge' });
     }
 
-    /** Every member the filters match, as Excel or PDF (D-107; the API records the export). */
+    /** Every member the filters match, as Excel or PDF (the API records the export). */
     protected async exportList(format: ExportFormat): Promise<void> {
         this.exporting.set(true);
         // Only the filters in use (an empty one means "any").

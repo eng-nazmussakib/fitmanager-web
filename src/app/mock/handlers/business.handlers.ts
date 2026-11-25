@@ -47,7 +47,7 @@ import type { EquipmentRow, PoRow, ProductRow, SupplierRow, TicketRow, TransferR
 import { branchMember } from './members.handlers';
 
 /**
- * Phase 6 in demo mode (D-098 to D-102): the API's equipment, catalogue, stock, purchase order, transfer and POS
+ * Business in demo mode: the API's equipment, catalogue, stock, purchase order, transfer and POS
  * routes (fitmanager-api src/features/equipment, catalogue, stock, pos) on the mock's tables, with the same rules and
  * messages. The stock steps are shared with the seed (../business.ts).
  */
@@ -68,7 +68,7 @@ function claim(oid: unknown, kind: string): string | null {
     return f.oid;
 }
 
-/* ---------- equipment (D-098) ---------- */
+/* ---------- equipment ---------- */
 
 export function nextService(e: Pick<EquipmentRow, 'service_every_days' | 'last_serviced_on' | 'purchased_on' | 'created_on' | 'status'>): string | null {
     if (!e.service_every_days || e.status === 'retired') return null;
@@ -342,7 +342,7 @@ function listTickets(ctx: Ctx): HttpResponse<unknown> {
     );
 }
 
-/* ---------- catalogue and suppliers (D-099) ---------- */
+/* ---------- catalogue and suppliers ---------- */
 
 function productWire(p: ProductRow): Product {
     const d = db();
@@ -453,7 +453,7 @@ function supplierFields(b: Record<string, unknown>, before?: SupplierRow): Parti
     return out;
 }
 
-/* ---------- stock (D-101) ---------- */
+/* ---------- stock ---------- */
 
 function levelWire(p: ProductRow, branchOid: string, costs: boolean): StockLevel {
     const d = db();
@@ -574,7 +574,7 @@ function hqStock(): HttpResponse<unknown> {
     });
 }
 
-/* ---------- purchase orders (D-100) ---------- */
+/* ---------- purchase orders ---------- */
 
 function poWire(o: PoRow): PurchaseOrder {
     const d = db();
@@ -691,7 +691,7 @@ function cancelPo(ctx: Ctx): HttpResponse<unknown> {
     return ok(poWire({ ...o, ...patch }), 'Order cancelled');
 }
 
-/* ---------- transfers (D-101) ---------- */
+/* ---------- transfers ---------- */
 
 function transferWire(t: TransferRow, branchOid: string): StockTransfer {
     return {
@@ -737,7 +737,7 @@ function closeTransfer(how: 'reject' | 'cancel') {
     };
 }
 
-/* ---------- POS (D-102) ---------- */
+/* ---------- POS ---------- */
 
 function cart(ctx: Ctx): CartLine[] {
     return ((ctx.body['lines'] as CartLine[] | undefined) ?? []).map(l => ({

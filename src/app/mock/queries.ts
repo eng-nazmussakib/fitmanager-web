@@ -14,7 +14,7 @@ import type { CheckInRow, MemberRow, MockDb } from './types';
  * their subscriptions, invoices and check-ins, so a sale or a check-in shows up on every screen at once.
  */
 interface Indexes {
-    /** Memberships only: a PT package gives credits, not a status (D-079). */
+    /** Memberships only: a PT package gives credits, not a status. */
     subs: Map<string, Subscription[]>;
     /** Every subscription, PT packages too (the member's plan list). */
     allSubs: Map<string, Subscription[]>;
@@ -73,7 +73,7 @@ export function memberState(m: MemberRow, today: string): MemberState {
     const freeze = current?.freezes.find(f => f.from <= today && today <= f.to) ?? null;
     const dues = (i.invoices.get(m.oid) ?? []).reduce((sum, inv) => sum + inv.due, 0);
     let status: MemberStatus;
-    // A ban covering the home branch, then a suspension in force, outrank everything (the API's order, D-093).
+    // A ban covering the home branch, then a suspension in force, outrank everything (the API's order).
     const sanction = memberSanction(m, today);
     if (sanction?.level === 'ban') status = 'Banned';
     else if (sanction) status = 'Suspended';

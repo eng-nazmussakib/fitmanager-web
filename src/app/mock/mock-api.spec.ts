@@ -14,8 +14,8 @@ interface Res<T> {
 }
 
 /**
- * The mock enforces what the API will (phase 0.5 brief): tokens, branch scoping by X-Branch-Id and the user's
- * assignments, and CASL permissions. These cases become API tests in phases 1 and 2.
+ * The mock enforces what the API will: tokens, branch scoping by X-Branch-Id and the user's
+ * assignments, and CASL permissions. The API tests check the same cases.
  */
 describe('mock API', () => {
     let http: HttpClient;
@@ -118,7 +118,7 @@ describe('mock API', () => {
         expect(pub.data[0].vat_rate).toBe(0.075);
     });
 
-    it('site groups: section and page switch separately; required groups stay on (D-040)', async () => {
+    it('site groups: section and page switch separately; required groups stay on', async () => {
         interface Group {
             key: string;
             required: boolean;
@@ -142,7 +142,7 @@ describe('mock API', () => {
         expect(pub.data.filter(r => r.required).map(r => r.key)).toEqual(['hero', 'services', 'plans', 'facilities']);
     });
 
-    it('phase 2 (D-059, D-067, D-068): a visitor trains anywhere; refunds and suspensions (D-093) follow the API’s rules', async () => {
+    it('a visitor trains anywhere; refunds and suspensions follow the API’s rules', async () => {
         const send = <T>(method: 'POST', path: string, body: unknown, token: string, branch: string): Promise<Res<T>> =>
             firstValueFrom(http.request<Res<T>>(method, `${base}${path}`, { body, headers: { Authorization: `Bearer ${token}`, 'X-Branch-Id': branch } }));
         const deskDha = await login('desk.dhanmondi', 'Desk@123');
@@ -160,7 +160,7 @@ describe('mock API', () => {
         const manager = await login('manager.gulshan', 'Manager@123');
         const page = await get<{ rows: { oid: string; code: string; status: string }[] }>('/v1/members?size=100&status=Active', desk, 'br-gul');
         const member = page.data.rows[0]?.oid ?? '';
-        // A suspension is a step on a discipline case (D-093): the desk warns, a manager suspends.
+        // A suspension is a step on a discipline case: the desk warns, a manager suspends.
         const at = new Date(Date.now() - 60_000).toISOString();
         const body = {
             subject_kind: 'member',

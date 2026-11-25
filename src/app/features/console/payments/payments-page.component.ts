@@ -252,7 +252,7 @@ export class PaymentsPageComponent {
         });
     }
 
-    /** Payments and refunds of the period, oldest first, as Excel or PDF (D-107; the API records the export). */
+    /** Payments and refunds of the period, oldest first, as Excel or PDF (the API records the export). */
     protected async exportPayments(format: ExportFormat): Promise<void> {
         const to = todayIso();
         const from = addDaysIso(to, -(this.exportDays() - 1));

@@ -4,7 +4,7 @@ import type { ExerciseRow, FileRow, MemberRow, MockDb, RoutineRow, WorkoutRow } 
 import { addDaysIso, at } from './clock';
 
 /**
- * Phase 4 in demo mode: the HQ exercise library and templates (the database's seeds/demo/006_training.sql) and the
+ * Training in demo mode: the HQ exercise library and templates (the database's seeds/demo/006_training.sql) and the
  * showcase cases (seeds/showcase/104_training_cases.sql), with the same photos and videos as static assets
  * (public/assets/images/training). Runs after `seedSchedulingCases`, which gives Sam Cole (tr-gul-1) his clients.
  */

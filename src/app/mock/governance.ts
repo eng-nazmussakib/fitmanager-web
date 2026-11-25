@@ -6,7 +6,7 @@ import { db } from './store';
 import type { MemberRow, MockDb, SanctionRow } from './types';
 
 /**
- * Phase 5's derived state, worked out when read as the API does (D-075): the sanction behind a member's status, the
+ * Governance's derived state, worked out when read as the API does: the sanction behind a member's status, the
  * sanctions the access rules check, where a member stands with each policy, and a staff suspension at sign-in.
  * Used by the queries (member status), the access rules and the governance handlers.
  */
@@ -25,7 +25,7 @@ function standing(memberOid: string, d: MockDb): SanctionRow[] {
     return (d.sanctions ?? []).filter(s => s.member_oid === memberOid && (s.level === 'suspension' || s.level === 'ban') && !s.overturned_at && !s.lifted);
 }
 
-/** What makes the member Suspended or Banned at home (D-093): a ban covering the home branch, else a suspension in force. */
+/** What makes the member Suspended or Banned at home: a ban covering the home branch, else a suspension in force. */
 export function memberSanction(
     m: MemberRow,
     today: string,
@@ -63,7 +63,7 @@ export function accessSanctions(memberOid: string, branchOid: string, d: MockDb 
         }));
 }
 
-/** Each active policy and where the member stands with it (the API's `memberPolicies`, D-090, D-091). */
+/** Each active policy and where the member stands with it (the API's `memberPolicies`). */
 export function memberPolicies(m: Pick<MemberRow, 'oid' | 'joined_on'>, today: string, d: MockDb = db()): MemberPolicy[] {
     const grace = d.settings.policy_grace_days;
     return (d.policies ?? [])
@@ -104,7 +104,7 @@ export function policiesOutstanding(m: Pick<MemberRow, 'oid' | 'joined_on'>, tod
         .map(p => ({ title: p.title, blocks_on: p.blocks_on! }));
 }
 
-/** The last day of a staff suspension in force today, or null (sign-in is refused until then, D-093). */
+/** The last day of a staff suspension in force today, or null (sign-in is refused until then). */
 export function staffSuspendedUntil(username: string, today: string, d: MockDb = db()): string | null {
     const ends = (d.sanctions ?? [])
         .filter(

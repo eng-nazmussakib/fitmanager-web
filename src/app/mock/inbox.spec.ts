@@ -17,7 +17,7 @@ const inboxOf = (username: string, code: string) => {
 };
 const kinds = (box: ReturnType<typeof inboxOf>) => new Set(box.items.map(m => m.kind));
 
-/** Phase 7b (D-108) in demo mode: a message of every kind, read state, and who sees what. */
+/** Notifications in demo mode: a message of every kind, read state, and who sees what. */
 describe('the bell in demo mode', () => {
     it('members: every new kind is there for someone, with the API’s wording', () => {
         const all = db.members.flatMap(m => memberMessages(db, m, today, now));

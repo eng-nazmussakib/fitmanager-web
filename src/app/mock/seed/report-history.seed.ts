@@ -10,9 +10,9 @@ import { Rng } from './prng';
 const PORTAL_MEMBER = 'MEM-GUL-000001';
 
 /**
- * Three months of history for the reports (D-111), like the database seed 107: the timetable from 92 days back to
+ * Three months of history for the reports, like the database seed 107: the timetable from 92 days back to
  * where `seedClasses` starts (last week), booked by the branch's members (attended, cancelled, and no-shows only
- * before 30 days back, so no one is paused for no-shows, D-081); NPS answers from a third of the members, once;
+ * before 30 days back, so no one is paused for no-shows); NPS answers from a third of the members, once;
  * and one attended class in ten rated. Visits reach back 92 days in `seedAttendance`, and the shop's sales in
  * `seedBusiness`. Deterministic.
  */

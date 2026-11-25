@@ -63,14 +63,14 @@ function update(ctx: Ctx): HttpResponse<unknown> {
     whole('freeze_min_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
     whole('freeze_max_days', 1, MAX_FREEZE_DAYS, `A freeze lasts 1 to ${MAX_FREEZE_DAYS} days.`);
     whole('freeze_max_count', 0, 12, 'Allow 0 to 12 freezes per plan.');
-    // Class booking (D-081), the API's ranges.
+    // Class booking, the API's ranges.
     whole('booking_open_days', 1, 60, 'Classes open 1 to 60 days ahead.');
     whole('booking_max_active', 1, 50, 'Allow 1 to 50 upcoming bookings.');
     whole('booking_cancel_hours', 0, 72, 'The free cancel window is 0 to 72 hours.');
     whole('noshow_limit', 1, 20, 'Pause booking after 1 to 20 missed classes.');
     whole('noshow_window_days', 1, 365, 'Count missed classes over 1 to 365 days.');
     whole('noshow_block_days', 1, 90, 'Pause booking for 1 to 90 days.');
-    // Governance (D-091, D-095).
+    // Governance.
     whole('policy_grace_days', 0, 90, 'The policy grace period is 0 to 90 days.');
     whole('complaint_response_hours', 1, 336, 'Complaints are answered within 1 to 336 hours.');
     const min = patch.freeze_min_days ?? db().settings.freeze_min_days;
@@ -81,7 +81,7 @@ function update(ctx: Ctx): HttpResponse<unknown> {
     return ok(db().settings, 'Settings saved');
 }
 
-/** `GET /v1/public/site-groups`: every group with its section and page switches, in display order (D-040). */
+/** `GET /v1/public/site-groups`: every group with its section and page switches, in display order. */
 function publicGroups(): HttpResponse<unknown> {
     return ok(
         db().siteGroups.map(g => ({

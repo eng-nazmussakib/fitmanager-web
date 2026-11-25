@@ -18,17 +18,17 @@ export type FileKind =
     | 'product_photo'
     | 'equipment_photo'
     | 'ticket_photo'
-    // Phase 7c (D-109): website images (post covers, gallery and branch photos), public once used.
+    // Website images (post covers, gallery and branch photos), public once used.
     | 'site_image';
 
-/** `POST /v1/files`: a pending file and where to PUT its bytes (D-058). */
+/** `POST /v1/files`: a pending file and where to PUT its bytes. */
 interface UploadStart {
     file: { oid: string };
     upload: { url: string; method: 'PUT'; headers: Record<string, string>; expires_at: string };
 }
 
 /**
- * Member photos and documents (D-058, D-069): the bytes go straight from the browser to the file store with a
+ * Member photos and documents: the bytes go straight from the browser to the file store with a
  * short-lived signed URL (the bucket's, or the API's own route in development), never through the API. Then the
  * API checks what arrived and marks it ready. The limits are the API's; the browser only resizes photos.
  */
@@ -39,7 +39,7 @@ export class FilesService {
 
     /**
      * Uploads one file; emits the ready file's oid. `portal`: a member's own progress photo (`/v1/me/files`, at their
-     * home branch, D-089).
+     * home branch).
      */
     upload(kind: FileKind, blob: Blob, name: string, memberOid?: string, portal = false): Observable<string> {
         const base = portal ? '/v1/me/files' : '/v1/files';

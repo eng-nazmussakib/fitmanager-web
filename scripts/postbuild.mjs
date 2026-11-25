@@ -26,7 +26,7 @@ if (!origin.startsWith('http')) {
 // The home page is always public.
 const paths = [...new Set(['/', ...Object.keys(routes)])].filter(p => !/^\/(me|console|hq|auth|demo|dev)(\/|$)/.test(p));
 const today = new Date().toISOString().slice(0, 10);
-// A blog post's lastmod is the day it was published (its JSON-LD `datePublished`, D-110); every other page's, the build.
+// A blog post's lastmod is the day it was published (its JSON-LD `datePublished`); every other page's, the build.
 const lastmod = p => {
     const file = join(dist, p === '/' ? 'index.html' : `${p.slice(1)}/index.html`);
     const published = existsSync(file) ? readFileSync(file, 'utf8').match(/"datePublished":"(\d{4}-\d{2}-\d{2})/)?.[1] : undefined;

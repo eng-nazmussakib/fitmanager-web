@@ -35,7 +35,7 @@ import { EquipmentDialogComponent } from './equipment-dialog.component';
 import { TicketDialogComponent, type TicketDialogData } from './ticket-dialog.component';
 
 /**
- * `/console/:branch/equipment` (D-098): the branch's register (service due worked out when read, warranty, what was
+ * `/console/:branch/equipment`: the branch's register (service due worked out when read, warranty, what was
  * spent) and its maintenance tickets. Every staff member reports a fault; the branch manager keeps the register, runs
  * the tickets, records services and retires what cannot be used.
  */
@@ -281,7 +281,7 @@ export class EquipmentPageComponent {
         { value: 'retired', label: 'Retired' },
         { value: 'all', label: 'All' }
     ];
-    /** `?tab=tickets` opens the tickets (the inbox's link for an urgent ticket, D-108). */
+    /** `?tab=tickets` opens the tickets (the inbox's link for an urgent ticket). */
     protected readonly tab = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('tab') === 'tickets' ? 'tickets' : 'register');
     protected readonly status = signal('');
     protected readonly q = signal('');

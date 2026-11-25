@@ -130,7 +130,7 @@ export class LandingComponent {
     protected readonly facilities = this.c.facilities.items.map(f => ({ ...f, icon: FACILITY_ICONS[f.icon] }));
     protected readonly branches = this.site.branches;
     protected readonly branchHeading = this.site.branchHeading;
-    /** The database's posts and photos (phase 7c, D-109), the config's until they load or with no API. */
+    /** The database's posts and photos, the config's until they load or with no API. */
     private readonly _content = inject(SiteContentService);
     protected readonly posts = computed(() => this._content.posts().slice(0, 5));
     protected readonly galleryPreview = computed(() => this._content.photos().slice(0, this.c.gallery.preview ?? 6));
@@ -194,7 +194,7 @@ export class LandingComponent {
         const branches = c.branches.items;
         const seo = inject(SeoService);
         const tagline = inject(TenantService).brand.tagline;
-        // Again when the section switches arrive (D-040): the FAQ structured data follows the FAQ section.
+        // Again when the section switches arrive: the FAQ structured data follows the FAQ section.
         effect(() => {
             const faq = this.site.enabled('faq');
             seo.update({

@@ -1,7 +1,7 @@
 import type { Action, Subject } from '@core/auth/ability';
 
 /**
- * The staff inbox behind the console's bell (phase 7b, D-108 b): what a branch manager or HQ must act on. A message
+ * The staff inbox behind the console's bell: what a branch manager or HQ must act on. A message
  * is addressed to a branch (or HQ) and shown there to whoever holds its kind's permission.
  */
 export type StaffMessageKind =

@@ -8,7 +8,7 @@ import { Rng } from './prng';
 const WEEKDAY_FACTOR = [1, 1, 1, 0.95, 0.9, 0.55, 1.05];
 
 /**
- * 92 days of check-ins (three months of history for the reports, D-111) following each member's habit (morning, midday or evening regulars) and the branch's
+ * 92 days of check-ins (three months of history for the reports) following each member's habit (morning, midday or evening regulars) and the branch's
  * opening hours. Today's visits stop at the current time; people who came in within the last ~80 minutes are
  * still inside (no check-out), which feeds the live occupancy.
  */

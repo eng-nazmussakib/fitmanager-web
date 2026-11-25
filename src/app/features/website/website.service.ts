@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import { ApiService } from '@core/http/api.service';
 import type { BlogCategory, BlogPost, GalleryPhoto, Offer, OfferPayload, PostPayload } from '@core/models/website.model';
 
-/** The website's content for HQ and branch managers (phase 7c, D-109): `/v1/website/*` and `/v1/hq/website/*`. */
+/** The website's content for HQ and branch managers: `/v1/website/*` and `/v1/hq/website/*`. */
 @Injectable({ providedIn: 'root' })
 export class WebsiteService {
     private readonly _api = inject(ApiService);

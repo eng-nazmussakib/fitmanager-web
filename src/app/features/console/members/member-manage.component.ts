@@ -20,7 +20,7 @@ import { ConsoleService } from '../console.service';
 type Action = 'transfer' | 'anonymise' | 'portal' | null;
 
 /**
- * The member actions that are not about money (D-064, D-068): portal access with a temporary password (the desk),
+ * The member actions that are not about money: portal access with a temporary password (the desk),
  * move the home branch, and "delete my data" (a manager: `manage Member`). Each opens a
  * dialog; the API decides and audits.
  */

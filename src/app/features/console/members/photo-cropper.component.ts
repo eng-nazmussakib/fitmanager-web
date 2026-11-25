@@ -5,7 +5,7 @@ import { ButtonComponent } from '@shared/ui/button/button.component';
 
 /**
  * Crops a member photo to a square (ngx-image-cropper, browser-only: load it inside `@defer`). Emits a small
- * base64 JPEG; the form turns it into a Blob and uploads it through FilesService (D-058).
+ * base64 JPEG; the form turns it into a Blob and uploads it through FilesService.
  */
 @Component({
     selector: 'app-photo-cropper',

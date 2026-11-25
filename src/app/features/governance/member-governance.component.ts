@@ -15,7 +15,7 @@ import { GovernanceService } from './governance.service';
 import { IncidentDialogComponent, type IncidentDialogData } from './incident-dialog.component';
 
 /**
- * A member's governance tab (D-090 to D-094): where they stand with each policy (the desk records "signed on paper"),
+ * A member's governance tab: where they stand with each policy (the desk records "signed on paper"),
  * their strikes and the suggested next step, and the cases about them that this branch may see.
  */
 @Component({

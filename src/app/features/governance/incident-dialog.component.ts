@@ -34,8 +34,8 @@ function dhakaLocalNow(): string {
 }
 
 /**
- * Records an incident (D-092) about a member (this branch's, or a visitor by code) or a staff member, at the branch
- * where it happened, citing a policy clause where one applies, with evidence (photos made small, or PDFs; D-094). The
+ * Records an incident about a member (this branch's, or a visitor by code) or a staff member, at the branch
+ * where it happened, citing a policy clause where one applies, with evidence (photos made small, or PDFs). The
  * notes and witnesses stay internal. A case about a branch manager goes to HQ.
  */
 @Component({

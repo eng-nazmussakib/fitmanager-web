@@ -1,5 +1,5 @@
-# Cloudflare Workers Static Assets headers (D-026). Applied to files served from dist/browser.
-# The CSP allows Cloudflare Web Analytics, which Cloudflare injects into the pages (D-112).
+# Cloudflare Workers Static Assets headers. Applied to files served from dist/browser.
+# The CSP allows Cloudflare Web Analytics, which Cloudflare injects into the pages.
 # Private, client-rendered routes are answered by cloudflare/worker.mjs, which adds X-Robots-Tag itself.
 
 /*

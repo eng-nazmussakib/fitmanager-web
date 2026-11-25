@@ -20,13 +20,13 @@ export interface Subscription {
     invoice_oid: string;
     freezes: Freeze[];
     created_at: string;
-    /** From the template (D-063). */
+    /** From the template. */
     freezable?: boolean;
     cancelled_at?: string | null;
     cancel_reason?: string | null;
-    /** The plan it was upgraded to (D-067 b). */
+    /** The plan it was upgraded to. */
     upgraded_to?: string | null;
-    /** A membership or a PT package (D-079); PT packages carry their sessions. */
+    /** A membership or a PT package; PT packages carry their sessions. */
     kind?: 'membership' | 'pt';
     sessions?: number | null;
     sessions_used?: number;
@@ -78,5 +78,5 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
     bank: 'Bank transfer'
 };
 
-/** bKash, Nagad, card and bank need the transaction reference (D-009). */
+/** bKash, Nagad, card and bank need the transaction reference. */
 export const METHODS_NEEDING_REFERENCE: PaymentMethod[] = ['card', 'bkash', 'nagad', 'bank'];

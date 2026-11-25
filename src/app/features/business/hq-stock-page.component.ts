@@ -7,7 +7,7 @@ import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui/dis
 
 import { BusinessService } from './business.service';
 
-/** `/hq/stock` (D-101): every product at every branch, the low ones marked, and the stock's value at cost. */
+/** `/hq/stock`: every product at every branch, the low ones marked, and the stock's value at cost. */
 @Component({
     selector: 'app-hq-stock-page',
     imports: [TakaPipe, PageHeaderComponent, BadgeComponent, CardComponent, SkeletonComponent],

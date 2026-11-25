@@ -11,7 +11,7 @@ import { MenuComponent, MenuItemDirective, MenuTriggerDirective } from '@shared/
 /**
  * Switches the console between the branches the user works at, keeping the current section
  * (`/console/gulshan/members/42` → `/console/dhanmondi/members`). HQ staff also get "HQ overview".
- * The branch is in the URL (D-014), so this is only a set of links.
+ * The branch is in the URL, so this is only a set of links.
  */
 @Component({
     selector: 'app-branch-switcher',
